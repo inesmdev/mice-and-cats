@@ -1,5 +1,7 @@
 package foop;
 
+import foop.world.World;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
@@ -61,15 +63,8 @@ public class Client implements AutoCloseable, Runnable {
             @Override
             public void paint(Graphics graphics) {
                 Graphics2D g = (Graphics2D) graphics;
-                int gridSize = 11;
-                int w = getWidth();
-                int h = getHeight();
-                for (int r = 0; r < gridSize; ++r) {
-                    for (int c = 0; c < gridSize; ++c) {
-                        g.setColor((r * gridSize + c) % 2 == 0 ? Color.GRAY : Color.WHITE);
-                        g.fillRect(r * w / gridSize, c * h / gridSize, w / gridSize, h / gridSize);
-                    }
-                }
+                World world = new World();
+                world.render(g, getWidth(), getHeight());
             }
         });
         f.setVisible(true);
