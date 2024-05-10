@@ -56,7 +56,6 @@ public class ConnectedSubwaysPlayingField extends JPanel {
     }
 
     private Point getNeighbor(List<Point> availableCells, Point cell) {
-        int maxDistance = Math.min(numRows, numCols) - 4; // Maximum distance between the first and last cell
 
         List<Point> neighbors = new ArrayList<>();
         neighbors.add(new Point(cell.x - 1, cell.y)); // Up
@@ -78,8 +77,7 @@ public class ConnectedSubwaysPlayingField extends JPanel {
         return null; // No available neighbor found within the distance limit
     }
     private boolean isWithinGrid(Point cell){
-        if (cell.x < 10 && cell.y < 10) return true;
-        return false;
+        return cell.x < 10 && cell.y < 10;
     }
 
     @Override
