@@ -37,6 +37,7 @@ public class Client implements AutoCloseable, Runnable {
                 SwingUtilities.invokeLater(() -> updateLobby.accept(m));
             } else if (message instanceof GameWorldMessage m) {
                 world = new World(m);
+                SwingUtilities.invokeLater(jFrame::repaint);
             } else {
                 return message;
             }
