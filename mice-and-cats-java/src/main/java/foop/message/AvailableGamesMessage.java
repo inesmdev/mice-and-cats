@@ -8,7 +8,7 @@ import java.util.List;
 
 public record AvailableGamesMessage(List<Game> games) implements Message {
 
-    public record Game(String name, Duration duration, List<String> players) {
+    public record Game(String name, Duration duration, List<String> players, boolean started) {
     }
 
     public static final int TAG = 3;
@@ -29,6 +29,7 @@ public record AvailableGamesMessage(List<Game> games) implements Message {
             for (String player : game.players()) {
                 out.writeUTF(player);
             }
+            out.writeBoolean(game.started());
         }
     }
 
@@ -45,7 +46,8 @@ public record AvailableGamesMessage(List<Game> games) implements Message {
             for (int j = 0; j < players.length; ++j) {
                 players[j] = in.readUTF();
             }
-            games[i] = new Game(name, duration, List.of(players));
+            boolean started = in.readBoolean();
+            games[i] = new Game(name, duration, List.of(players), started);
         }
         return new AvailableGamesMessage(List.of(games));
     }

@@ -50,7 +50,7 @@ public class Client implements AutoCloseable, Runnable {
 
             serialize(new InitialMessage(playerName), out);
 
-            serialize(new CreateGameMessage("game1", Duration.ofSeconds(30)), out);
+            serialize(new CreateGameMessage("game1"), out);
             if (receiveNext(in).into(GenericResponseMessage.class).error()) {
                 serialize(new JoinGameMessage("game1"), out);
                 if (receiveNext(in).into(GenericResponseMessage.class).error()) {

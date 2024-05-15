@@ -16,10 +16,10 @@ public class MessageTests {
     static Stream<Message> messages() throws IOException {
         return Stream.of(
                 new AvailableGamesMessage(List.of(
-                        new AvailableGamesMessage.Game("test1", Duration.ofSeconds(1, 2), List.of("a", "b")),
-                        new AvailableGamesMessage.Game("test2", Duration.ofSeconds(3, 4), List.of())
+                        new AvailableGamesMessage.Game("test1", Duration.ofSeconds(1, 2), List.of("a", "b"), true),
+                        new AvailableGamesMessage.Game("test2", Duration.ofSeconds(3, 4), List.of(), false)
                 )),
-                new CreateGameMessage("test", Duration.ofSeconds(1, 2)),
+                new CreateGameMessage("test"),
                 new GenericResponseMessage("test", true),
                 new InitialMessage("test"),
                 new JoinGameMessage("test"),

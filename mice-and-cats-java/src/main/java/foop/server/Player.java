@@ -1,15 +1,17 @@
-package foop;
+package foop.server;
 
 import foop.message.Message;
 
 import java.net.Socket;
 import java.util.concurrent.LinkedTransferQueue;
+import java.util.concurrent.TimeUnit;
 
 public class Player {
     private String name;
     private final Socket socket;
     private boolean ready;
     private final LinkedTransferQueue<Message> toClient = new LinkedTransferQueue<>();
+    private ServerGame game;
 
     public Player(Socket socket) {
         this.socket = socket;
@@ -20,8 +22,8 @@ public class Player {
         toClient.put(message);
     }
 
-    public Message takeMessageToSend() throws InterruptedException {
-        return toClient.take();
+    public Message pollMessageToSend(long timeout, TimeUnit unit) throws InterruptedException {
+        return toClient.poll(timeout, unit);
     }
 
     public String getName() {
@@ -42,6 +44,14 @@ public class Player {
 
     public void setReady(boolean ready) {
         this.ready = ready;
+    }
+
+    public ServerGame getGame() {
+        return game;
+    }
+
+    public void setGame(ServerGame game) {
+        this.game = game;
     }
 
     @Override
