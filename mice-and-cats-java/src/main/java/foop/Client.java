@@ -19,10 +19,11 @@ import static foop.message.Message.serialize;
 public class Client implements AutoCloseable, Runnable {
 
     private final Socket socket;
+    private final String playerName = "Player" + new Random().nextInt(100);
     private volatile boolean running = true;
     private JFrame jFrame;
     private Consumer<AvailableGamesMessage> updateLobby;
-    private final String playerName = "Player" + new Random().nextInt(100);
+    private World world;
 
     public Client(int port) throws IOException {
         socket = new Socket("localhost", port);
@@ -34,6 +35,8 @@ public class Client implements AutoCloseable, Runnable {
             var message = Message.parse(in);
             if (message instanceof AvailableGamesMessage m) {
                 SwingUtilities.invokeLater(() -> updateLobby.accept(m));
+            } else if (message instanceof GameWorldMessage m) {
+                world = new World(m);
             } else {
                 return message;
             }
@@ -98,7 +101,12 @@ public class Client implements AutoCloseable, Runnable {
             public void paint(Graphics graphics) {
                 Graphics2D g = (Graphics2D) graphics;
                 World world = new World();
-                world.render(g, getWidth(), getHeight());
+                var w = Client.this.world;
+                if (w != null) {
+                    world.render(g, getWidth(), getHeight());
+                } else {
+                    g.clearRect(0, 0, getWidth(), getHeight());
+                }
             }
         });
 
@@ -108,7 +116,7 @@ public class Client implements AutoCloseable, Runnable {
         f.add(lobbyList);
 
         updateLobby = (message) -> {
-            int index =  lobbyList.getSelectedIndex();
+            int index = lobbyList.getSelectedIndex();
             var selected = index != -1 ? lobbyListModel.get(index).name() : null;
 
             lobbyListModel.removeAllElements();

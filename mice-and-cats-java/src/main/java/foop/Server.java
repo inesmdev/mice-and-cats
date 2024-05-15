@@ -113,7 +113,7 @@ public class Server implements AutoCloseable {
                 } else if (message instanceof SetReadyForGameMessage m) {
                     synchronized (games) {
                         player.setReady(m.ready());
-                        if (player.getGame() != null) {
+                        if (m.ready() && player.getGame() != null) {
                             player.getGame().startIfAllReady();
                         }
                         sendAvailableGames(null);

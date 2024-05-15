@@ -1,7 +1,10 @@
 import foop.message.*;
+import foop.world.Position;
+import foop.world.Subway;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -20,6 +23,7 @@ public class MessageTests {
                         new AvailableGamesMessage.Game("test2", Duration.ofSeconds(3, 4), List.of(), false)
                 )),
                 new CreateGameMessage("test"),
+                new GameWorldMessage(new int[][]{new int[]{1, 2, 3}, new int[]{4, 5, 6}}, List.of(new Subway(1, Color.RED, List.of(new Position(1, 2), new Position(3, 4))))),
                 new GenericResponseMessage("test", true),
                 new InitialMessage("test"),
                 new JoinGameMessage("test"),

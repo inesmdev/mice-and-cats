@@ -3,13 +3,6 @@ package foop.message;
 import java.io.*;
 
 public interface Message {
-    void serialize(DataOutputStream out) throws IOException;
-
-    /**
-     * @return The value of the static field TAG on the class that can parse this message.
-     */
-    int tag();
-
     static void serialize(Message message, OutputStream out) throws IOException {
         var bodyByteArrayOutputStream = new ByteArrayOutputStream();
         var bodyDataOutputStream = new DataOutputStream(bodyByteArrayOutputStream);
@@ -29,6 +22,7 @@ public interface Message {
             case AvailableGamesMessage.TAG -> AvailableGamesMessage::parse;
             case CreateGameMessage.TAG -> CreateGameMessage::parse;
             case GenericResponseMessage.TAG -> GenericResponseMessage::parse;
+            case GameWorldMessage.TAG -> GameWorldMessage::parse;
             case InitialMessage.TAG -> InitialMessage::parse;
             case JoinGameMessage.TAG -> JoinGameMessage::parse;
             case SetReadyForGameMessage.TAG -> SetReadyForGameMessage::parse;
@@ -47,6 +41,13 @@ public interface Message {
 
         return result;
     }
+
+    void serialize(DataOutputStream out) throws IOException;
+
+    /**
+     * @return The value of the static field TAG on the class that can parse this message.
+     */
+    int tag();
 
     default <T> T into(Class<T> c) throws IOException {
         if (c.isInstance(this)) {
