@@ -8,7 +8,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.WeakHashMap;
 
-public class Server implements AutoCloseable, Runnable {
+public class Server implements AutoCloseable {
 
     private final ServerSocket socket;
     private final WeakHashMap<Socket, Void> clients = new WeakHashMap<>();
@@ -22,7 +22,7 @@ public class Server implements AutoCloseable, Runnable {
         return socket.getLocalPort();
     }
 
-    public void run() {
+    public void runAcceptor() {
         while (Main.running) {
             try {
                 var client = socket.accept();
@@ -31,6 +31,12 @@ public class Server implements AutoCloseable, Runnable {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    public void runLobby() {
+        while (Main.running) {
+
         }
     }
 

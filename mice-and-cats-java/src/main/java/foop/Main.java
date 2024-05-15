@@ -21,7 +21,7 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         try (var server = new Server()) {
-            serverThread = new Thread(server, "server-main");
+            serverThread = new Thread(server::runAcceptor, "server-main");
             serverThread.setUncaughtExceptionHandler((t, e) -> stop());
             serverThread.start();
 
