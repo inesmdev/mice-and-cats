@@ -26,9 +26,12 @@ public interface Message {
 
         int tag = dataInputStream.readInt();
         ParserFunction parser = switch (tag) {
-            case CreateGameMessage.TAG -> CreateGameMessage::parse;
-            case JoinGameMessage.TAG -> JoinGameMessage::parse;
             case AvailableGamesMessage.TAG -> AvailableGamesMessage::parse;
+            case CreateGameMessage.TAG -> CreateGameMessage::parse;
+            case GenericResponseMessage.TAG -> GenericResponseMessage::parse;
+            case InitialMessage.TAG -> InitialMessage::parse;
+            case JoinGameMessage.TAG -> JoinGameMessage::parse;
+            case SetReadyForGameMessage.TAG -> SetReadyForGameMessage::parse;
             default -> throw new IOException("Unexpected tag: " + tag);
         };
 
@@ -43,5 +46,13 @@ public interface Message {
         }
 
         return result;
+    }
+
+    default <T> T into(Class<T> c) throws IOException {
+        if (c.isInstance(this)) {
+            return (T) this;
+        } else {
+            throw new IOException("Expected " + c.getName() + " but got " + this);
+        }
     }
 }

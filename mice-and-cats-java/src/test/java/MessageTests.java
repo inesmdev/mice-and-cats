@@ -1,7 +1,4 @@
-import foop.message.AvailableGamesMessage;
-import foop.message.CreateGameMessage;
-import foop.message.JoinGameMessage;
-import foop.message.Message;
+import foop.message.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -19,11 +16,15 @@ public class MessageTests {
     static Stream<Message> messages() throws IOException {
         return Stream.of(
                 new AvailableGamesMessage(List.of(
-                        new AvailableGamesMessage.Game("test1", Duration.ofSeconds(1, 2)),
-                        new AvailableGamesMessage.Game("test2", Duration.ofSeconds(3, 4))
+                        new AvailableGamesMessage.Game("test1", Duration.ofSeconds(1, 2), List.of("a", "b")),
+                        new AvailableGamesMessage.Game("test2", Duration.ofSeconds(3, 4), List.of())
                 )),
                 new CreateGameMessage("test", Duration.ofSeconds(1, 2)),
-                new JoinGameMessage("test")
+                new GenericResponseMessage("test", true),
+                new InitialMessage("test"),
+                new JoinGameMessage("test"),
+                new SetReadyForGameMessage(true),
+                new SetReadyForGameMessage(false)
         );
     }
 
