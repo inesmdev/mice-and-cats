@@ -37,9 +37,7 @@ public class ServerGame {
     public synchronized void startIfAllReady() {
         if (players.size() > 1 && players.stream().allMatch(Player::isReady)) {
             started = true;
-            var message = world.makeGameWorldMessage();
-            players.forEach(p -> p.send(message));
-
+            world.sendTo(players);
             new Thread(this::run).start();
         }
     }

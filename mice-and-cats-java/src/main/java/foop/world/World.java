@@ -91,10 +91,6 @@ public class World {
         }
     }
 
-    public GameWorldMessage makeGameWorldMessage() {
-        return new GameWorldMessage(subwayTiles, Arrays.asList(subways).subList(1, subways.length));
-    }
-
     public void entityUpdate(EntityUpdateMessage m) {
         if (m.id() < entities.size()) {
             var entity = entities.get(m.id());
@@ -104,6 +100,16 @@ public class World {
             entities.add(new Entity(m.id(), m.name(), m.position()));
         } else {
             throw new IllegalStateException("Unexpected entity update message: " + m);
+        }
+    }
+
+    public void sendTo(HashSet<Player> players) {
+        var message = new GameWorldMessage(subwayTiles, Arrays.asList(subways).subList(1, subways.length));
+        players.forEach(p -> p.send(message));
+
+        for (Entity entity : entities) {
+            var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition());
+            players.forEach(p -> p.send(entityUpdate));
         }
     }
 }
