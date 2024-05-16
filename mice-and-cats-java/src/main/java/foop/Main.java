@@ -27,11 +27,11 @@ public class Main {
 
             try (var client1 = new Client(server.port()); var client2 = new Client(server.port())) {
                 client1Thread = new Thread(client1, "client1-main");
-                client1Thread.setUncaughtExceptionHandler((t, e) -> stop());
+//                client1Thread.setUncaughtExceptionHandler((t, e) -> stop());
                 client1Thread.start();
 
                 client2Thread = new Thread(client2, "client2-main");
-                client2Thread.setUncaughtExceptionHandler((t, e) -> stop());
+//                client2Thread.setUncaughtExceptionHandler((t, e) -> stop());
                 client2Thread.start();
 
                 // just wait for clients to exit or crash

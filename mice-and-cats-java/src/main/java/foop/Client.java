@@ -37,7 +37,8 @@ public class Client implements AutoCloseable, Runnable {
                 SwingUtilities.invokeLater(() -> updateLobby.accept(m));
             } else if (message instanceof GameWorldMessage m) {
                 world = new World(m);
-                SwingUtilities.invokeLater(jFrame::repaint);
+            } else if (message instanceof EntityUpdateMessage m) {
+                world.entityUpdate(m);
             } else {
                 return message;
             }
@@ -100,11 +101,12 @@ public class Client implements AutoCloseable, Runnable {
         f.add(new JComponent() {
             @Override
             public void paint(Graphics graphics) {
+                repaint(); // already request next repaint
+
                 Graphics2D g = (Graphics2D) graphics;
-                World world = new World();
                 var w = Client.this.world;
                 if (w != null) {
-                    world.render(g, getWidth(), getHeight());
+                    w.render(g, getWidth(), getHeight());
                 } else {
                     g.clearRect(0, 0, getWidth(), getHeight());
                 }

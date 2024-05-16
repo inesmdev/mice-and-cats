@@ -1,17 +1,19 @@
 package foop.server;
 
+import foop.Main;
 import foop.message.AvailableGamesMessage;
 import foop.world.World;
 
 import java.time.Duration;
 import java.util.HashSet;
+import java.util.Random;
 
 public class ServerGame {
     private final String name;
     private final HashSet<Player> players = new HashSet<>();
+    private final World world;
     private Duration duration;
     private boolean started;
-    private World world;
 
     public ServerGame(String name) {
         this.name = name;
@@ -19,24 +21,43 @@ public class ServerGame {
         world = new World();
     }
 
-    public AvailableGamesMessage.Game getLobbyInfo() {
+    public synchronized AvailableGamesMessage.Game getLobbyInfo() {
         var ps = players.stream().map(Player::getName).toList();
         return new AvailableGamesMessage.Game(name, duration, ps, started);
     }
 
-    public void removePlayer(Player player) {
+    public synchronized void removePlayer(Player player) {
         players.remove(player);
     }
 
-    public void addPlayer(Player player) {
+    public synchronized void addPlayer(Player player) {
         players.add(player);
     }
 
-    public void startIfAllReady() {
+    public synchronized void startIfAllReady() {
         if (players.size() > 1 && players.stream().allMatch(Player::isReady)) {
             started = true;
             var message = world.makeGameWorldMessage();
             players.forEach(p -> p.send(message));
+
+            new Thread(this::run).start();
+        }
+    }
+
+    public void run() {
+        var r = new Random();
+
+        while (Main.running) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            synchronized (this) {
+                System.out.println("server update" + players);
+                world.serverUpdate(players, duration);
+            }
         }
     }
 }

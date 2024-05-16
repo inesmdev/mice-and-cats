@@ -21,6 +21,7 @@ public interface Message {
         ParserFunction parser = switch (tag) {
             case AvailableGamesMessage.TAG -> AvailableGamesMessage::parse;
             case CreateGameMessage.TAG -> CreateGameMessage::parse;
+            case EntityUpdateMessage.TAG -> EntityUpdateMessage::parse;
             case GenericResponseMessage.TAG -> GenericResponseMessage::parse;
             case GameWorldMessage.TAG -> GameWorldMessage::parse;
             case InitialMessage.TAG -> InitialMessage::parse;
