@@ -119,6 +119,12 @@ public class ConnectedSubwaysPlayingField extends JPanel {
         return cell.x < 10 && cell.y < 10;
     }
 
+    /**
+     * This method draws the playing field. The class has a variable typo for the different views:
+     * type 0 = subway view, the subways are drawn fully
+     * type 1 = top view, only the entries of the subway are drawn
+     * @param g the <code>Graphics</code> object to protect
+     */
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -159,28 +165,5 @@ public class ConnectedSubwaysPlayingField extends JPanel {
                 }
             }
         }
-    }
-
-    public static void main(String[] args) {
-        int numRows = 10;
-        int numCols = 10;
-        int numSubways = 3; // Configure the maximum number of subways
-        long seed1 = new Random().nextLong();
-
-        JFrame frameSubway = new JFrame("Cats and Mice in the Subway: Subway View");
-        int type0 = 0;
-        ConnectedSubwaysPlayingField playingField = new ConnectedSubwaysPlayingField(seed1, type0, numRows, numCols, numSubways);
-        frameSubway.add(playingField);
-        frameSubway.setSize(500, 500);
-        frameSubway.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frameSubway.setVisible(true);
-
-        JFrame frameTop = new JFrame("Cats and Mice in the Subway: Top View");
-        int type1 = 1;
-        ConnectedSubwaysPlayingField playingField2 = new ConnectedSubwaysPlayingField(seed1, type1, numRows, numCols, numSubways);
-        frameTop.add(playingField2);
-        frameTop.setSize(500, 500);
-        frameTop.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frameTop.setVisible(true);
     }
 }
