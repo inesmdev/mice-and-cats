@@ -46,7 +46,7 @@ public class ConnectedSubwaysPlayingField extends JPanel {
                 break; // No more available cells
             }
 
-            List<Point> subwayCells = new LinkedList<Point>();
+            List<Point> subwayCells = new LinkedList<>();
 
             Point cell1 = availableCells.removeFirst();
             subwayCells.add(cell1);
