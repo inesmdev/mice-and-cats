@@ -2,8 +2,8 @@ package foop.world;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 public class ConnectedSubwaysPlayingField extends JPanel {
     private int[][] grid;
@@ -11,25 +11,27 @@ public class ConnectedSubwaysPlayingField extends JPanel {
     private int numRows;
     private int numCols;
     private int numSubways;
+    private int type;
 
-    public ConnectedSubwaysPlayingField(int seed, int numRows, int numCols, int numbSubways) {
+    public ConnectedSubwaysPlayingField(long seed1, int type, int numRows, int numCols, int numbSubways) {
         this.numRows = numRows;
         this.numCols = numCols;
         this.numSubways = numbSubways;
-        this.grid = new int[numRows+1][numCols+1];
-        this.tempGrid = new int[numRows+1][numCols+1];
+        this.grid = new int[numRows + 1][numCols + 1];
+        this.tempGrid = new int[numRows + 1][numCols + 1];
+        this.type = type;
         // Initialize the grid with zeros
-        for (int i = 0; i < numRows+1; i++) {
-            for (int j = 0; j < numCols+1; j++) {
+        for (int i = 0; i < numRows + 1; i++) {
+            for (int j = 0; j < numCols + 1; j++) {
                 grid[i][j] = 0;
                 tempGrid[i][j] = 0;
             }
         }
 
-        placeConnectedSubways(seed);
+        placeConnectedSubways(seed1);
     }
 
-    private void placeConnectedSubways(int seed) {
+    private void placeConnectedSubways(long seed1) {
         List<Point> availableCells = new ArrayList<>();
         for (int i = 1; i < numRows; i++) {
             for (int j = 1; j < numCols; j++) {
@@ -37,7 +39,7 @@ public class ConnectedSubwaysPlayingField extends JPanel {
             }
         }
 
-        Collections.shuffle(availableCells, new Random(seed));
+        Collections.shuffle(availableCells, new Random(seed1));
 
         for (int i = 1; i <= numSubways; i++) { //start with 1, since 0 is used for empty cells
             if (availableCells.isEmpty()) {
@@ -51,9 +53,9 @@ public class ConnectedSubwaysPlayingField extends JPanel {
             tempGrid[cell1.x][cell1.y] = i;
             Point currCell = cell1;
             int numSubwayCells = 0;
-            while(currCell != null && numSubwayCells < 8 ){
-                Point newCell = getNeighbor(seed, availableCells, currCell, i);
-                if (newCell != null){
+            while (currCell != null && numSubwayCells < 8) {
+                Point newCell = getNeighbor(seed1, availableCells, currCell, i);
+                if (newCell != null) {
                     tempGrid[newCell.x][newCell.y] = i;
                     subwayCells.add(newCell);
                 }
@@ -61,18 +63,18 @@ public class ConnectedSubwaysPlayingField extends JPanel {
                 numSubwayCells++;
             }
 
-            //subway has to be at least 3 cells long
-            if(subwayCells.size()>2){
-                for (int j = 0; j < subwayCells.size() ; j++) {
+            //subway has to be at least 4 cells long
+            if (subwayCells.size() > 3) {
+                for (int j = 0; j < subwayCells.size(); j++) {
                     Point cell = subwayCells.get(j);
-                    if(j == 0 || j == subwayCells.size()-1) grid[cell.x][cell.y] = -1;
+                    if (j == 0 || j == subwayCells.size() - 1) grid[cell.x][cell.y] = -i;
                     else grid[cell.x][cell.y] = i;
                 }
             }
         }
     }
 
-    private Point getNeighbor(int seed, List<Point> availableCells, Point cell, int color) {
+    private Point getNeighbor(long seed1, List<Point> availableCells, Point cell, int color) {
 
         List<Point> neighbors = new ArrayList<>();
         neighbors.add(new Point(cell.x - 1, cell.y)); // Up
@@ -80,10 +82,10 @@ public class ConnectedSubwaysPlayingField extends JPanel {
         neighbors.add(new Point(cell.x, cell.y - 1)); // Left
         neighbors.add(new Point(cell.x, cell.y + 1)); // Right
 
-        Collections.shuffle(neighbors); // Randomize the order of neighbors
+        Collections.shuffle(neighbors, new Random(seed1)); // Randomize the order of neighbors
 
         for (Point neighbor : neighbors) {
-            if (availableCells.contains(neighbor) && isWithinGrid(neighbor) && noUturn(neighbor,color)) {
+            if (availableCells.contains(neighbor) && isWithinGrid(neighbor) && noUturn(neighbor, color)) {
                 availableCells.remove(neighbor); // Remove the cell from available cells
                 return neighbor;
 
@@ -97,20 +99,23 @@ public class ConnectedSubwaysPlayingField extends JPanel {
         int count = 0;
 
         //check in all 4 directions whether a cell of the same color is a neighbor
-        if(tempGrid[cell.x - 1] [cell.y] == color){
-            count+= 1;
-        }  if (tempGrid[cell.x + 1] [cell.y] == color) {
-            count+= 1;
-        }  if (tempGrid[cell.x] [cell.y + 1] == color) {
-            count+= 1;
-        }  if (tempGrid[cell.x] [cell.y - 1] == color) {
-            count+= 1;
+        if (tempGrid[cell.x - 1][cell.y] == color) {
+            count += 1;
         }
-        System.out.println(count);
-        return count <= 1; //has at most 1 neighbor of the same color
+        if (tempGrid[cell.x + 1][cell.y] == color) {
+            count += 1;
+        }
+        if (tempGrid[cell.x][cell.y + 1] == color) {
+            count += 1;
+        }
+        if (tempGrid[cell.x][cell.y - 1] == color) {
+            count += 1;
+        }
+
+        return count <= 1;
     }
 
-    private boolean isWithinGrid(Point cell){
+    private boolean isWithinGrid(Point cell) {
         return cell.x < 10 && cell.y < 10;
     }
 
@@ -128,18 +133,29 @@ public class ConnectedSubwaysPlayingField extends JPanel {
         // Draw grid
         for (int i = 0; i < numRows; i++) {
             for (int j = 0; j < numCols; j++) {
-
-                if(grid[i][j] == 0){
-                    g.setColor(Color.WHITE);
-                    g.fillRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
-                    g.setColor(Color.BLACK);
-                    g.drawRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
-                } else if (grid[i][j] == -1) {
-                    g.setColor(Color.GRAY);
-                    g.fillRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
-                } else{
-                    g.setColor(colors.get(grid[i][j]%4));
-                    g.fillRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
+                if (this.type == 0) {
+                    if (grid[i][j] == 0) {
+                        g.setColor(Color.WHITE);
+                        g.fillRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
+                        g.setColor(Color.BLACK);
+                        g.drawRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
+                    } else if (grid[i][j] < 0) {
+                        g.setColor(colors.get((grid[i][j] * -1) % 4));
+                        g.fillRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
+                    } else {
+                        g.setColor(colors.get(grid[i][j] % 4).darker());
+                        g.fillRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
+                    }
+                } else if (type == 1) {
+                    if (grid[i][j] < 0) {
+                        g.setColor(colors.get((grid[i][j] * -1) % 4));
+                        g.fillRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
+                    } else {
+                        g.setColor(Color.WHITE);
+                        g.fillRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
+                        g.setColor(Color.BLACK);
+                        g.drawRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
+                    }
                 }
             }
         }
@@ -148,13 +164,23 @@ public class ConnectedSubwaysPlayingField extends JPanel {
     public static void main(String[] args) {
         int numRows = 10;
         int numCols = 10;
-        int numSubways = 4; // Configure the maximum number of subways
-        int seed = (int)(Math.random()*100);
-        JFrame frame = new JFrame("Cats and Mice in the Subway");
-        ConnectedSubwaysPlayingField playingField = new ConnectedSubwaysPlayingField(seed, numRows, numCols, numSubways);
-        frame.add(playingField);
-        frame.setSize(400, 400);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setVisible(true);
+        int numSubways = 3; // Configure the maximum number of subways
+        long seed1 = new Random().nextLong();
+
+        JFrame frameSubway = new JFrame("Cats and Mice in the Subway: Subway View");
+        int type0 = 0;
+        ConnectedSubwaysPlayingField playingField = new ConnectedSubwaysPlayingField(seed1, type0, numRows, numCols, numSubways);
+        frameSubway.add(playingField);
+        frameSubway.setSize(500, 500);
+        frameSubway.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frameSubway.setVisible(true);
+
+        JFrame frameTop = new JFrame("Cats and Mice in the Subway: Top View");
+        int type1 = 1;
+        ConnectedSubwaysPlayingField playingField2 = new ConnectedSubwaysPlayingField(seed1, type1, numRows, numCols, numSubways);
+        frameTop.add(playingField2);
+        frameTop.setSize(500, 500);
+        frameTop.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frameTop.setVisible(true);
     }
 }
