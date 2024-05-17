@@ -6,12 +6,12 @@ import java.util.List;
 import java.util.*;
 
 public class ConnectedSubwaysPlayingField extends JPanel {
-    private int[][] grid;
-    private int[][] tempGrid;
-    private int numRows;
-    private int numCols;
-    private int numSubways;
-    private int type;
+    private final int[][] grid;
+    private final int[][] tempGrid;
+    private final int numRows;
+    private final int numCols;
+    private final int numSubways;
+    private final int type;
 
     public ConnectedSubwaysPlayingField(long seed1, int type, int numRows, int numCols, int numbSubways) {
         this.numRows = numRows;
@@ -46,7 +46,7 @@ public class ConnectedSubwaysPlayingField extends JPanel {
                 break; // No more available cells
             }
 
-            List<Point> subwayCells = new LinkedList();
+            List<Point> subwayCells = new LinkedList<Point>();
 
             Point cell1 = availableCells.removeFirst();
             subwayCells.add(cell1);
@@ -124,7 +124,7 @@ public class ConnectedSubwaysPlayingField extends JPanel {
         super.paintComponent(g);
         int cellWidth = getWidth() / numCols;
         int cellHeight = getHeight() / numRows;
-        List<Color> colors = new LinkedList();
+        List<Color> colors = new LinkedList<>();
         colors.add(Color.red);
         colors.add(Color.green);
         colors.add(Color.blue);
