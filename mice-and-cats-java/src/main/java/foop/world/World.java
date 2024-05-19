@@ -1,6 +1,13 @@
 package foop.world;
 
+import foop.message.EntityUpdateMessage;
+import foop.message.GameWorldMessage;
+import foop.server.Player;
+
 import java.awt.*;
+import java.util.List;
+import java.util.*;
+import java.time.Duration;
 import java.util.List;
 import java.util.*;
 
@@ -13,6 +20,7 @@ public class World {
     private final int numRows;
     private final int numCols;
     private final int numSubways;
+    private final ArrayList<Entity> entities = new ArrayList<>();
 
     private final int type;
 
@@ -37,6 +45,27 @@ public class World {
             }
         }
         placeConnectedSubways(seed);
+        entities.add(new Entity(0, "cat", new Position(1, 1)));
+    }
+
+    public World(GameWorldMessage m) {
+        subwayTiles = m.subwayTiles();
+        subways = new Subway[m.subways().size() + 1];
+        for (int i = 0; i < m.subways().size(); i++) {
+            subways[i + 1] = m.subways().get(i);
+        }
+    }
+
+    public void serverUpdate(HashSet<Player> players, Duration duration) {
+        var r = new Random();
+
+        var cat = entities.get(0);
+        cat.setPosition(new Position(r.nextInt(subwayTiles[0].length), r.nextInt(subwayTiles.length)));
+
+        var catUpdate = new EntityUpdateMessage(cat.getId(), cat.getName(), cat.getPosition());
+        for (var player : players) {
+            player.send(catUpdate);
+        }
     }
 
     private void placeConnectedSubways(Random seed1) {
@@ -175,6 +204,37 @@ public class World {
                 }
             }
         }
+
+        g.setColor(Color.BLACK);
+        g.setFont(new Font("default", Font.BOLD, 16));
+        for (Entity entity : entities) {
+            var bounds = g.getFontMetrics().getStringBounds(entity.getName(), g);
+            int x = originX + tileSize * entity.getPosition().x() + tileSize / 2 - (int) (bounds.getWidth() / 2);
+            int y = originY + tileSize * entity.getPosition().y() + tileSize / 2 + (int) (bounds.getHeight() / 2);
+            g.drawString(entity.getName(), x, y);
+        }
+        }
     }
 
+    public void entityUpdate(EntityUpdateMessage m) {
+        if (m.id() < entities.size()) {
+            var entity = entities.get(m.id());
+            entity.setName(m.name());
+            entity.setPosition(m.position());
+        } else if (m.id() == entities.size()) {
+            entities.add(new Entity(m.id(), m.name(), m.position()));
+        } else {
+            throw new IllegalStateException("Unexpected entity update message: " + m);
+        }
+    }
+
+    public void sendTo(HashSet<Player> players) {
+        var message = new GameWorldMessage(subwayTiles, Arrays.asList(subways).subList(1, subways.length));
+        players.forEach(p -> p.send(message));
+
+        for (Entity entity : entities) {
+            var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition());
+            players.forEach(p -> p.send(entityUpdate));
+        }
+    }
 }
