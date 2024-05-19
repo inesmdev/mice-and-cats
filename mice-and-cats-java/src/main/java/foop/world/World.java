@@ -1,8 +1,8 @@
 package foop.world;
 
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 public class World {
 
@@ -15,6 +15,10 @@ public class World {
     private final int numSubways;
 
     private final int type;
+
+    private final List<Color> colors = new LinkedList<>(Arrays.asList(Color.red, Color.green, Color.blue, Color.yellow));
+    private final List<Subway> subways = new LinkedList<>();
+
 
     public World(Random seed, int type, int numSubways, int numCols, int numRows) {
 
@@ -32,7 +36,6 @@ public class World {
                 tempGrid[i][j] = 0;
             }
         }
-
         placeConnectedSubways(seed);
     }
 
@@ -70,11 +73,26 @@ public class World {
 
             //subway has to be at least 4 cells long
             if (subwayCells.size() > 3) {
+                Position entry1 = null;
+                Position entry2 = null;
                 for (int j = 0; j < subwayCells.size(); j++) {
                     Point cell = subwayCells.get(j);
-                    if (j == 0 || j == subwayCells.size() - 1) grid[cell.x][cell.y] = -i;
-                    else grid[cell.x][cell.y] = i;
+
+                    if (j == 0) {
+                        grid[cell.x][cell.y] = -i;
+                        entry1 = new Position(cell.x, cell.y);
+                    }
+                    if (j == subwayCells.size() - 1) {
+                        grid[cell.x][cell.y] = -i;
+                        entry2 = new Position(cell.x, cell.y);
+                    } else {
+                        grid[cell.x][cell.y] = i;
+                    }
                 }
+                subways.add(new Subway(subways.size(), colors.get(i % 4), new Position[]{
+                        entry1,
+                        entry2,
+                }));
             }
         }
     }
@@ -128,12 +146,6 @@ public class World {
 
         int tileSize = Math.min(w / grid[0].length, h / grid.length);
 
-        List<Color> colors = new LinkedList<>();
-        colors.add(Color.red);
-        colors.add(Color.green);
-        colors.add(Color.blue);
-        colors.add(Color.yellow);
-
         // Draw grid
         for (int i = 0; i < numRows; i++) {
             for (int j = 0; j < numCols; j++) {
@@ -143,7 +155,7 @@ public class World {
                         g.fillRect(j * tileSize, i * tileSize, tileSize, tileSize);
                         g.setColor(Color.BLACK);
                         g.drawRect(j * tileSize, i * tileSize, tileSize, tileSize);
-                    } else if (grid[i][j] < 0) {
+                    } else if (grid[i][j] < 0) { //this is an exit
                         g.setColor(colors.get((grid[i][j] * -1) % 4));
                         g.fillRect(j * tileSize, i * tileSize, tileSize, tileSize);
                     } else {
