@@ -14,10 +14,8 @@ public class World {
     // 0=empty, +-subway ids, +means exit
     // int[y][x] row major
     private final int[][] grid;
-    private final int[][] tempGrid;
     private final int numRows;
     private final int numCols;
-    private final int numSubways;
     private final ArrayList<Entity> entities = new ArrayList<>();
 
     private final int type;
@@ -29,25 +27,21 @@ public class World {
     public World(Random seed, int type, int numSubways, int numCols, int numRows) {
 
         grid = new int[numRows][numCols];
-        tempGrid = new int[numRows][numCols];
         this.type = type;
-        this.numSubways = numSubways;
         this.numCols = numCols;
         this.numRows = numRows;
         this.subways = new ArrayList<>();
 
-        placeConnectedSubways(seed);
+        placeConnectedSubways(seed, numSubways);
         entities.add(new Entity(0, "cat", new Position(1, 1)));
     }
 
     public World(GameWorldMessage m) {
         grid = m.subwayTiles();
-        tempGrid = null;
         subways = new ArrayList<>(m.subways());
         this.type = 0;
         this.numRows = grid.length;
         this.numCols = grid[0].length;
-        this.numSubways = 4;
     }
 
     public void serverUpdate(HashSet<Player> players, Duration duration) {
@@ -62,10 +56,11 @@ public class World {
         }
     }
 
-    private void placeConnectedSubways(Random seed1) {
+    private void placeConnectedSubways(Random seed1, int numSubways) {
+        var tempGrid = new int[numRows][numCols];
         java.util.List<Point> availableCells = new ArrayList<>();
-        for (int i = 1; i < numRows -1; i++) {
-            for (int j = 1; j < numCols -1; j++) {
+        for (int i = 1; i < numRows - 1; i++) {
+            for (int j = 1; j < numCols - 1; j++) {
                 availableCells.add(new Point(i, j));
             }
         }
@@ -85,7 +80,7 @@ public class World {
             Point currCell = cell1;
             int numSubwayCells = 0;
             while (currCell != null && numSubwayCells < 8) {
-                Point newCell = getNeighbor(seed1, availableCells, currCell, i);
+                Point newCell = getNeighbor(seed1, availableCells, currCell, i, tempGrid);
                 if (newCell != null) {
                     tempGrid[newCell.x][newCell.y] = i;
                     subwayCells.add(newCell);
@@ -104,8 +99,7 @@ public class World {
                     if (j == 0) {
                         grid[cell.x][cell.y] = -i;
                         entry1 = new Position(cell.x, cell.y);
-                    }
-                    if (j == subwayCells.size() - 1) {
+                    } else if (j == subwayCells.size() - 1) {
                         grid[cell.x][cell.y] = -i;
                         entry2 = new Position(cell.x, cell.y);
                     } else {
@@ -117,7 +111,7 @@ public class World {
         }
     }
 
-    private Point getNeighbor(Random seed1, List<Point> availableCells, Point cell, int color) {
+    private Point getNeighbor(Random seed1, List<Point> availableCells, Point cell, int color, int[][] tempGrid) {
 
         List<Point> neighbors = new ArrayList<>();
         neighbors.add(new Point(cell.x - 1, cell.y)); // Up
@@ -128,7 +122,7 @@ public class World {
         Collections.shuffle(neighbors, seed1); // Randomize the order of neighbors
 
         for (Point neighbor : neighbors) {
-            if (availableCells.contains(neighbor) && isWithinGrid(neighbor) && noUturn(neighbor, color)) {
+            if (availableCells.contains(neighbor) && isWithinGrid(neighbor) && noUturn(neighbor, color, tempGrid)) {
                 availableCells.remove(neighbor); // Remove the cell from available cells
                 return neighbor;
 
@@ -138,7 +132,7 @@ public class World {
         return null; // No available neighbor found within the distance limit
     }
 
-    private boolean noUturn(Point cell, int color) {
+    private boolean noUturn(Point cell, int color, int[][] tempGrid) {
         int count = 0;
 
         //check in all 4 directions whether a cell of the same color is a neighbor
