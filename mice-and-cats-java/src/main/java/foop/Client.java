@@ -48,7 +48,7 @@ public class Client implements AutoCloseable, Runnable {
         int numRows = 10;
         int numCols = 10;
         int numSubways = 3; // Configure the maximum number of subways
-        long seed1 = new Random().nextLong();
+        Random seed1 = new Random();
 
         JFrame f = new JFrame("Cats and Mice in the Subway: Subway View");
         int type0 = 0;

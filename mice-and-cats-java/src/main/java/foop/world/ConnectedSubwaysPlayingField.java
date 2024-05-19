@@ -13,7 +13,7 @@ public class ConnectedSubwaysPlayingField extends JPanel {
     private final int numSubways;
     private final int type;
 
-    public ConnectedSubwaysPlayingField(long seed1, int type, int numRows, int numCols, int numbSubways) {
+    public ConnectedSubwaysPlayingField(Random seed1, int type, int numRows, int numCols, int numbSubways) {
         this.numRows = numRows;
         this.numCols = numCols;
         this.numSubways = numbSubways;
@@ -31,7 +31,7 @@ public class ConnectedSubwaysPlayingField extends JPanel {
         placeConnectedSubways(seed1);
     }
 
-    private void placeConnectedSubways(long seed1) {
+    private void placeConnectedSubways(Random seed1) {
         List<Point> availableCells = new ArrayList<>();
         for (int i = 1; i < numRows; i++) {
             for (int j = 1; j < numCols; j++) {
@@ -39,7 +39,7 @@ public class ConnectedSubwaysPlayingField extends JPanel {
             }
         }
 
-        Collections.shuffle(availableCells, new Random(seed1));
+        Collections.shuffle(availableCells, seed1);
 
         for (int i = 1; i <= numSubways; i++) { //start with 1, since 0 is used for empty cells
             if (availableCells.isEmpty()) {
@@ -74,7 +74,7 @@ public class ConnectedSubwaysPlayingField extends JPanel {
         }
     }
 
-    private Point getNeighbor(long seed1, List<Point> availableCells, Point cell, int color) {
+    private Point getNeighbor(Random seed1, List<Point> availableCells, Point cell, int color) {
 
         List<Point> neighbors = new ArrayList<>();
         neighbors.add(new Point(cell.x - 1, cell.y)); // Up
@@ -82,7 +82,7 @@ public class ConnectedSubwaysPlayingField extends JPanel {
         neighbors.add(new Point(cell.x, cell.y - 1)); // Left
         neighbors.add(new Point(cell.x, cell.y + 1)); // Right
 
-        Collections.shuffle(neighbors, new Random(seed1)); // Randomize the order of neighbors
+        Collections.shuffle(neighbors, seed1); // Randomize the order of neighbors
 
         for (Point neighbor : neighbors) {
             if (availableCells.contains(neighbor) && isWithinGrid(neighbor) && noUturn(neighbor, color)) {
