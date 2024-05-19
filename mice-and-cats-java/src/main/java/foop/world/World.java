@@ -165,8 +165,9 @@ public class World {
     public void render(Graphics2D g, int w, int h) {
 
         int tileSize = Math.min(w / grid[0].length, h / grid.length);
-        int originX = 0;
-        int originY = 0;
+
+        g.translate((w - tileSize * grid[0].length) / 2, (h - tileSize * grid.length) / 2);
+
 
         // Draw grid
         for (int i = 0; i < numRows; i++) {
@@ -202,8 +203,8 @@ public class World {
         g.setFont(new Font("default", Font.BOLD, 16));
         for (Entity entity : entities) {
             var bounds = g.getFontMetrics().getStringBounds(entity.getName(), g);
-            int x = originX + tileSize * entity.getPosition().x() + tileSize / 2 - (int) (bounds.getWidth() / 2);
-            int y = originY + tileSize * entity.getPosition().y() + tileSize / 2 + (int) (bounds.getHeight() / 2);
+            int x = tileSize * entity.getPosition().x() + tileSize / 2 - (int) (bounds.getWidth() / 2);
+            int y = tileSize * entity.getPosition().y() + tileSize / 2 + (int) (bounds.getHeight() / 2);
             g.drawString(entity.getName(), x, y);
         }
 
