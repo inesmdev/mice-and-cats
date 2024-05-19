@@ -5,8 +5,6 @@ import foop.message.GameWorldMessage;
 import foop.server.Player;
 
 import java.awt.*;
-import java.util.List;
-import java.util.*;
 import java.time.Duration;
 import java.util.List;
 import java.util.*;
@@ -24,43 +22,39 @@ public class World {
 
     private final int type;
 
-    private final List<Color> colors = new LinkedList<>(Arrays.asList(Color.red, Color.green, Color.blue, Color.yellow));
-    private final List<Subway> subways = new LinkedList<>();
+    private final List<Color> colors = List.of(Color.red, Color.green, Color.blue, Color.yellow);
+    private final List<Subway> subways;
 
 
     public World(Random seed, int type, int numSubways, int numCols, int numRows) {
 
-        grid = new int[numRows + 1][numCols + 1];
-        tempGrid = new int[numRows + 1][numCols + 1];
+        grid = new int[numRows][numCols];
+        tempGrid = new int[numRows][numCols];
         this.type = type;
         this.numSubways = numSubways;
         this.numCols = numCols;
         this.numRows = numRows;
+        this.subways = new ArrayList<>();
 
-        // Initialize the grid with zeros
-        for (int i = 0; i < numRows + 1; i++) {
-            for (int j = 0; j < numCols + 1; j++) {
-                grid[i][j] = 0;
-                tempGrid[i][j] = 0;
-            }
-        }
         placeConnectedSubways(seed);
         entities.add(new Entity(0, "cat", new Position(1, 1)));
     }
 
     public World(GameWorldMessage m) {
-        subwayTiles = m.subwayTiles();
-        subways = new Subway[m.subways().size() + 1];
-        for (int i = 0; i < m.subways().size(); i++) {
-            subways[i + 1] = m.subways().get(i);
-        }
+        grid = m.subwayTiles();
+        tempGrid = null;
+        subways = new ArrayList<>(m.subways());
+        this.type = 0;
+        this.numRows = grid.length;
+        this.numCols = grid[0].length;
+        this.numSubways = 4;
     }
 
     public void serverUpdate(HashSet<Player> players, Duration duration) {
         var r = new Random();
 
         var cat = entities.get(0);
-        cat.setPosition(new Position(r.nextInt(subwayTiles[0].length), r.nextInt(subwayTiles.length)));
+        cat.setPosition(new Position(r.nextInt(grid[0].length), r.nextInt(grid.length)));
 
         var catUpdate = new EntityUpdateMessage(cat.getId(), cat.getName(), cat.getPosition());
         for (var player : players) {
@@ -70,8 +64,8 @@ public class World {
 
     private void placeConnectedSubways(Random seed1) {
         java.util.List<Point> availableCells = new ArrayList<>();
-        for (int i = 1; i < numRows; i++) {
-            for (int j = 1; j < numCols; j++) {
+        for (int i = 1; i < numRows -1; i++) {
+            for (int j = 1; j < numCols -1; j++) {
                 availableCells.add(new Point(i, j));
             }
         }
@@ -118,10 +112,7 @@ public class World {
                         grid[cell.x][cell.y] = i;
                     }
                 }
-                subways.add(new Subway(subways.size(), colors.get(i % 4), new Position[]{
-                        entry1,
-                        entry2,
-                }));
+                subways.add(new Subway(subways.size(), colors.get(i % 4), List.of(entry1, entry2)));
             }
         }
     }
@@ -174,6 +165,8 @@ public class World {
     public void render(Graphics2D g, int w, int h) {
 
         int tileSize = Math.min(w / grid[0].length, h / grid.length);
+        int originX = 0;
+        int originY = 0;
 
         // Draw grid
         for (int i = 0; i < numRows; i++) {
@@ -213,7 +206,7 @@ public class World {
             int y = originY + tileSize * entity.getPosition().y() + tileSize / 2 + (int) (bounds.getHeight() / 2);
             g.drawString(entity.getName(), x, y);
         }
-        }
+
     }
 
     public void entityUpdate(EntityUpdateMessage m) {
@@ -229,7 +222,7 @@ public class World {
     }
 
     public void sendTo(HashSet<Player> players) {
-        var message = new GameWorldMessage(subwayTiles, Arrays.asList(subways).subList(1, subways.length));
+        var message = new GameWorldMessage(grid, subways);
         players.forEach(p -> p.send(message));
 
         for (Entity entity : entities) {

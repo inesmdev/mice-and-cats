@@ -18,7 +18,7 @@ public class ServerGame {
     public ServerGame(String name) {
         this.name = name;
         duration = Duration.ofSeconds(42);
-        world = new World();
+        world = new World(new Random(), 0, 4 ,16, 16);
     }
 
     public synchronized AvailableGamesMessage.Game getLobbyInfo() {
