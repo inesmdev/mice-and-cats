@@ -1,8 +1,9 @@
 package foop;
 
-import foop.world.ConnectedSubwaysPlayingField;
+import foop.world.World;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
@@ -45,16 +46,7 @@ public class Client implements AutoCloseable, Runnable {
     }
 
     private void createAndShowGUI() {
-        int numRows = 10;
-        int numCols = 10;
-        int numSubways = 3; // Configure the maximum number of subways
-        Random seed1 = new Random();
-
-        JFrame f = new JFrame("Cats and Mice in the Subway: Subway View");
-        int type0 = 0;
-        ConnectedSubwaysPlayingField playingField = new ConnectedSubwaysPlayingField(seed1, type0, numRows, numCols, numSubways);
-
-
+        JFrame f = new JFrame("Swing Paint Demo");
         f.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         f.addWindowListener(new WindowAdapter() {
             @Override
@@ -68,9 +60,44 @@ public class Client implements AutoCloseable, Runnable {
             }
         });
         f.setSize(500, 500);
-        f.add(playingField);
+        f.add(new JComponent() {
+            @Override
+            public void paint(Graphics graphics) {
+                Graphics2D g = (Graphics2D) graphics;
+                World world = new World(new Random(), 0, 4, 16, 16);
+                world.render(g, getWidth(), getHeight());
+            }
+        });
         f.setVisible(true);
     }
+    //todo: delete this comment later, if World.java is definitely used instead of ConnectedSubwaysPlayingField
+//    private void createAndShowGUI() {
+//        int numRows = 10;
+//        int numCols = 10;
+//        int numSubways = 3; // Configure the maximum number of subways
+//        Random seed1 = new Random();
+//
+//        JFrame f = new JFrame("Cats and Mice in the Subway: Subway View");
+//        int type0 = 0;
+//        ConnectedSubwaysPlayingField playingField = new ConnectedSubwaysPlayingField(seed1, type0, numRows, numCols, numSubways);
+//
+//
+//        f.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+//        f.addWindowListener(new WindowAdapter() {
+//            @Override
+//            public void windowClosed(WindowEvent e) {
+//                Client.this.running = false;
+//                try {
+//                    Client.this.socket.close();
+//                } catch (IOException ex) {
+//                    ex.printStackTrace();
+//                }
+//            }
+//        });
+//        f.setSize(500, 500);
+//        f.add(playingField);
+//        f.setVisible(true);
+//    }
 
     @Override
     public void close() throws Exception {
