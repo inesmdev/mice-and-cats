@@ -3,11 +3,14 @@ package foop.server;
 import foop.Main;
 import foop.message.AvailableGamesMessage;
 import foop.world.World;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.Random;
 
+@Slf4j
 public class ServerGame {
     private final String name;
     private final HashSet<Player> players = new HashSet<>();
@@ -53,7 +56,7 @@ public class ServerGame {
             }
 
             synchronized (this) {
-                System.out.println("server update" + players);
+                log.info("server update{}", players);
                 world.serverUpdate(players, duration);
             }
         }

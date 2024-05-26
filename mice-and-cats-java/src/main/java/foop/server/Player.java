@@ -1,11 +1,13 @@
 package foop.server;
 
 import foop.message.Message;
+import lombok.extern.slf4j.Slf4j;
 
 import java.net.Socket;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class Player {
     private String name;
     private final Socket socket;
@@ -18,7 +20,7 @@ public class Player {
     }
 
     public void send(Message message) {
-        System.out.println("server->" + name + ": " + message);
+        log.info("server->{}: {}", name, message);
         toClient.put(message);
     }
 

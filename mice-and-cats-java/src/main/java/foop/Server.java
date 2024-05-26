@@ -3,6 +3,7 @@ package foop;
 import foop.message.*;
 import foop.server.Player;
 import foop.server.ServerGame;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class Server implements AutoCloseable {
 
     private final ServerSocket socket;
@@ -52,7 +54,7 @@ public class Server implements AutoCloseable {
                 }
             }
         } catch (EOFException e) {
-            System.out.println("player disconnected: " + player);
+            log.info("player disconnected: {}", player);
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         } finally {
@@ -66,7 +68,7 @@ public class Server implements AutoCloseable {
         ) {
             var initialMessage = Message.parse(in).into(InitialMessage.class);
             player.setName(initialMessage.playerName());
-            System.out.println("Server: new player " + initialMessage.playerName());
+            log.info("Server: new player {}", initialMessage.playerName());
 
             synchronized (games) {
                 sendAvailableGames(player);
@@ -123,7 +125,7 @@ public class Server implements AutoCloseable {
                 }
             }
         } catch (EOFException e) {
-            System.out.println("player disconnected: " + player);
+            log.warn("player disconnected: {}", player);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {

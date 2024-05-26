@@ -21,12 +21,6 @@ public class Exit extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        frame.dispose();
-        client.setRunning(false);
-        try {
-            client.getSocket().close();
-        } catch (IOException ex) {
-            log.error(ex.getMessage());
-        }
+
     }
 }

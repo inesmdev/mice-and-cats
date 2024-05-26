@@ -1,21 +1,20 @@
 package foop;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Main {
     public static volatile boolean running = true;
     public static Thread serverThread;
-    public static Thread client1Thread;
-    public static Thread client2Thread;
+    public static Set<Thread> clientThreads = new HashSet<>();
 
     public static void stop() {
         running = false;
         if (serverThread != null) {
             serverThread.interrupt();
         }
-        if (client1Thread != null) {
-            client1Thread.interrupt();
-        }
-        if (client2Thread != null) {
-            client2Thread.interrupt();
+        for (Thread client : clientThreads) {
+            client.interrupt();
         }
     }
 
@@ -25,18 +24,28 @@ public class Main {
             serverThread.setUncaughtExceptionHandler((t, e) -> stop());
             serverThread.start();
 
-            try (var client1 = new Client(server.port()); var client2 = new Client(server.port())) {
-                client1Thread = new Thread(client1, "client1-main");
-//                client1Thread.setUncaughtExceptionHandler((t, e) -> stop());
-                client1Thread.start();
+            try (
+                var client1 = new Client(server.port());
+                var client3 = new Client(server.port());
+                var client2 = new Client(server.port()))
+            {
 
-                client2Thread = new Thread(client2, "client2-main");
+                clientThreads.add(new Thread(client1, "client1-main"));
+//                client1Thread.setUncaughtExceptionHandler((t, e) -> stop());
+
+                clientThreads.add(new Thread(client2, "client2-main"));
+                clientThreads.add(new Thread(client3, "client3-main"));
 //                client2Thread.setUncaughtExceptionHandler((t, e) -> stop());
-                client2Thread.start();
+
+                // start all the clients
+                for (var client : clientThreads) {
+                    client.start();
+                }
 
                 // just wait for clients to exit or crash
-                client1Thread.join();
-                client2Thread.join();
+                for (var client : clientThreads) {
+                    client.join();
+                }
             }
         } finally {
             stop();
