@@ -1,7 +1,5 @@
 package foop.views;
 
-import foop.Client;
-import foop.actions.Exit;
 import foop.message.CreateGameMessage;
 import foop.message.InitialMessage;
 import lombok.extern.slf4j.Slf4j;
@@ -10,10 +8,6 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.io.IOException;
-
-import static foop.message.Message.serialize;
 
 @Slf4j
 public class EntreView extends JPanel implements View {
@@ -58,7 +52,7 @@ public class EntreView extends JPanel implements View {
 
             @Override
             public void changedUpdate(DocumentEvent e) {
-                log.info("changedUpdate: " + e.toString());
+                log.info("changedUpdate: {}", e.toString());
             }
         });
 

@@ -3,7 +3,6 @@ package foop.message;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.time.Duration;
 
 public record CreateGameMessage(String name) implements Message {
     public static final int TAG = 1;

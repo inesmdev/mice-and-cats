@@ -1,8 +1,5 @@
 package foop.views;
 
-import foop.Client;
-import foop.actions.Exit;
-import foop.entities.Player;
 import foop.message.AvailableGamesMessage;
 import foop.message.InitialMessage;
 import foop.message.JoinGameMessage;
@@ -11,9 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.function.Consumer;
-
-import static foop.message.Message.serialize;
 
 @Slf4j
 public class StartView extends JPanel implements View {

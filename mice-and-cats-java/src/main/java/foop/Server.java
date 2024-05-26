@@ -43,7 +43,7 @@ public class Server implements AutoCloseable {
 
     void runClientWriter(Player player) {
         try (var s = player.getSocket();
-             var out = s.getOutputStream();
+             var out = s.getOutputStream()
         ) {
             while (true) {
                 var message = player.pollMessageToSend(1, TimeUnit.SECONDS);
@@ -64,7 +64,7 @@ public class Server implements AutoCloseable {
 
     void runClientReader(Player player) {
         try (var s = player.getSocket();
-             var in = s.getInputStream();
+             var in = s.getInputStream()
         ) {
             var initialMessage = Message.parse(in).into(InitialMessage.class);
             player.setName(initialMessage.playerName());

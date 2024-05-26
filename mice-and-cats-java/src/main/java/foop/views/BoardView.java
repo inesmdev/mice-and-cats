@@ -1,24 +1,16 @@
 package foop.views;
 
-import foop.actions.Exit;
-import foop.message.AvailableGamesMessage;
 import foop.message.SetReadyForGameMessage;
 import foop.world.World;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
-import java.util.function.Consumer;
-
-import static foop.message.Message.serialize;
 
 @Slf4j
 public class BoardView extends JPanel {
 
-    private GameFrame frame;
+    private final GameFrame frame;
 
     public BoardView(GameFrame frame) {
         this.frame = frame;
