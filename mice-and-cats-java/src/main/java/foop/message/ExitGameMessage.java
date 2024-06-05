@@ -4,8 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public record CreateGameMessage(String name, int minPlayer) implements Message {
-    public static final int TAG = 1;
+public record ExitGameMessage(String name) implements Message {
+    public static final int TAG = 9;
 
     @Override
     public int tag() {
@@ -15,13 +15,10 @@ public record CreateGameMessage(String name, int minPlayer) implements Message {
     @Override
     public void serialize(DataOutputStream out) throws IOException {
         out.writeUTF(name);
-        out.writeInt(minPlayer);
     }
 
-    public static CreateGameMessage parse(DataInputStream in) throws IOException {
+    public static ExitGameMessage parse(DataInputStream in) throws IOException {
         var name = in.readUTF();
-        var minPlayer = in.readInt();
-        return new CreateGameMessage(name, minPlayer);
+        return new ExitGameMessage(name);
     }
-
 }

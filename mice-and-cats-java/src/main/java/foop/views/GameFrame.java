@@ -4,6 +4,7 @@ import foop.Client;
 import foop.message.AvailableGamesMessage;
 import foop.message.Message;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -17,8 +18,12 @@ import java.io.IOException;
 public class GameFrame extends JFrame {
 
     private final Client client;
+    @Setter
+    private String playerName;
     private CardLayout cardLayout;
     private JPanel mainPanel;
+    @Setter
+    private String gameName;
 
 
     public GameFrame(Client client) {
@@ -32,7 +37,7 @@ public class GameFrame extends JFrame {
         addWindowListener(new WindowAdapter() {
             //            @Override
             public void windowClosed(WindowEvent e) {
-                client.setRunning(false);
+                client.close();
                 try {
                     client.getSocket().close();
                 } catch (IOException ex) {
@@ -49,26 +54,31 @@ public class GameFrame extends JFrame {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        mainPanel.add("EntreView", new EntreView(this));
-        mainPanel.add("StartView", new StartView(this));
+        mainPanel.add("TitleScreenView", new TitleScreenView(this));
+        mainPanel.add("JoinGameView", new JoinGameView(this));
         mainPanel.add("BoardView", new BoardView(this));
+        mainPanel.add("CreateGameView", new CreateGameView(this));
 
         add(mainPanel);
         setLocationByPlatform(true);
 
-        showEntreView();
+        showTitleScreenView();
     }
 
-    public void showStartView() {
-        this.cardLayout.show(mainPanel, "StartView");
+    public void showTitleScreenView() {
+        this.cardLayout.show(mainPanel, "TitleScreenView");
     }
 
     public void showBoardView() {
         cardLayout.show(mainPanel, "BoardView");
     }
 
-    public void showEntreView() {
-        cardLayout.show(mainPanel, "EntreView");
+    public void showJoinGameView() {
+        cardLayout.show(mainPanel, "JoinGameView");
+    }
+
+    public void showCreateGameView() {
+        cardLayout.show(mainPanel, "CreateGameView");
     }
 
     public void send(Message message) {
@@ -77,7 +87,7 @@ public class GameFrame extends JFrame {
 
     public void exit() {
         dispose();
-        client.setRunning(false);
+        client.close();
         try {
             client.getSocket().close();
         } catch (IOException ex) {
@@ -85,15 +95,8 @@ public class GameFrame extends JFrame {
         }
     }
 
-    public void setPlayName(String playerName) {
-        client.setPlayerName(playerName);
-    }
-
-    public String getPlayerName() {
-        return client.getPlayerName();
-    }
-
     public DefaultListModel<AvailableGamesMessage.Game> getLobbyList() {
         return client.getLobbyListModel();
     }
+
 }

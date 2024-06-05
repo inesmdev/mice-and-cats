@@ -1,7 +1,6 @@
 package foop.views;
 
 import foop.message.AvailableGamesMessage;
-import foop.message.InitialMessage;
 import foop.message.JoinGameMessage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -10,20 +9,21 @@ import javax.swing.*;
 import java.awt.*;
 
 @Slf4j
-public class StartView extends JPanel implements View {
+public class JoinGameView extends JPanel {
 
 
     private final GameFrame frame;
     @Getter
     private JList<AvailableGamesMessage.Game> lobbyList;
+    private boolean firstTime = true;
 
-    public StartView(GameFrame frame) {
+    public JoinGameView(GameFrame frame) {
         this.frame = frame;
         render();
     }
 
 
-    public void render() {
+    private void render() {
 
         setLayout(new BorderLayout());
 
@@ -34,9 +34,7 @@ public class StartView extends JPanel implements View {
 
         lobbyList = new JList<>(frame.getLobbyList());
         lobbyList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        lobbyList.addListSelectionListener(e -> {
-            startButton.setEnabled(true);
-        });
+        lobbyList.addListSelectionListener(e -> startButton.setEnabled(true));
         lobbyList.setBounds(100, 100, 200, 30);
         add(lobbyList, BorderLayout.CENTER);
         JScrollPane scrollPane = new JScrollPane(lobbyList,
@@ -44,14 +42,15 @@ public class StartView extends JPanel implements View {
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 
-
-        startButton.setBackground(Color.GREEN);
-        startButton.setForeground(Color.BLUE);
         startButton.setFont(new Font("Monospaced", Font.PLAIN, 12));
-        startButton.addActionListener(actionEvent -> {
-            //Todo check if game is selected...
+        startButton.addActionListener(e -> {
+            startButton.setEnabled(false);
             AvailableGamesMessage.Game game = lobbyList.getSelectedValue();
-            frame.send(new InitialMessage(frame.getPlayerName()));
+            frame.setGameName(game.name());
+            if (firstTime) {
+
+                firstTime = false;
+            }
             frame.send(new JoinGameMessage(game.name()));
             frame.showBoardView();
         });
@@ -59,8 +58,6 @@ public class StartView extends JPanel implements View {
 
 
         JButton exitButton = new JButton("Exit");
-        exitButton.setForeground(Color.BLUE);
-        exitButton.setFont(new Font("Monospaced", Font.PLAIN, 12));
         exitButton.addActionListener(e -> frame.exit());
 
 
@@ -84,7 +81,7 @@ public class StartView extends JPanel implements View {
         returnButton.setSize(50, 50);
         returnButton.addActionListener(e -> {
             log.info("return button clicked");
-            frame.showEntreView();
+            frame.showTitleScreenView();
         });
 
         JLabel headerLabel = new JLabel("Cat and Mouse", SwingConstants.CENTER);

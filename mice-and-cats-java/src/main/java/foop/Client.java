@@ -7,7 +7,6 @@ import foop.message.Message;
 import foop.views.GameFrame;
 import foop.world.World;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,18 +20,16 @@ import java.util.function.Consumer;
 
 import static foop.message.Message.serialize;
 
-@Setter
 @Getter
 @Slf4j
 public class Client implements AutoCloseable, Runnable {
 
     private final Socket socket;
-    private String playerName = "Player" + new Random().nextInt(100);
+    private final String clientName = "Client_" + new Random().nextInt(100);
     private volatile boolean running = true;
     private JFrame jFrame;
-    private Consumer<AvailableGamesMessage> updateLobby;
     private World world;
-    private DefaultListModel<AvailableGamesMessage.Game> lobbyListModel = new DefaultListModel<>();
+    private final DefaultListModel<AvailableGamesMessage.Game> lobbyListModel = new DefaultListModel<>();
 
     public Client(int port) throws IOException {
         socket = new Socket("localhost", port);
@@ -43,7 +40,8 @@ public class Client implements AutoCloseable, Runnable {
         while (true) {
             var message = Message.parse(in);
             if (message instanceof AvailableGamesMessage m) {
-                SwingUtilities.invokeLater(() -> updateLobby.accept(m));
+                updateLobby(m);
+                //SwingUtilities.invokeLater(() -> updateLobby.accept(m));
             } else if (message instanceof GameWorldMessage m) {
                 world = new World(m);
             } else if (message instanceof EntityUpdateMessage m) {
@@ -60,16 +58,9 @@ public class Client implements AutoCloseable, Runnable {
             SwingUtilities.invokeAndWait(this::createAndShowGUI);
             var in = socket.getInputStream();
 
-//            if (receiveNext(in).into(GenericResponseMessage.class).error()) {
-//                serialize(new JoinGameMessage("game1"), out);
-//                if (receiveNext(in).into(GenericResponseMessage.class).error()) {
-//                    throw new IOException("Could not join game");
-//                }
-//            }
-
             while (Main.running && this.running) {
                 var message = receiveNext(in);
-                log.info("{}: {}", playerName, message);
+                log.info("{}: {}", clientName, message);
             }
         } catch (IOException | InterruptedException | InvocationTargetException e) {
             throw new RuntimeException(e);
@@ -79,19 +70,22 @@ public class Client implements AutoCloseable, Runnable {
                     jFrame.dispose();
                 }
             });
-            log.info("{} exited", playerName);
+            log.info("{} exited", clientName);
         }
     }
 
     private void createAndShowGUI() {
-
         this.jFrame = new GameFrame(this);
-        this.updateLobby = updateLobby();
     }
 
     @Override
-    public void close() throws Exception {
-        this.socket.close();
+    public void close() {
+        running = false;
+        try {
+            this.socket.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
@@ -100,23 +94,8 @@ public class Client implements AutoCloseable, Runnable {
         serialize(message, this.socket.getOutputStream());
     }
 
-    public synchronized Consumer<AvailableGamesMessage> updateLobby() {
-        return availableGamesMessage -> {
-            JList<AvailableGamesMessage> lobbyList = new JList<>();
-            int index = lobbyList.getSelectedIndex();
-            var selected = index != -1 ? lobbyListModel.get(index).name() : null;
-
-            lobbyListModel.removeAllElements();
-            lobbyListModel.addAll(availableGamesMessage.games());
-
-            if (selected != null) {
-                for (int i = 0; i < lobbyListModel.size(); ++i) {
-                    if (selected.equals(lobbyListModel.get(i).name())) {
-                        lobbyList.setSelectedIndex(i);
-                        break;
-                    }
-                }
-            }
-        };
+    private synchronized void updateLobby(AvailableGamesMessage m) {
+        lobbyListModel.removeAllElements();
+        lobbyListModel.addAll(m.games());
     }
 }
