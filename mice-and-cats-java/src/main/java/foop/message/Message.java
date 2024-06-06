@@ -27,6 +27,7 @@ public interface Message {
             case InitialMessage.TAG -> InitialMessage::parse;
             case JoinGameMessage.TAG -> JoinGameMessage::parse;
             case SetReadyForGameMessage.TAG -> SetReadyForGameMessage::parse;
+            case ExitGameMessage.TAG -> ExitGameMessage::parse;
             default -> throw new IOException("Unexpected tag: " + tag);
         };
 

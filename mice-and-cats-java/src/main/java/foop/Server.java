@@ -3,6 +3,7 @@ package foop;
 import foop.message.*;
 import foop.server.Player;
 import foop.server.ServerGame;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class Server implements AutoCloseable {
 
     private final ServerSocket socket;
@@ -41,7 +43,7 @@ public class Server implements AutoCloseable {
 
     void runClientWriter(Player player) {
         try (var s = player.getSocket();
-             var out = s.getOutputStream();
+             var out = s.getOutputStream()
         ) {
             while (true) {
                 var message = player.pollMessageToSend(1, TimeUnit.SECONDS);
@@ -52,7 +54,7 @@ public class Server implements AutoCloseable {
                 }
             }
         } catch (EOFException e) {
-            System.out.println("player disconnected: " + player);
+            log.info("player disconnected: {}", player);
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
         } finally {
@@ -62,11 +64,11 @@ public class Server implements AutoCloseable {
 
     void runClientReader(Player player) {
         try (var s = player.getSocket();
-             var in = s.getInputStream();
+             var in = s.getInputStream()
         ) {
             var initialMessage = Message.parse(in).into(InitialMessage.class);
             player.setName(initialMessage.playerName());
-            System.out.println("Server: new player " + initialMessage.playerName());
+            log.info("Server: new player {}", initialMessage.playerName());
 
             synchronized (games) {
                 sendAvailableGames(player);
@@ -82,10 +84,11 @@ public class Server implements AutoCloseable {
                             player.getGame().removePlayer(player);
                             player.setGame(null);
                         }
+                        // can't create a game with the same name:
                         if (games.containsKey(m.name())) {
                             player.send(new GenericResponseMessage("Name already exists", true));
                         } else {
-                            var game = new ServerGame(m.name());
+                            var game = new ServerGame(m.name(), m.minPlayer());
                             game.addPlayer(player);
                             player.setGame(game);
                             games.put(m.name(), game);
@@ -118,12 +121,22 @@ public class Server implements AutoCloseable {
                         }
                         sendAvailableGames(null);
                     }
+                } else if (message instanceof ExitGameMessage m) {
+                    synchronized (games) {
+                        player.setReady(false);
+                        if (player.getGame() != null) {
+                            player.getGame().removePlayer(player);
+                            player.getGame().stop();
+                            player.setGame(null);
+                        }
+                        sendAvailableGames(null);
+                    }
                 } else {
                     throw new IOException("Unexpected message: " + message);
                 }
             }
         } catch (EOFException e) {
-            System.out.println("player disconnected: " + player);
+            log.warn("player disconnected: {}", player);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {
