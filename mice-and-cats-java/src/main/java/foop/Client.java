@@ -16,7 +16,6 @@ import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 import java.util.Random;
-import java.util.function.Consumer;
 
 import static foop.message.Message.serialize;
 
@@ -27,21 +26,18 @@ public class Client implements AutoCloseable, Runnable {
     private final Socket socket;
     private final String clientName = "Client_" + new Random().nextInt(100);
     private volatile boolean running = true;
-    private JFrame jFrame;
+    private GameFrame jFrame;
     private World world;
-    private final DefaultListModel<AvailableGamesMessage.Game> lobbyListModel = new DefaultListModel<>();
 
     public Client(int port) throws IOException {
         socket = new Socket("localhost", port);
     }
 
-
     Message receiveNext(InputStream in) throws IOException {
         while (true) {
             var message = Message.parse(in);
             if (message instanceof AvailableGamesMessage m) {
-                updateLobby(m);
-                //SwingUtilities.invokeLater(() -> updateLobby.accept(m));
+                SwingUtilities.invokeLater(() -> jFrame.updateLobby(m));
             } else if (message instanceof GameWorldMessage m) {
                 world = new World(m);
             } else if (message instanceof EntityUpdateMessage m) {
@@ -92,10 +88,5 @@ public class Client implements AutoCloseable, Runnable {
     @SneakyThrows
     public synchronized void send(Message message) {
         serialize(message, this.socket.getOutputStream());
-    }
-
-    private synchronized void updateLobby(AvailableGamesMessage m) {
-        lobbyListModel.removeAllElements();
-        lobbyListModel.addAll(m.games());
     }
 }

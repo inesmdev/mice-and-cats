@@ -25,6 +25,7 @@ public class GameFrame extends JFrame {
     @Setter
     private String gameName;
 
+    private final JoinGameView joinGameView;
 
     public GameFrame(Client client) {
         this.client = client;
@@ -46,6 +47,8 @@ public class GameFrame extends JFrame {
             }
         });
 
+        joinGameView = new JoinGameView(this);
+
         initComponents();
         setVisible(true);
     }
@@ -55,7 +58,7 @@ public class GameFrame extends JFrame {
         mainPanel = new JPanel(cardLayout);
 
         mainPanel.add("TitleScreenView", new TitleScreenView(this));
-        mainPanel.add("JoinGameView", new JoinGameView(this));
+        mainPanel.add("JoinGameView", joinGameView);
         mainPanel.add("BoardView", new BoardView(this));
         mainPanel.add("CreateGameView", new CreateGameView(this));
 
@@ -95,8 +98,7 @@ public class GameFrame extends JFrame {
         }
     }
 
-    public DefaultListModel<AvailableGamesMessage.Game> getLobbyList() {
-        return client.getLobbyListModel();
+    public void updateLobby(AvailableGamesMessage m) {
+        joinGameView.updateLobby(m);
     }
-
 }

@@ -13,17 +13,14 @@ public class JoinGameView extends JPanel {
 
 
     private final GameFrame frame;
-    @Getter
-    private JList<AvailableGamesMessage.Game> lobbyList;
+
+    private final JList<AvailableGamesMessage.Game> lobbyList;
+    private final DefaultListModel<AvailableGamesMessage.Game> lobbyListModel = new DefaultListModel<>();
+
     private boolean firstTime = true;
 
     public JoinGameView(GameFrame frame) {
         this.frame = frame;
-        render();
-    }
-
-
-    private void render() {
 
         setLayout(new BorderLayout());
 
@@ -32,7 +29,7 @@ public class JoinGameView extends JPanel {
 
         JButton startButton = new JButton("Start");
 
-        lobbyList = new JList<>(frame.getLobbyList());
+        lobbyList = new JList<>(lobbyListModel);
         lobbyList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         lobbyList.addListSelectionListener(e -> startButton.setEnabled(true));
         lobbyList.setBounds(100, 100, 200, 30);
@@ -84,5 +81,22 @@ public class JoinGameView extends JPanel {
         headPanel.add(headerLabel, BorderLayout.CENTER);
         headPanel.add(returnButton, BorderLayout.WEST);
         return headPanel;
+    }
+
+    public void updateLobby(AvailableGamesMessage message) {
+        int index = lobbyList.getSelectedIndex();
+        var selected = index != -1 ? lobbyListModel.get(index).name() : null;
+
+        lobbyListModel.removeAllElements();
+        lobbyListModel.addAll(message.games());
+
+        if (selected != null) {
+            for (int i = 0; i < lobbyListModel.size(); ++i) {
+                if (selected.equals(lobbyListModel.get(i).name())) {
+                    lobbyList.setSelectedIndex(i);
+                    break;
+                }
+            }
+        }
     }
 }
