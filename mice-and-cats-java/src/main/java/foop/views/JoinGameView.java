@@ -27,7 +27,7 @@ public class JoinGameView extends JPanel {
         JPanel headPanel = getHeadPanel();
         add(headPanel, BorderLayout.NORTH);
 
-        JButton startButton = new JButton("Start");
+        JButton startButton = new JButton("Join");
 
         lobbyList = new JList<>(lobbyListModel);
         lobbyList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
