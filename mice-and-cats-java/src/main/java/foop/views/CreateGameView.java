@@ -19,11 +19,7 @@ public class CreateGameView extends JPanel {
     private void render() {
         this.setLayout(new BorderLayout());
 
-        JLabel title = new JLabel("Create a new game");
-        title.setFont(new Font("Arial", Font.BOLD, 16));
-        title.setForeground(Color.BLACK);
-        title.setHorizontalAlignment(SwingConstants.CENTER);
-        this.add(title, BorderLayout.NORTH);
+        add(getHeadPanel(), BorderLayout.NORTH);
 
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.PAGE_AXIS));
@@ -81,6 +77,25 @@ public class CreateGameView extends JPanel {
         });
         this.add(createGameButton, BorderLayout.SOUTH);
 
+    }
+
+    private JPanel getHeadPanel() {
+        JPanel headPanel = new JPanel();
+        headPanel.setLayout(new BorderLayout());
+
+        JButton returnButton = new JButton("←");
+        returnButton.setSize(50, 50);
+        returnButton.addActionListener(e -> {
+            log.info("return button clicked");
+            frame.showTitleScreenView();
+        });
+
+        JLabel headerLabel = new JLabel("Create a game", SwingConstants.CENTER);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
+
+        headPanel.add(headerLabel, BorderLayout.CENTER);
+        headPanel.add(returnButton, BorderLayout.WEST);
+        return headPanel;
     }
 }
 

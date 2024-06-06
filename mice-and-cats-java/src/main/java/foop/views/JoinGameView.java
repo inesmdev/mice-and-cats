@@ -57,10 +57,6 @@ public class JoinGameView extends JPanel {
         startButton.setEnabled(false);
 
 
-        JButton exitButton = new JButton("Exit");
-        exitButton.addActionListener(e -> frame.exit());
-
-
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BorderLayout());
         centerPanel.add(scrollPane, BorderLayout.CENTER);
@@ -68,9 +64,7 @@ public class JoinGameView extends JPanel {
 
         JPanel southPanel = new JPanel();
         southPanel.add(startButton);
-        southPanel.add(exitButton);
         add(southPanel, BorderLayout.SOUTH);
-
     }
 
     private JPanel getHeadPanel() {
