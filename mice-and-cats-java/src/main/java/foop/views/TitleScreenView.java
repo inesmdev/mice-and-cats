@@ -33,15 +33,14 @@ public class TitleScreenView extends JPanel {
         //panel.setBorder(BorderFactory.createLineBorder(Color.RED));
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-
-        JLabel nameLabel = new JLabel("Enter a name:", SwingConstants.CENTER);
+        JLabel nameLabel = new JLabel("Enter your name:", SwingConstants.CENTER);
 
         JTextField tf = new JTextField();
         tf.setEditable(true);
         tf.setPreferredSize(new Dimension(100, 20));
 
         JPanel namePanel = new JPanel();
-        namePanel.setMaximumSize(new Dimension(200, 40));
+        namePanel.setMaximumSize(new Dimension(1000, 40));
         //namePanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         namePanel.add(nameLabel);
         namePanel.add(tf);
@@ -81,6 +80,7 @@ public class TitleScreenView extends JPanel {
         });
         joinBtn.setEnabled(false);
         panel.add(buttonPanel, BorderLayout.CENTER);
+
         add(panel, BorderLayout.CENTER);
 
         // Document listener for buttons:
