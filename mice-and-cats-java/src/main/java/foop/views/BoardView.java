@@ -7,15 +7,26 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 
 @Slf4j
 public class BoardView extends JPanel {
 
     private final GameFrame frame;
+    private static final String ACTION_UP = "ACTION_UP";
 
     public BoardView(GameFrame frame) {
         this.frame = frame;
         render();
+
+        getActionMap().put(ACTION_UP, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                log.info(ACTION_UP);
+            }
+        });
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke('w'), ACTION_UP);
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("UP"), ACTION_UP);
     }
 
     public void render() {
