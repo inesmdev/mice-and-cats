@@ -3,6 +3,7 @@ package foop.world;
 import foop.message.EntityUpdateMessage;
 import foop.message.GameWorldMessage;
 import foop.server.Player;
+import lombok.Getter;
 
 import java.awt.*;
 import java.time.Duration;
@@ -16,6 +17,7 @@ public class World {
     private final int[][] grid;
     private final int numRows;
     private final int numCols;
+    @Getter
     private final ArrayList<Entity> entities = new ArrayList<>();
 
     private final int type;
@@ -34,6 +36,7 @@ public class World {
 
         placeConnectedSubways(seed, numSubways);
         entities.add(new Entity(0, "cat", new Position(1, 1)));
+        entities.add(new Entity(1, "p1", new Position(1, 1)));
     }
 
     public World(GameWorldMessage m) {
@@ -48,11 +51,14 @@ public class World {
         var r = new Random();
 
         var cat = entities.get(0);
+        var p = entities.get(1);
         cat.setPosition(new Position(r.nextInt(grid[0].length), r.nextInt(grid.length)));
 
         var catUpdate = new EntityUpdateMessage(cat.getId(), cat.getName(), cat.getPosition());
+        var pUpdate = new EntityUpdateMessage(p.getId(), p.getName(), p.getPosition());
         for (var player : players) {
             player.send(catUpdate);
+            player.send(pUpdate);
         }
     }
 

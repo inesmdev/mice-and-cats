@@ -19,6 +19,7 @@ public class GameFrame extends JFrame {
 
     private final Client client;
     @Setter
+    @Getter
     private String playerName;
     private CardLayout cardLayout;
     private JPanel mainPanel;

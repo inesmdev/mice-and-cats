@@ -1,7 +1,9 @@
 package foop.views;
 
+import foop.message.EntityUpdateMessage;
 import foop.message.ExitGameMessage;
 import foop.message.SetReadyForGameMessage;
+import foop.world.Position;
 import foop.world.World;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,6 +16,9 @@ public class BoardView extends JPanel {
 
     private final GameFrame frame;
     private static final String ACTION_UP = "ACTION_UP";
+    private static final String ACTION_DOWN = "ACTION_DOWN";
+    private static final String ACTION_RIGHT = "ACTION_RIGHT";
+    private static final String ACTION_LEFT = "ACTION_LEFT";
 
     public BoardView(GameFrame frame) {
         this.frame = frame;
@@ -23,10 +28,52 @@ public class BoardView extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 log.info(ACTION_UP);
+                var player = frame.getClient().getWorld().getEntities().get(1);
+                player.setPosition(new Position(player.getPosition().x(), player.getPosition().y()-1));
+                var playerUpdate = new EntityUpdateMessage(player.getId(),player.getName(), player.getPosition() );
+                frame.send(playerUpdate);
+
             }
         });
+        getActionMap().put(ACTION_DOWN, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                log.info(ACTION_DOWN);
+                var player = frame.getClient().getWorld().getEntities().get(1);
+                player.setPosition(new Position(player.getPosition().x(), player.getPosition().y()+1));
+                var playerUpdate = new EntityUpdateMessage(player.getId(),player.getName(), player.getPosition() );
+                frame.send(playerUpdate);
+            }
+        });
+        getActionMap().put(ACTION_RIGHT, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                log.info(ACTION_RIGHT);
+                var player = frame.getClient().getWorld().getEntities().get(1);
+                player.setPosition(new Position(player.getPosition().x()+1, player.getPosition().y()));
+                var playerUpdate = new EntityUpdateMessage(player.getId(),player.getName(), player.getPosition() );
+                frame.send(playerUpdate);
+            }
+        });
+        getActionMap().put(ACTION_LEFT, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                log.info(ACTION_LEFT);
+                var player = frame.getClient().getWorld().getEntities().get(1);
+                player.setPosition(new Position(player.getPosition().x()-1, player.getPosition().y()));
+                var playerUpdate = new EntityUpdateMessage(player.getId(),player.getName(), player.getPosition() );
+                frame.send(playerUpdate);
+            }
+        });
+
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke('w'), ACTION_UP);
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("UP"), ACTION_UP);
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke('s'), ACTION_DOWN);
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("DOWN"), ACTION_DOWN);
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke('a'), ACTION_LEFT);
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("LEFT"), ACTION_LEFT);
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke('d'), ACTION_RIGHT);
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("RIGHT"), ACTION_RIGHT);
     }
 
     public void render() {
