@@ -26,7 +26,7 @@ public class World {
     private final List<Subway> subways;
 
 
-    public World(Random seed, int type, int numSubways, int numCols, int numRows) {
+    public World(Random seed, int type, int numSubways, int numCols, int numRows, HashSet<Player> players) {
 
         grid = new int[numRows][numCols];
         this.type = type;
@@ -35,8 +35,12 @@ public class World {
         this.subways = new ArrayList<>();
 
         placeConnectedSubways(seed, numSubways);
-        entities.add(new Entity(0, "cat", new Position(1, 1)));
-        entities.add(new Entity(1, "p1", new Position(1, 1)));
+
+        entities.add(new Entity(0, "cat", new Position(1, 1), false));
+
+        for (Player player : players) {
+            entities.add(new Entity(entities.size(), player.getName(), new Position(entities.size(), 2), false));
+        }
     }
 
     public World(GameWorldMessage m) {
@@ -54,8 +58,8 @@ public class World {
         var p = entities.get(1);
         cat.setPosition(new Position(r.nextInt(grid[0].length), r.nextInt(grid.length)));
 
-        var catUpdate = new EntityUpdateMessage(cat.getId(), cat.getName(), cat.getPosition());
-        var pUpdate = new EntityUpdateMessage(p.getId(), p.getName(), p.getPosition());
+        var catUpdate = new EntityUpdateMessage(cat.getId(), cat.getName(), cat.getPosition(), cat.isUnderground());
+        var pUpdate = new EntityUpdateMessage(p.getId(), p.getName(), p.getPosition(), p.isUnderground());
         for (var player : players) {
             player.send(catUpdate);
             player.send(pUpdate);
@@ -216,7 +220,7 @@ public class World {
             entity.setName(m.name());
             entity.setPosition(m.position());
         } else if (m.id() == entities.size()) {
-            entities.add(new Entity(m.id(), m.name(), m.position()));
+            entities.add(new Entity(m.id(), m.name(), m.position(), m.isUnderground()));
         } else {
             throw new IllegalStateException("Unexpected entity update message: " + m);
         }
@@ -227,8 +231,25 @@ public class World {
         players.forEach(p -> p.send(message));
 
         for (Entity entity : entities) {
-            var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition());
+            var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground());
             players.forEach(p -> p.send(entityUpdate));
         }
+    }
+
+    public void movePlayer(HashSet<Player> players, Player player, int direction) {
+
+        var entity = entities.stream().filter(e -> e.getName().equals(player.getName())).findFirst().get();
+        var position = switch (direction) {
+            case 1 -> new Position(entity.getPosition().x(), entity.getPosition().y() - 1);
+            case 2 -> new Position(entity.getPosition().x() + 1, entity.getPosition().y());
+            case 3 -> new Position(entity.getPosition().x(), entity.getPosition().y() + 1);
+            case 4 -> new Position(entity.getPosition().x() - 1, entity.getPosition().y());
+            default -> throw new IllegalArgumentException("Illegal Direction: " + direction);
+        };
+        //todo: collision detection (bound, subways)
+        entity.setPosition(position);
+
+        var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground());
+        players.forEach(p -> p.send(entityUpdate));
     }
 }

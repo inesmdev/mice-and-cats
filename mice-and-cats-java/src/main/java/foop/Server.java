@@ -9,6 +9,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -130,6 +131,11 @@ public class Server implements AutoCloseable {
                             player.setGame(null);
                         }
                         sendAvailableGames(null);
+                    }
+                } else if (message instanceof PlayerCommandMessage m) {
+                    synchronized (games) {
+                        var game = Objects.requireNonNull(player.getGame());
+                        game.movePlayer(player, m.direction());
                     }
                 } else {
                     throw new IOException("Unexpected message: " + message);

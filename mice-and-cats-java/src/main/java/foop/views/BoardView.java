@@ -1,9 +1,8 @@
 package foop.views;
 
-import foop.message.EntityUpdateMessage;
 import foop.message.ExitGameMessage;
+import foop.message.PlayerCommandMessage;
 import foop.message.SetReadyForGameMessage;
-import foop.world.Position;
 import foop.world.World;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,11 +13,11 @@ import java.awt.event.ActionEvent;
 @Slf4j
 public class BoardView extends JPanel {
 
-    private final GameFrame frame;
     private static final String ACTION_UP = "ACTION_UP";
     private static final String ACTION_DOWN = "ACTION_DOWN";
     private static final String ACTION_RIGHT = "ACTION_RIGHT";
     private static final String ACTION_LEFT = "ACTION_LEFT";
+    private final GameFrame frame;
 
     public BoardView(GameFrame frame) {
         this.frame = frame;
@@ -28,9 +27,7 @@ public class BoardView extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 log.info(ACTION_UP);
-                var player = frame.getClient().getWorld().getEntities().get(1);
-                player.setPosition(new Position(player.getPosition().x(), player.getPosition().y()-1));
-                var playerUpdate = new EntityUpdateMessage(player.getId(),player.getName(), player.getPosition() );
+                var playerUpdate = new PlayerCommandMessage(1);
                 frame.send(playerUpdate);
 
             }
@@ -39,9 +36,7 @@ public class BoardView extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 log.info(ACTION_DOWN);
-                var player = frame.getClient().getWorld().getEntities().get(1);
-                player.setPosition(new Position(player.getPosition().x(), player.getPosition().y()+1));
-                var playerUpdate = new EntityUpdateMessage(player.getId(),player.getName(), player.getPosition() );
+                var playerUpdate = new PlayerCommandMessage(3);
                 frame.send(playerUpdate);
             }
         });
@@ -49,9 +44,7 @@ public class BoardView extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 log.info(ACTION_RIGHT);
-                var player = frame.getClient().getWorld().getEntities().get(1);
-                player.setPosition(new Position(player.getPosition().x()+1, player.getPosition().y()));
-                var playerUpdate = new EntityUpdateMessage(player.getId(),player.getName(), player.getPosition() );
+                var playerUpdate = new PlayerCommandMessage(2);
                 frame.send(playerUpdate);
             }
         });
@@ -59,9 +52,7 @@ public class BoardView extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 log.info(ACTION_LEFT);
-                var player = frame.getClient().getWorld().getEntities().get(1);
-                player.setPosition(new Position(player.getPosition().x()-1, player.getPosition().y()));
-                var playerUpdate = new EntityUpdateMessage(player.getId(),player.getName(), player.getPosition() );
+                var playerUpdate = new PlayerCommandMessage(4);
                 frame.send(playerUpdate);
             }
         });

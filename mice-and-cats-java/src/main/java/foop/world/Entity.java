@@ -1,42 +1,24 @@
 package foop.world;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@ToString
 public class Entity {
     private final int id;
+    @Setter
     private String name;
+    @Setter
     private Position position;
+    private boolean isUnderground;
 
-    public Entity(int id, String name, Position position) {
+    public Entity(int id, String name, Position position, boolean isUnderground) {
         this.id = id;
         this.name = name;
         this.position = position;
+        this.isUnderground = isUnderground;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Position getPosition() {
-        return position;
-    }
-
-    public void setPosition(Position position) {
-        this.position = position;
-    }
-
-    @Override
-    public String toString() {
-        return "Entity{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", position=" + position +
-                '}';
-    }
 }
