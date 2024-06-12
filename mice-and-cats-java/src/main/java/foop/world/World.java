@@ -4,12 +4,14 @@ import foop.message.EntityUpdateMessage;
 import foop.message.GameWorldMessage;
 import foop.server.Player;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.awt.*;
 import java.time.Duration;
 import java.util.List;
 import java.util.*;
 
+@Slf4j
 public class World {
 
     // 0=empty, +-subway ids, +means exit
@@ -163,7 +165,7 @@ public class World {
     }
 
     private boolean isWithinGrid(Point cell) {
-        return cell.x < numCols && cell.x > 0 && cell.y < numRows && cell.y > 0;
+        return cell.x < numCols && cell.x >= 0 && cell.y < numRows && cell.y >= 0;
     }
 
     public void render(Graphics2D g, int w, int h) {
@@ -247,9 +249,12 @@ public class World {
             default -> throw new IllegalArgumentException("Illegal Direction: " + direction);
         };
         //todo: collision detection (bound, subways)
-        entity.setPosition(position);
+        if (isWithinGrid(new Point(position.x(), position.y()))) {
+            entity.setPosition(position);
+            var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground());
+            players.forEach(p -> p.send(entityUpdate));
+        }
 
-        var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground());
-        players.forEach(p -> p.send(entityUpdate));
+
     }
 }
