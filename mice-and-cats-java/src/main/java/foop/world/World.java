@@ -43,7 +43,7 @@ public class World {
         entities.add(new Entity(0, "cat", new Position(1, 1), false));
 
         for (Player player : players) {
-            entities.add(new Entity(entities.size(), player.getName(), getRandomGroundPosition(), false));
+            entities.add(new Entity(entities.size(), player.getName(), getRandomGroundPosition(seed), false));
         }
     }
 
@@ -177,8 +177,7 @@ public class World {
         return cell.x() < numCols && cell.x() >= 0 && cell.y() < numRows && cell.y() >= 0;
     }
 
-    private Position getRandomGroundPosition() {
-        Random rand = new Random();
+    private Position getRandomGroundPosition(Random rand) {
         int randomX = rand.nextInt(this.numCols);
         int randomY = rand.nextInt(this.numRows);
 
