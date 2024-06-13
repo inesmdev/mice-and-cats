@@ -78,9 +78,9 @@ public class World {
     private void placeConnectedSubways(Random seed1, int numSubways) {
         var tempGrid = new int[numRows][numCols];
         java.util.List<Position> availableCells = new ArrayList<>();
-        for (int i = 1; i < numRows - 1; i++) {
-            for (int j = 1; j < numCols - 1; j++) {
-                availableCells.add(new Position(i, j));
+        for (int x = 1; x < numCols - 1; x++) {
+            for (int y = 1; y < numRows - 1; y++) {
+                availableCells.add(new Position(x, y));
             }
         }
 
@@ -95,13 +95,13 @@ public class World {
 
             Position cell1 = availableCells.removeFirst();
             subwayCells.add(cell1);
-            tempGrid[cell1.x()][cell1.y()] = i;
+            tempGrid[cell1.y()][cell1.x()] = i;
             Position currCell = cell1;
             int numSubwayCells = 0;
             while (currCell != null && numSubwayCells < 8) {
                 Position newCell = getNeighbor(seed1, availableCells, currCell, i, tempGrid);
                 if (newCell != null) {
-                    tempGrid[newCell.x()][newCell.y()] = i;
+                    tempGrid[newCell.y()][newCell.x()] = i;
                     subwayCells.add(newCell);
                 }
                 currCell = newCell;
@@ -115,13 +115,13 @@ public class World {
                 for (int j = 0; j < subwayCells.size(); j++) {
                     Position cell = subwayCells.get(j);
                     if (j == 0) {
-                        grid[cell.x()][cell.y()] = -i;
+                        grid[cell.y()][cell.x()] = -i;
                         entry1 = cell;
                     } else if (j == subwayCells.size() - 1) {
-                        grid[cell.x()][cell.y()] = -i;
+                        grid[cell.y()][cell.x()] = -i;
                         entry2 = cell;
                     } else {
-                        grid[cell.x()][cell.y()] = i;
+                        grid[cell.y()][cell.x()] = i;
                     }
                 }
                 var newSubway = new Subway(subways.size(), colors.get(i % 4), List.of(entry1, entry2), subwayCells.stream().toList());
@@ -135,10 +135,10 @@ public class World {
     private Position getNeighbor(Random seed1, List<Position> availableCells, Position cell, int color, int[][] tempGrid) {
 
         List<Position> neighbors = new ArrayList<>();
-        neighbors.add(new Position(cell.x() - 1, cell.y())); // Up
-        neighbors.add(new Position(cell.x() + 1, cell.y())); // Down
-        neighbors.add(new Position(cell.x(), cell.y() - 1)); // Left
-        neighbors.add(new Position(cell.x(), cell.y() + 1)); // Right
+        neighbors.add(new Position(cell.x() - 1, cell.y()));
+        neighbors.add(new Position(cell.x() + 1, cell.y()));
+        neighbors.add(new Position(cell.x(), cell.y() - 1));
+        neighbors.add(new Position(cell.x(), cell.y() + 1));
 
         Collections.shuffle(neighbors, seed1); // Randomize the order of neighbors
 
@@ -157,16 +157,16 @@ public class World {
         int count = 0;
 
         //check in all 4 directions whether a cell of the same color is a neighbor
-        if (tempGrid[cell.x() - 1][cell.y()] == color) {
+        if (tempGrid[cell.y() - 1][cell.x()] == color) {
             count += 1;
         }
-        if (tempGrid[cell.x() + 1][cell.y()] == color) {
+        if (tempGrid[cell.y() + 1][cell.x()] == color) {
             count += 1;
         }
-        if (tempGrid[cell.x()][cell.y() + 1] == color) {
+        if (tempGrid[cell.y()][cell.x() + 1] == color) {
             count += 1;
         }
-        if (tempGrid[cell.x()][cell.y() - 1] == color) {
+        if (tempGrid[cell.y()][cell.x() - 1] == color) {
             count += 1;
         }
 
@@ -179,11 +179,11 @@ public class World {
 
     private Position getRandomGroundPosition() {
         Random rand = new Random();
-        int randomX = rand.nextInt(this.numRows);
+        int randomX = rand.nextInt(this.numCols);
         int randomY = rand.nextInt(this.numRows);
 
         while (grid[randomY][randomX] != 0) {
-            randomX = rand.nextInt(this.numRows);
+            randomX = rand.nextInt(this.numCols);
             randomY = rand.nextInt(this.numRows);
         }
         return new Position(randomX, randomY);
@@ -274,37 +274,31 @@ public class World {
         boolean isUnderground = entity.isUnderground();
 
         if (isWithinGrid(position)) {
+            int newTile = grid[position.y()][position.x()];
+            int oldTile = grid[entity.getPosition().y()][entity.getPosition().x()];
 
-            //check if new position is an entry -> if yes, switch isUnderground
-            if (grid[position.y()][position.x()] < 0) { //axis are flipped in grid
+            if (!isUnderground) {
                 isMoveLegal = true;
-                isUnderground = !entity.isUnderground();
-                log.info("is underground: " + isUnderground);
-                if (entity.isUnderground()) {
-                    //coming out of the subway
-                    //todo: switch views
-                } else {
-                    //entering a subway
-                    //todo: switch views
+                if (newTile < 0) {
+                    isUnderground = true;
                 }
-
-            } else if (entity.isUnderground()) {
-                //can't leave current subway except through exit
-                var nextPoint = position;//new Point(position.y(), position.x()); //flipped axis
-                var currPoint = entity.getPosition(); //new Point(entity.getPosition().y(), entity.getPosition().x());
-                var currSubway = this.cellToSubway.get(currPoint);
-                if (currSubway == null) throw new IllegalStateException("Entity is underground but not in a subway.");
-
-                //legal movement
-                if (currSubway.subwayCells().contains(nextPoint)) {
-                    isMoveLegal = true;
-                }
-
             } else {
-                //!underGround and not at an exit
-                isMoveLegal = true;
+                boolean sameSubway = newTile == oldTile || newTile == -oldTile;
+                isMoveLegal = oldTile < 0 || sameSubway;
+                isUnderground = newTile < 0 || sameSubway;
             }
+
+            // sanity check
+            if (entity.isUnderground() && cellToSubway.get(entity.getPosition()) == null) {
+                throw new RuntimeException("Entity is underground but not in subway");
+            }
+
             if (isMoveLegal) {
+                // sanity check
+                if (isUnderground && (cellToSubway.get(position) == null)) {
+                    throw new RuntimeException("Entity is underground but not in subway");
+                }
+
                 entity.setPosition(position);
                 entity.setUnderground(isUnderground);
                 var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground());
