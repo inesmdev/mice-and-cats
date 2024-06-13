@@ -25,7 +25,8 @@ public class World {
     private final int type;
 
     private final List<Color> colors = List.of(Color.red, Color.green, Color.blue, Color.yellow);
-    private final List<Subway> subways;
+    private final HashMap<Integer, Subway> subways;
+    private final HashMap<Point, Subway> cellToSubway;
 
 
     public World(Random seed, int type, int numSubways, int numCols, int numRows, HashSet<Player> players) {
@@ -34,23 +35,32 @@ public class World {
         this.type = type;
         this.numCols = numCols;
         this.numRows = numRows;
-        this.subways = new ArrayList<>();
+        this.subways = new HashMap<>();
+        this.cellToSubway = new HashMap<>();
 
         placeConnectedSubways(seed, numSubways);
 
         entities.add(new Entity(0, "cat", new Position(1, 1), false));
 
         for (Player player : players) {
-            entities.add(new Entity(entities.size(), player.getName(), new Position(entities.size(), 2), false));
+            entities.add(new Entity(entities.size(), player.getName(), getRandomGroundPosition(), false));
         }
     }
 
     public World(GameWorldMessage m) {
         grid = m.subwayTiles();
-        subways = new ArrayList<>(m.subways());
+        subways = new HashMap<>();
+        cellToSubway = new HashMap<>();
+        m.subways().forEach(s ->
+        {
+            subways.put(s.id(), s);
+            s.subwayCells().forEach(c -> cellToSubway.put(c, s));
+        });
         this.type = 0;
         this.numRows = grid.length;
         this.numCols = grid[0].length;
+
+
     }
 
     public void serverUpdate(HashSet<Player> players, Duration duration) {
@@ -84,7 +94,7 @@ public class World {
                 break; // No more available cells
             }
 
-            List<Point> subwayCells = new LinkedList<>();
+            List<Point> subwayCells = new ArrayList<>();
 
             Point cell1 = availableCells.removeFirst();
             subwayCells.add(cell1);
@@ -107,7 +117,6 @@ public class World {
                 Position entry2 = null;
                 for (int j = 0; j < subwayCells.size(); j++) {
                     Point cell = subwayCells.get(j);
-
                     if (j == 0) {
                         grid[cell.x][cell.y] = -i;
                         entry1 = new Position(cell.x, cell.y);
@@ -118,7 +127,10 @@ public class World {
                         grid[cell.x][cell.y] = i;
                     }
                 }
-                subways.add(new Subway(subways.size(), colors.get(i % 4), List.of(entry1, entry2)));
+                var newSubway = new Subway(subways.size(), colors.get(i % 4), List.of(entry1, entry2), subwayCells.stream().toList());
+                subways.put(newSubway.id(), newSubway);
+                newSubway.subwayCells().forEach(c -> cellToSubway.put(c, newSubway));
+
             }
         }
     }
@@ -166,6 +178,18 @@ public class World {
 
     private boolean isWithinGrid(Point cell) {
         return cell.x < numCols && cell.x >= 0 && cell.y < numRows && cell.y >= 0;
+    }
+
+    private Position getRandomGroundPosition() {
+        Random rand = new Random();
+        int randomX = rand.nextInt(this.numRows);
+        int randomY = rand.nextInt(this.numRows);
+
+        while (grid[randomX][randomY] != 0) {
+            randomX = rand.nextInt(this.numRows);
+            randomY = rand.nextInt(this.numRows);
+        }
+        return new Position(randomX, randomY);
     }
 
     public void render(Graphics2D g, int w, int h) {
@@ -229,7 +253,7 @@ public class World {
     }
 
     public void sendTo(HashSet<Player> players) {
-        var message = new GameWorldMessage(grid, subways);
+        var message = new GameWorldMessage(grid, subways.values().stream().toList());
         players.forEach(p -> p.send(message));
 
         for (Entity entity : entities) {
@@ -249,10 +273,47 @@ public class World {
             default -> throw new IllegalArgumentException("Illegal Direction: " + direction);
         };
         //todo: collision detection (bound, subways)
+        boolean isMoveLegal = false;
+        boolean isUnderground = entity.isUnderground();
         if (isWithinGrid(new Point(position.x(), position.y()))) {
-            entity.setPosition(position);
-            var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground());
-            players.forEach(p -> p.send(entityUpdate));
+
+
+            //check if new position is an entry -> if yes, switch isUnderground
+            if (grid[position.y()][position.x()] < 0) { //axis are flipped in grid
+                isMoveLegal = true;
+                isUnderground = !entity.isUnderground();
+                log.info("is underground: " + isUnderground);
+                if (entity.isUnderground()) {
+                    //coming out of the subway
+                    //todo: switch views
+                } else {
+                    //entering a subway
+                    //todo: switch views
+                }
+
+            } else if (entity.isUnderground()) {
+                //can't leave current subway except through exit
+                var nextPoint = new Point(position.y(), position.x()); //flipped axis
+                var currPoint = new Point(entity.getPosition().y(), entity.getPosition().x());
+                var currSubway = this.cellToSubway.get(currPoint);
+                if (currSubway == null) throw new IllegalStateException("Entity is underground but not in a subway.");
+
+                //legal movement
+                if (currSubway.subwayCells().contains(nextPoint)) {
+                    isMoveLegal = true;
+                }
+
+            } else {
+                //!underGround and not at an exit
+                isMoveLegal = true;
+            }
+            if (isMoveLegal) {
+                entity.setPosition(position);
+                entity.setUnderground(isUnderground);
+                var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground());
+                players.forEach(p -> p.send(entityUpdate));
+            }
+
         }
 
 

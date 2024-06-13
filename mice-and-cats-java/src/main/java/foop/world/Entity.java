@@ -12,6 +12,7 @@ public class Entity {
     private String name;
     @Setter
     private Position position;
+    @Setter
     private boolean isUnderground;
 
     public Entity(int id, String name, Position position, boolean isUnderground) {
