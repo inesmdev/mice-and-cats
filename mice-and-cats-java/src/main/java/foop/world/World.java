@@ -26,7 +26,7 @@ public class World {
 
     private final List<Color> colors = List.of(Color.red, Color.green, Color.blue, Color.yellow);
     private final HashMap<Integer, Subway> subways;
-    private final HashMap<Point, Subway> cellToSubway;
+    private final HashMap<Position, Subway> cellToSubway;
 
 
     public World(Random seed, int type, int numSubways, int numCols, int numRows, HashSet<Player> players) {
@@ -80,10 +80,10 @@ public class World {
 
     private void placeConnectedSubways(Random seed1, int numSubways) {
         var tempGrid = new int[numRows][numCols];
-        java.util.List<Point> availableCells = new ArrayList<>();
+        java.util.List<Position> availableCells = new ArrayList<>();
         for (int i = 1; i < numRows - 1; i++) {
             for (int j = 1; j < numCols - 1; j++) {
-                availableCells.add(new Point(i, j));
+                availableCells.add(new Position(i, j));
             }
         }
 
@@ -94,17 +94,17 @@ public class World {
                 break; // No more available cells
             }
 
-            List<Point> subwayCells = new ArrayList<>();
+            List<Position> subwayCells = new ArrayList<>();
 
-            Point cell1 = availableCells.removeFirst();
+            Position cell1 = availableCells.removeFirst();
             subwayCells.add(cell1);
-            tempGrid[cell1.x][cell1.y] = i;
-            Point currCell = cell1;
+            tempGrid[cell1.x()][cell1.y()] = i;
+            Position currCell = cell1;
             int numSubwayCells = 0;
             while (currCell != null && numSubwayCells < 8) {
-                Point newCell = getNeighbor(seed1, availableCells, currCell, i, tempGrid);
+                Position newCell = getNeighbor(seed1, availableCells, currCell, i, tempGrid);
                 if (newCell != null) {
-                    tempGrid[newCell.x][newCell.y] = i;
+                    tempGrid[newCell.x()][newCell.y()] = i;
                     subwayCells.add(newCell);
                 }
                 currCell = newCell;
@@ -116,15 +116,15 @@ public class World {
                 Position entry1 = null;
                 Position entry2 = null;
                 for (int j = 0; j < subwayCells.size(); j++) {
-                    Point cell = subwayCells.get(j);
+                    Position cell = subwayCells.get(j);
                     if (j == 0) {
-                        grid[cell.x][cell.y] = -i;
-                        entry1 = new Position(cell.x, cell.y);
+                        grid[cell.x()][cell.y()] = -i;
+                        entry1 = cell;
                     } else if (j == subwayCells.size() - 1) {
-                        grid[cell.x][cell.y] = -i;
-                        entry2 = new Position(cell.x, cell.y);
+                        grid[cell.x()][cell.y()] = -i;
+                        entry2 = cell;
                     } else {
-                        grid[cell.x][cell.y] = i;
+                        grid[cell.x()][cell.y()] = i;
                     }
                 }
                 var newSubway = new Subway(subways.size(), colors.get(i % 4), List.of(entry1, entry2), subwayCells.stream().toList());
@@ -135,17 +135,17 @@ public class World {
         }
     }
 
-    private Point getNeighbor(Random seed1, List<Point> availableCells, Point cell, int color, int[][] tempGrid) {
+    private Position getNeighbor(Random seed1, List<Position> availableCells, Position cell, int color, int[][] tempGrid) {
 
-        List<Point> neighbors = new ArrayList<>();
-        neighbors.add(new Point(cell.x - 1, cell.y)); // Up
-        neighbors.add(new Point(cell.x + 1, cell.y)); // Down
-        neighbors.add(new Point(cell.x, cell.y - 1)); // Left
-        neighbors.add(new Point(cell.x, cell.y + 1)); // Right
+        List<Position> neighbors = new ArrayList<>();
+        neighbors.add(new Position(cell.x() - 1, cell.y())); // Up
+        neighbors.add(new Position(cell.x() + 1, cell.y())); // Down
+        neighbors.add(new Position(cell.x(), cell.y() - 1)); // Left
+        neighbors.add(new Position(cell.x(), cell.y() + 1)); // Right
 
         Collections.shuffle(neighbors, seed1); // Randomize the order of neighbors
 
-        for (Point neighbor : neighbors) {
+        for (Position neighbor : neighbors) {
             if (availableCells.contains(neighbor) && isWithinGrid(neighbor) && noUturn(neighbor, color, tempGrid)) {
                 availableCells.remove(neighbor); // Remove the cell from available cells
                 return neighbor;
@@ -156,28 +156,28 @@ public class World {
         return null; // No available neighbor found within the distance limit
     }
 
-    private boolean noUturn(Point cell, int color, int[][] tempGrid) {
+    private boolean noUturn(Position cell, int color, int[][] tempGrid) {
         int count = 0;
 
         //check in all 4 directions whether a cell of the same color is a neighbor
-        if (tempGrid[cell.x - 1][cell.y] == color) {
+        if (tempGrid[cell.x() - 1][cell.y()] == color) {
             count += 1;
         }
-        if (tempGrid[cell.x + 1][cell.y] == color) {
+        if (tempGrid[cell.x() + 1][cell.y()] == color) {
             count += 1;
         }
-        if (tempGrid[cell.x][cell.y + 1] == color) {
+        if (tempGrid[cell.x()][cell.y() + 1] == color) {
             count += 1;
         }
-        if (tempGrid[cell.x][cell.y - 1] == color) {
+        if (tempGrid[cell.x()][cell.y() - 1] == color) {
             count += 1;
         }
 
         return count <= 1;
     }
 
-    private boolean isWithinGrid(Point cell) {
-        return cell.x < numCols && cell.x >= 0 && cell.y < numRows && cell.y >= 0;
+    private boolean isWithinGrid(Position cell) {
+        return cell.x() < numCols && cell.x() >= 0 && cell.y() < numRows && cell.y() >= 0;
     }
 
     private Position getRandomGroundPosition() {
@@ -276,7 +276,7 @@ public class World {
         boolean isMoveLegal = false;
         boolean isUnderground = entity.isUnderground();
 
-        if (isWithinGrid(new Point(position.x(), position.y()))) {
+        if (isWithinGrid(position)) {
 
             //check if new position is an entry -> if yes, switch isUnderground
             if (grid[position.y()][position.x()] < 0) { //axis are flipped in grid
@@ -293,8 +293,8 @@ public class World {
 
             } else if (entity.isUnderground()) {
                 //can't leave current subway except through exit
-                var nextPoint = new Point(position.y(), position.x()); //flipped axis
-                var currPoint = new Point(entity.getPosition().y(), entity.getPosition().x());
+                var nextPoint = position;//new Point(position.y(), position.x()); //flipped axis
+                var currPoint = entity.getPosition(); //new Point(entity.getPosition().y(), entity.getPosition().x());
                 var currSubway = this.cellToSubway.get(currPoint);
                 if (currSubway == null) throw new IllegalStateException("Entity is underground but not in a subway.");
 
