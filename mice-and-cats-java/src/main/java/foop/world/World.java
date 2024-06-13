@@ -185,7 +185,7 @@ public class World {
         int randomX = rand.nextInt(this.numRows);
         int randomY = rand.nextInt(this.numRows);
 
-        while (grid[randomX][randomY] != 0) {
+        while (grid[randomY][randomX] != 0) {
             randomX = rand.nextInt(this.numRows);
             randomY = rand.nextInt(this.numRows);
         }
@@ -272,11 +272,11 @@ public class World {
             case 4 -> new Position(entity.getPosition().x() - 1, entity.getPosition().y());
             default -> throw new IllegalArgumentException("Illegal Direction: " + direction);
         };
-        //todo: collision detection (bound, subways)
+
         boolean isMoveLegal = false;
         boolean isUnderground = entity.isUnderground();
-        if (isWithinGrid(new Point(position.x(), position.y()))) {
 
+        if (isWithinGrid(new Point(position.x(), position.y()))) {
 
             //check if new position is an entry -> if yes, switch isUnderground
             if (grid[position.y()][position.x()] < 0) { //axis are flipped in grid
