@@ -2,7 +2,6 @@ package foop.views;
 
 import foop.message.AvailableGamesMessage;
 import foop.message.JoinGameMessage;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -33,6 +32,20 @@ public class JoinGameView extends JPanel {
         lobbyList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         lobbyList.addListSelectionListener(e -> startButton.setEnabled(true));
         lobbyList.setBounds(100, 100, 200, 30);
+        lobbyList.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+                var component = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value instanceof AvailableGamesMessage.Game g) {
+                    setText(g.name() + ":" +
+                            " [" + String.join(", ", g.players()) + "]" +
+                            " (" + g.duration().toMinutes() + "m " + g.duration().getSeconds() + "s)" +
+                            (g.started() ? " (started)" : "")
+                    );
+                }
+                return component;
+            }
+        });
         add(lobbyList, BorderLayout.CENTER);
         JScrollPane scrollPane = new JScrollPane(lobbyList,
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,

@@ -1,5 +1,7 @@
 package foop;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,6 +21,16 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception {
+        Assets.getInstance().load();
+        SwingUtilities.invokeAndWait(() -> {
+            try {
+                UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+            } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+                throw new RuntimeException(e);
+            }
+//            UIManager.put("Button.background", Color.GREEN);
+        });
+
         try (var server = new Server()) {
             serverThread = new Thread(server::runAcceptor, "server-main");
             serverThread.setUncaughtExceptionHandler((t, e) -> stop());
