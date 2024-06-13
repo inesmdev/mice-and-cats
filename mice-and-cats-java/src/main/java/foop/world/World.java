@@ -231,9 +231,9 @@ public class World {
             var bounds = g.getFontMetrics().getStringBounds(entity.getName(), g);
             int x = tileSize * entity.getPosition().x() + tileSize / 2 - (int) (bounds.getWidth() / 2);
             int y = tileSize * entity.getPosition().y() + tileSize / 2 + (int) (bounds.getHeight() / 2);
-            g.drawString(entity.getName(), x, y);
+            var name = entity.isUnderground() ? "(" + entity.getName() + ")" : entity.getName();
+            g.drawString(name, x, y);
         }
-
     }
 
     public void entityUpdate(EntityUpdateMessage m) {
@@ -241,6 +241,7 @@ public class World {
             var entity = entities.get(m.id());
             entity.setName(m.name());
             entity.setPosition(m.position());
+            entity.setUnderground(m.isUnderground());
         } else if (m.id() == entities.size()) {
             entities.add(new Entity(m.id(), m.name(), m.position(), m.isUnderground()));
         } else {
