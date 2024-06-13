@@ -67,14 +67,11 @@ public class World {
         var r = new Random();
 
         var cat = entities.get(0);
-        var p = entities.get(1);
         cat.setPosition(new Position(r.nextInt(grid[0].length), r.nextInt(grid.length)));
 
         var catUpdate = new EntityUpdateMessage(cat.getId(), cat.getName(), cat.getPosition(), cat.isUnderground());
-        var pUpdate = new EntityUpdateMessage(p.getId(), p.getName(), p.getPosition(), p.isUnderground());
         for (var player : players) {
             player.send(catUpdate);
-            player.send(pUpdate);
         }
     }
 
