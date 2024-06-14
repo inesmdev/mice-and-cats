@@ -41,7 +41,7 @@ public class ServerGame {
     public synchronized void startIfAllReady() {
         if (players.size() >= minPlayers && players.stream().allMatch(Player::isReady)) {
             started = true;
-            world = new World(new Random(), 0, 4, 20, 5, players);
+            world = new World(new Random(), 4, 20, 5, players);
             world.sendTo(players);
             gameThread = new Thread(this::run);
             gameThread.start();
