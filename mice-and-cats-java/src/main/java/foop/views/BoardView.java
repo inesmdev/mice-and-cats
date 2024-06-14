@@ -1,6 +1,7 @@
 package foop.views;
 
 import foop.message.ExitGameMessage;
+import foop.message.PlayerCommandMessage;
 import foop.message.SetReadyForGameMessage;
 import foop.world.World;
 import lombok.extern.slf4j.Slf4j;
@@ -12,8 +13,11 @@ import java.awt.event.ActionEvent;
 @Slf4j
 public class BoardView extends JPanel {
 
-    private final GameFrame frame;
     private static final String ACTION_UP = "ACTION_UP";
+    private static final String ACTION_DOWN = "ACTION_DOWN";
+    private static final String ACTION_RIGHT = "ACTION_RIGHT";
+    private static final String ACTION_LEFT = "ACTION_LEFT";
+    private final GameFrame frame;
 
     public BoardView(GameFrame frame) {
         this.frame = frame;
@@ -23,10 +27,44 @@ public class BoardView extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 log.info(ACTION_UP);
+                var playerUpdate = new PlayerCommandMessage(1);
+                frame.send(playerUpdate);
+
             }
         });
+        getActionMap().put(ACTION_DOWN, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                log.info(ACTION_DOWN);
+                var playerUpdate = new PlayerCommandMessage(3);
+                frame.send(playerUpdate);
+            }
+        });
+        getActionMap().put(ACTION_RIGHT, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                log.info(ACTION_RIGHT);
+                var playerUpdate = new PlayerCommandMessage(2);
+                frame.send(playerUpdate);
+            }
+        });
+        getActionMap().put(ACTION_LEFT, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                log.info(ACTION_LEFT);
+                var playerUpdate = new PlayerCommandMessage(4);
+                frame.send(playerUpdate);
+            }
+        });
+
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke('w'), ACTION_UP);
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("UP"), ACTION_UP);
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke('s'), ACTION_DOWN);
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("DOWN"), ACTION_DOWN);
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke('a'), ACTION_LEFT);
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("LEFT"), ACTION_LEFT);
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke('d'), ACTION_RIGHT);
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("RIGHT"), ACTION_RIGHT);
     }
 
     public void render() {

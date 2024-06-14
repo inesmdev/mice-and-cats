@@ -14,7 +14,7 @@ public class ServerGame {
     private final String name;
     private final int minPlayers;
     private final HashSet<Player> players = new HashSet<>();
-    private final World world;
+    private World world;
     private Duration duration;
     private boolean started;
     private Thread gameThread;
@@ -23,7 +23,6 @@ public class ServerGame {
         this.name = name;
         this.minPlayers = minPlayers;
         duration = Duration.ofSeconds(42);
-        world = new World(new Random(), 0, 4 ,16, 16);
     }
 
     public synchronized AvailableGamesMessage.Game getLobbyInfo() {
@@ -42,8 +41,9 @@ public class ServerGame {
     public synchronized void startIfAllReady() {
         if (players.size() >= minPlayers && players.stream().allMatch(Player::isReady)) {
             started = true;
+            world = new World(new Random(), 0, 4, 20, 5, players);
             world.sendTo(players);
-            gameThread = new  Thread(this::run);
+            gameThread = new Thread(this::run);
             gameThread.start();
         } else {
             started = false;
@@ -76,5 +76,10 @@ public class ServerGame {
                 world.serverUpdate(players, duration);
             }
         }
+    }
+
+
+    public void movePlayer(Player player, int direction) {
+        world.movePlayer(players, player, direction);
     }
 }

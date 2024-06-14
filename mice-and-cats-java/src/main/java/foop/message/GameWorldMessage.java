@@ -30,7 +30,11 @@ public record GameWorldMessage(int[][] subwayTiles, List<Subway> subways) implem
             for (int j = 0; j < exits.length; j++) {
                 exits[j] = new Position(in.readInt(), in.readInt());
             }
-            subways[i] = new Subway(i + 1, color, List.of(exits));
+            var subwayCells = new Position[in.readInt()];
+            for (int j = 0; j < subwayCells.length; j++) {
+                subwayCells[j] = new Position(in.readInt(), in.readInt());
+            }
+            subways[i] = new Subway(i + 1, color, List.of(exits), Arrays.stream(subwayCells).toList());
         }
         return new GameWorldMessage(subwayTiles, List.of(subways));
     }
@@ -56,6 +60,11 @@ public record GameWorldMessage(int[][] subwayTiles, List<Subway> subways) implem
             for (var exit : subway.exits()) {
                 out.writeInt(exit.x());
                 out.writeInt(exit.y());
+            }
+            out.writeInt(subway.subwayCells().size());
+            for (var subwayCell : subway.subwayCells()) {
+                out.writeInt(subwayCell.x());
+                out.writeInt(subwayCell.y());
             }
         }
     }
