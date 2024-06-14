@@ -192,7 +192,10 @@ public class World {
 
         g.translate((w - tileSize * grid[0].length) / 2, (h - tileSize * grid.length) / 2);
 
-        var playerEntity = entities.stream().filter(e -> e.getName().equals(playerName)).findFirst().get();
+        var playerEntity = entities.stream().filter(e -> e.getName().equals(playerName)).findFirst().orElse(null);
+        if (playerEntity == null) {
+            return; // we haven't received the entities yet
+        }
         var playerSubway = getSubway(playerEntity);
 
         // Draw grid
@@ -221,16 +224,19 @@ public class World {
             }
         }
 
-        g.setFont(new Font("default", Font.BOLD, 16));
+        g.setFont(new Font("default", Font.BOLD, 12));
         for (Entity entity : entities) {
             if (getSubway(entity) == playerSubway || superVision) {
                 var bounds = g.getFontMetrics().getStringBounds(entity.getName(), g);
 
+                int imageDown = tileSize / 5;
+                int textUp = tileSize / 3;
+
                 var image = entity.getId() == 0 ? Assets.getInstance().getCat() : Assets.getInstance().getMouse();
-                g.drawImage(image, tileSize * entity.getPosition().x(), tileSize * entity.getPosition().y(), tileSize, tileSize, null);
+                g.drawImage(image, tileSize * entity.getPosition().x(), tileSize * entity.getPosition().y() + imageDown, tileSize, tileSize, null);
 
                 int x = tileSize * entity.getPosition().x() + tileSize / 2 - (int) (bounds.getWidth() / 2);
-                int y = tileSize * entity.getPosition().y() + tileSize / 2 + (int) (bounds.getHeight() / 2);
+                int y = tileSize * entity.getPosition().y() + tileSize / 2 + (int) (bounds.getHeight() / 2) - textUp;
                 var name = entity.isUnderground() ? "(" + entity.getName() + ")" : entity.getName();
                 g.setColor(entity.isUnderground() ? Color.WHITE : Color.BLACK);
                 g.drawString(name, x, y);
