@@ -10,9 +10,11 @@ import java.awt.*;
 public class CreateGameView extends JPanel {
 
     private final GameFrame frame;
+    private final JTextField gameName;
 
     public CreateGameView(GameFrame frame) {
         this.frame = frame;
+        this.gameName = new JTextField();
         render();
     }
 
@@ -28,8 +30,7 @@ public class CreateGameView extends JPanel {
 
         JLabel gameNameLabel = new JLabel("Game Name");
 
-        JTextField gameName = new JTextField();
-        gameName.setPreferredSize(new Dimension(100, 20));
+        gameName.setPreferredSize(new Dimension(150, 20));
 
         JPanel gameNamePanel = new JPanel();
         //gameNamePanel.setBorder(BorderFactory.createLineBorder(Color.GREEN));
@@ -43,7 +44,7 @@ public class CreateGameView extends JPanel {
         JLabel gameSizeLabel = new JLabel("Game size");
 
         JTextField gameSize = new JTextField();
-        gameSize.setPreferredSize(new Dimension(100, 20));
+        gameSize.setPreferredSize(new Dimension(150, 20));
 
         JPanel gameSizePanel = new JPanel();
         gameSizePanel.setMaximumSize(new Dimension(300, 50));
@@ -96,6 +97,10 @@ public class CreateGameView extends JPanel {
         headPanel.add(headerLabel, BorderLayout.CENTER);
         headPanel.add(returnButton, BorderLayout.WEST);
         return headPanel;
+    }
+
+    public void setDefaultName(String playerName) {
+        gameName.setText(playerName + "'s game");
     }
 }
 
