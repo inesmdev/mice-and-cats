@@ -27,6 +27,7 @@ public class GameFrame extends JFrame {
     private String gameName;
 
     private final JoinGameView joinGameView;
+    private final CreateGameView createGameView;
 
     public GameFrame(Client client) {
         this.client = client;
@@ -49,6 +50,7 @@ public class GameFrame extends JFrame {
         });
 
         joinGameView = new JoinGameView(this);
+        createGameView = new CreateGameView(this);
 
         initComponents();
         setVisible(true);
@@ -61,7 +63,7 @@ public class GameFrame extends JFrame {
         mainPanel.add("TitleScreenView", new TitleScreenView(this));
         mainPanel.add("JoinGameView", joinGameView);
         mainPanel.add("BoardView", new BoardView(this));
-        mainPanel.add("CreateGameView", new CreateGameView(this));
+        mainPanel.add("CreateGameView", createGameView);
 
         add(mainPanel);
         setLocationByPlatform(true);
@@ -82,6 +84,7 @@ public class GameFrame extends JFrame {
     }
 
     public void showCreateGameView() {
+        createGameView.setDefaultName(playerName);
         cardLayout.show(mainPanel, "CreateGameView");
     }
 

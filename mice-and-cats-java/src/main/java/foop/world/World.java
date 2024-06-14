@@ -1,5 +1,6 @@
 package foop.world;
 
+import foop.Assets;
 import foop.message.EntityUpdateMessage;
 import foop.message.GameWorldMessage;
 import foop.server.Player;
@@ -229,11 +230,15 @@ public class World {
         g.setFont(new Font("default", Font.BOLD, 16));
         for (Entity entity : entities) {
             var bounds = g.getFontMetrics().getStringBounds(entity.getName(), g);
+
+            var image = entity.getId() == 0 ? Assets.getInstance().getCat() : Assets.getInstance().getMouse();
+            g.drawImage(image, tileSize * entity.getPosition().x(), tileSize * entity.getPosition().y(), tileSize, tileSize, null);
+
             int x = tileSize * entity.getPosition().x() + tileSize / 2 - (int) (bounds.getWidth() / 2);
             int y = tileSize * entity.getPosition().y() + tileSize / 2 + (int) (bounds.getHeight() / 2);
-            g.drawString(entity.getName(), x, y);
+            var name = entity.isUnderground() ? "(" + entity.getName() + ")" : entity.getName();
+            g.drawString(name, x, y);
         }
-
     }
 
     public void entityUpdate(EntityUpdateMessage m) {
@@ -241,6 +246,7 @@ public class World {
             var entity = entities.get(m.id());
             entity.setName(m.name());
             entity.setPosition(m.position());
+            entity.setUnderground(m.isUnderground());
         } else if (m.id() == entities.size()) {
             entities.add(new Entity(m.id(), m.name(), m.position(), m.isUnderground()));
         } else {
