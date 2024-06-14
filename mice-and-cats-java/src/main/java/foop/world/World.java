@@ -229,17 +229,21 @@ public class World {
             if (getSubway(entity) == playerSubway || superVision) {
                 var bounds = g.getFontMetrics().getStringBounds(entity.getName(), g);
 
-                int imageDown = tileSize / 5;
+                boolean isCat = entity.getId() == 0;
+
+                int imageDown = isCat ? 0 : tileSize / 5;
                 int textUp = tileSize / 3;
 
-                var image = entity.getId() == 0 ? Assets.getInstance().getCat() : Assets.getInstance().getMouse();
+                var image = isCat ? Assets.getInstance().getCat() : Assets.getInstance().getMouse();
                 g.drawImage(image, tileSize * entity.getPosition().x(), tileSize * entity.getPosition().y() + imageDown, tileSize, tileSize, null);
 
-                int x = tileSize * entity.getPosition().x() + tileSize / 2 - (int) (bounds.getWidth() / 2);
-                int y = tileSize * entity.getPosition().y() + tileSize / 2 + (int) (bounds.getHeight() / 2) - textUp;
-                var name = entity.isUnderground() ? "(" + entity.getName() + ")" : entity.getName();
-                g.setColor(entity.isUnderground() ? Color.WHITE : Color.BLACK);
-                g.drawString(name, x, y);
+                if (!isCat) {
+                    int x = tileSize * entity.getPosition().x() + tileSize / 2 - (int) (bounds.getWidth() / 2);
+                    int y = tileSize * entity.getPosition().y() + tileSize / 2 + (int) (bounds.getHeight() / 2) - textUp;
+                    var name = entity.isUnderground() ? "(" + entity.getName() + ")" : entity.getName();
+                    g.setColor(playerEntity.isUnderground() ? Color.WHITE : Color.BLACK); // depends on how the player sees the background
+                    g.drawString(name, x, y);
+                }
             }
         }
     }
