@@ -18,6 +18,7 @@ public class BoardView extends JPanel {
     private static final String ACTION_RIGHT = "ACTION_RIGHT";
     private static final String ACTION_LEFT = "ACTION_LEFT";
     private final GameFrame frame;
+    private boolean superVision;
 
     public BoardView(GameFrame frame) {
         this.frame = frame;
@@ -82,7 +83,7 @@ public class BoardView extends JPanel {
                 World world = frame.getClient().getWorld();
                 if (world != null) {
                     readyButton.setText("Started");
-                    world.render(g, getWidth(), getHeight());
+                    world.render(g, getWidth(), getHeight(), frame.getPlayerName(), superVision);
                 } else {
                     g.clearRect(0, 0, getWidth(), getHeight());
                 }
@@ -95,6 +96,14 @@ public class BoardView extends JPanel {
         panel.setSize(300, 500);
         panel.setLayout(new BorderLayout());
 
+        JPanel sidePanel = new JPanel();
+        sidePanel.setLayout(new BoxLayout(sidePanel, BoxLayout.Y_AXIS));
+
+        var visionCheckbox = new JCheckBox("Super vision", superVision);
+        visionCheckbox.addActionListener(e -> superVision = visionCheckbox.isSelected());
+        sidePanel.add(visionCheckbox);
+
+        panel.add(sidePanel, BorderLayout.CENTER);
 
         readyButton.addActionListener(e -> {
             readyButton.setEnabled(false);

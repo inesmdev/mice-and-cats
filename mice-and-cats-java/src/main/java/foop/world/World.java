@@ -23,17 +23,13 @@ public class World {
     @Getter
     private final ArrayList<Entity> entities = new ArrayList<>();
 
-    private final int type;
-
     private final List<Color> colors = List.of(Color.red, Color.green, Color.blue, Color.yellow);
     private final HashMap<Integer, Subway> subways;
     private final HashMap<Position, Subway> cellToSubway;
 
 
-    public World(Random seed, int type, int numSubways, int numCols, int numRows, HashSet<Player> players) {
-
+    public World(Random seed, int numSubways, int numCols, int numRows, HashSet<Player> players) {
         grid = new int[numRows][numCols];
-        this.type = type;
         this.numCols = numCols;
         this.numRows = numRows;
         this.subways = new HashMap<>();
@@ -57,11 +53,8 @@ public class World {
             subways.put(s.id(), s);
             s.subwayCells().forEach(c -> cellToSubway.put(c, s));
         });
-        this.type = 0;
         this.numRows = grid.length;
         this.numCols = grid[0].length;
-
-
     }
 
     public void serverUpdate(HashSet<Player> players, Duration duration) {
@@ -189,55 +182,69 @@ public class World {
         return new Position(randomX, randomY);
     }
 
-    public void render(Graphics2D g, int w, int h) {
+    private int getSubway(Entity e) {
+        return e.isUnderground() ? Math.abs(grid[e.getPosition().y()][e.getPosition().x()]) : 0;
+    }
+
+    public void render(Graphics2D g, int w, int h, String playerName, boolean superVision) {
 
         int tileSize = Math.min(w / grid[0].length, h / grid.length);
 
         g.translate((w - tileSize * grid[0].length) / 2, (h - tileSize * grid.length) / 2);
 
+        var playerEntity = entities.stream().filter(e -> e.getName().equals(playerName)).findFirst().orElse(null);
+        if (playerEntity == null) {
+            return; // we haven't received the entities yet
+        }
+        var playerSubway = getSubway(playerEntity);
 
         // Draw grid
         for (int i = 0; i < numRows; i++) {
             for (int j = 0; j < numCols; j++) {
-                if (this.type == 0) {
-                    if (grid[i][j] == 0) {
-                        g.setColor(Color.WHITE);
-                        g.fillRect(j * tileSize, i * tileSize, tileSize, tileSize);
-                        g.setColor(Color.BLACK);
-                        g.drawRect(j * tileSize, i * tileSize, tileSize, tileSize);
-                    } else if (grid[i][j] < 0) { //this is an exit
-                        g.setColor(colors.get((grid[i][j] * -1) % 4));
-                        g.fillRect(j * tileSize, i * tileSize, tileSize, tileSize);
-                    } else {
-                        g.setColor(colors.get(grid[i][j] % 4).darker());
-                        g.fillRect(j * tileSize, i * tileSize, tileSize, tileSize);
-                    }
-                } else if (type == 1) {
-                    if (grid[i][j] < 0) {
-                        g.setColor(colors.get((grid[i][j] * -1) % 4));
+                if (grid[i][j] == 0) {
+                    g.setColor(playerEntity.isUnderground() ? Color.BLACK : Color.WHITE);
+                    g.fillRect(j * tileSize, i * tileSize, tileSize, tileSize);
+                } else if (grid[i][j] < 0) { //this is an exit
+                    g.setColor(colors.get((grid[i][j] * -1) % 4));
+                    g.fillRect(j * tileSize, i * tileSize, tileSize, tileSize);
+                } else {
+                    var c = colors.get(grid[i][j] % 4).darker();
+                    if (grid[i][j] == playerSubway) {
+                        g.setColor(c);
                         g.fillRect(j * tileSize, i * tileSize, tileSize, tileSize);
                     } else {
-                        g.setColor(Color.WHITE);
+                        g.setColor(playerEntity.isUnderground() ? Color.BLACK : Color.WHITE);
                         g.fillRect(j * tileSize, i * tileSize, tileSize, tileSize);
-                        g.setColor(Color.BLACK);
-                        g.drawRect(j * tileSize, i * tileSize, tileSize, tileSize);
+                        g.setColor(new Color(c.getRed(), c.getGreen(), c.getBlue(), 100));
+                        g.fillRect(j * tileSize, i * tileSize, tileSize, tileSize);
                     }
                 }
+                g.setColor(Color.BLACK);
+                g.drawRect(j * tileSize, i * tileSize, tileSize, tileSize);
             }
         }
 
-        g.setColor(Color.BLACK);
-        g.setFont(new Font("default", Font.BOLD, 16));
+        g.setFont(new Font("default", Font.BOLD, 12));
         for (Entity entity : entities) {
-            var bounds = g.getFontMetrics().getStringBounds(entity.getName(), g);
+            if (getSubway(entity) == playerSubway || superVision) {
+                var bounds = g.getFontMetrics().getStringBounds(entity.getName(), g);
 
-            var image = entity.getId() == 0 ? Assets.getInstance().getCat() : Assets.getInstance().getMouse();
-            g.drawImage(image, tileSize * entity.getPosition().x(), tileSize * entity.getPosition().y(), tileSize, tileSize, null);
+                boolean isCat = entity.getId() == 0;
 
-            int x = tileSize * entity.getPosition().x() + tileSize / 2 - (int) (bounds.getWidth() / 2);
-            int y = tileSize * entity.getPosition().y() + tileSize / 2 + (int) (bounds.getHeight() / 2);
-            var name = entity.isUnderground() ? "(" + entity.getName() + ")" : entity.getName();
-            g.drawString(name, x, y);
+                int imageDown = isCat ? 0 : tileSize / 5;
+                int textUp = tileSize / 3;
+
+                var image = isCat ? Assets.getInstance().getCat() : Assets.getInstance().getMouse();
+                g.drawImage(image, tileSize * entity.getPosition().x(), tileSize * entity.getPosition().y() + imageDown, tileSize, tileSize, null);
+
+                if (!isCat) {
+                    int x = tileSize * entity.getPosition().x() + tileSize / 2 - (int) (bounds.getWidth() / 2);
+                    int y = tileSize * entity.getPosition().y() + tileSize / 2 + (int) (bounds.getHeight() / 2) - textUp;
+                    var name = entity.isUnderground() ? "(" + entity.getName() + ")" : entity.getName();
+                    g.setColor(playerEntity.isUnderground() ? Color.WHITE : Color.BLACK); // depends on how the player sees the background
+                    g.drawString(name, x, y);
+                }
+            }
         }
     }
 
