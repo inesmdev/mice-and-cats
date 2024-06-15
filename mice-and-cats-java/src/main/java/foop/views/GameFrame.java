@@ -17,6 +17,11 @@ import java.io.IOException;
 @Slf4j
 public class GameFrame extends JFrame {
 
+    private static final String TITLE_SCREEN_VIEW = "TitleScreenView";
+    private static final String JOIN_GAME_VIEW = "JoinGameView";
+    private static final String BOARD_VIEW = "BoardView";
+    private static final String CREATE_GAME_VIEW = "CreateGameView";
+
     private final Client client;
     @Setter
     @Getter
@@ -60,10 +65,10 @@ public class GameFrame extends JFrame {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        mainPanel.add("TitleScreenView", new TitleScreenView(this));
-        mainPanel.add("JoinGameView", joinGameView);
-        mainPanel.add("BoardView", new BoardView(this));
-        mainPanel.add("CreateGameView", createGameView);
+        mainPanel.add(TITLE_SCREEN_VIEW, new TitleScreenView(this));
+        mainPanel.add(JOIN_GAME_VIEW, joinGameView);
+        mainPanel.add(BOARD_VIEW, new BoardView(this));
+        mainPanel.add(CREATE_GAME_VIEW, createGameView);
 
         add(mainPanel);
         setLocationByPlatform(true);
@@ -72,20 +77,20 @@ public class GameFrame extends JFrame {
     }
 
     public void showTitleScreenView() {
-        this.cardLayout.show(mainPanel, "TitleScreenView");
+        this.cardLayout.show(mainPanel, TITLE_SCREEN_VIEW);
     }
 
     public void showBoardView() {
-        cardLayout.show(mainPanel, "BoardView");
+        cardLayout.show(mainPanel, BOARD_VIEW);
     }
 
     public void showJoinGameView() {
-        cardLayout.show(mainPanel, "JoinGameView");
+        cardLayout.show(mainPanel, JOIN_GAME_VIEW);
     }
 
     public void showCreateGameView() {
         createGameView.setDefaultName(playerName);
-        cardLayout.show(mainPanel, "CreateGameView");
+        cardLayout.show(mainPanel, CREATE_GAME_VIEW);
     }
 
     public void send(Message message) {
