@@ -30,7 +30,7 @@ public class MessageTests {
                 new JoinGameMessage("test"),
                 new SetReadyForGameMessage(true),
                 new SetReadyForGameMessage(false),
-                new GameOverMessage(true),
+                new GameOverMessage(GameOverMessage.Result.ALL_BUT_YOU_DIED),
                 new PlayerCommandMessage(1)
         );
     }

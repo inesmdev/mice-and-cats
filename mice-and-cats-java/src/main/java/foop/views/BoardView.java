@@ -18,10 +18,13 @@ public class BoardView extends JPanel {
     private static final String ACTION_RIGHT = "ACTION_RIGHT";
     private static final String ACTION_LEFT = "ACTION_LEFT";
     private final GameFrame frame;
+    private final JButton readyButton;
     private boolean superVision;
+    private boolean started;
 
     public BoardView(GameFrame frame) {
         this.frame = frame;
+        readyButton = new JButton();
         render();
 
         getActionMap().put(ACTION_UP, new AbstractAction() {
@@ -72,7 +75,6 @@ public class BoardView extends JPanel {
 
         setLayout(new BorderLayout());
 
-        JButton readyButton = new JButton("Ready");
         JButton stopButton = new JButton("Stop");
 
         JComponent component = new JComponent() {
@@ -83,6 +85,7 @@ public class BoardView extends JPanel {
                 World world = frame.getClient().getWorld();
                 if (world != null) {
                     readyButton.setText("Started");
+                    started = true;
                     world.render(g, getWidth(), getHeight(), frame.getClient().getPlayerName(), superVision);
                 } else {
                     g.clearRect(0, 0, getWidth(), getHeight());
@@ -112,13 +115,14 @@ public class BoardView extends JPanel {
             frame.getClient().send(new SetReadyForGameMessage(true));
         });
 
-
         stopButton.addActionListener(e -> {
-            readyButton.setEnabled(true);
-            readyButton.setText("Ready");
             log.info("Stopping game");
             frame.getClient().exitGame();
-            frame.showTitleScreenView();
+            if (started) {
+                frame.showGameOverDeathView(false);
+            } else {
+                frame.showTitleScreenView();
+            }
         });
 
         JPanel buttonPanel = new JPanel();
@@ -131,5 +135,10 @@ public class BoardView extends JPanel {
 
     }
 
+    public void startNewGame() {
+        readyButton.setEnabled(true);
+        readyButton.setText("Ready");
+        started = false;
+    }
 
 }

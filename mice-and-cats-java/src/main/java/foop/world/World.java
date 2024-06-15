@@ -2,6 +2,7 @@ package foop.world;
 
 import foop.Assets;
 import foop.message.EntityUpdateMessage;
+import foop.message.GameOverMessage;
 import foop.message.GameWorldMessage;
 import foop.server.Player;
 import lombok.Getter;
@@ -59,14 +60,42 @@ public class World {
     }
 
     public void afterEntityMoved(HashSet<Player> players) {
+        // necessary if this is called after the game is already over
+        if (players.isEmpty()) {
+            return;
+        }
+
         var cat = entities.get(0);
         for (Entity e : entities) {
-            if (cat != e && !e.isDead() && cat.getPosition().equals(e.getPosition())) {
+            if (cat != e && !e.isDead() && cat.getPosition().equals(e.getPosition()) && cat.isUnderground() == e.isUnderground()) {
                 e.setDead(true);
                 var update = new EntityUpdateMessage(e.getId(), e.getName(), e.getPosition(), e.isUnderground(), e.isDead());
-                for (var player : players) {
+                // we copy to avoid iterator invalidation, when a player is removed
+                for (var player : new ArrayList<>(players)) {
                     player.send(update);
+                    if (player.getName().equals(e.getName())) {
+                        player.gameOver(new GameOverMessage(GameOverMessage.Result.YOU_DIED));
+                    }
                 }
+            }
+        }
+
+        // game-over: only one player left
+        if (entities.stream().filter(e -> e.getId() != 0 && !e.isDead()).count() == 1) {
+            var name = entities.stream().filter(e -> e.getId() != 0 && !e.isDead()).findFirst().get().getName();
+            var player = players.stream().filter(p -> p.getName().equals(name)).findFirst().get();
+            player.gameOver(new GameOverMessage(GameOverMessage.Result.ALL_BUT_YOU_DIED));
+        }
+
+        // game-over: all players in one tunnel
+        if (entities.stream().filter(e -> e.getId() != 0 && !e.isDead() && getSubway(e) != 0).findFirst().orElse(null) instanceof Entity undead) {
+            var subway = getSubway(undead);
+            if (entities.stream().filter(e -> e.getId() != 0 && !e.isDead()).allMatch(e -> getSubway(e) == subway)) {
+                var victoryMessage = new GameOverMessage(GameOverMessage.Result.VICTORY);
+                entities.stream().filter(e -> e.getId() != 0 && !e.isDead()).forEach(e -> {
+                    var player = players.stream().filter(p -> p.getName().equals(e.getName())).findFirst().get();
+                    player.gameOver(victoryMessage);
+                });
             }
         }
     }
@@ -353,5 +382,14 @@ public class World {
         }
 
         afterEntityMoved(players);
+    }
+
+    public void killDisconnectedPlayer(String name, HashSet<Player> players) {
+        var entity = entities.stream().filter(e -> e.getName().equals(name)).findFirst().orElse(null);
+        if (entity != null && !entity.isDead()) {
+            entity.setDead(true);
+            var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground(), entity.isDead());
+            players.forEach(p -> p.send(entityUpdate));
+        }
     }
 }

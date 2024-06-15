@@ -1,5 +1,6 @@
 package foop.server;
 
+import foop.message.GameOverMessage;
 import foop.message.Message;
 import lombok.extern.slf4j.Slf4j;
 
@@ -62,5 +63,11 @@ public class Player {
                 "name='" + name + '\'' +
                 ", socket=" + socket +
                 '}';
+    }
+
+    public void gameOver(GameOverMessage gameOverMessage) {
+        send(gameOverMessage);
+        getGame().removePlayer(this);
+        game = null;
     }
 }

@@ -28,6 +28,8 @@ public class GameFrame extends JFrame {
 
     private final JoinGameView joinGameView;
     private final CreateGameView createGameView;
+    private final GameOverDeathView gameOverDeathView;
+    private final BoardView boardView;
 
     public GameFrame(Client client) {
         this.client = client;
@@ -47,16 +49,18 @@ public class GameFrame extends JFrame {
 
         joinGameView = new JoinGameView(this);
         createGameView = new CreateGameView(this);
+        gameOverDeathView = new GameOverDeathView(this);
+        boardView = new BoardView(this);
 
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
         mainPanel.add(TITLE_SCREEN_VIEW, new TitleScreenView(this));
         mainPanel.add(JOIN_GAME_VIEW, joinGameView);
-        mainPanel.add(BOARD_VIEW, new BoardView(this));
+        mainPanel.add(BOARD_VIEW, boardView);
         mainPanel.add(CREATE_GAME_VIEW, createGameView);
         mainPanel.add(GAME_OVER_VICTORY_VIEW, new GameOverVictoryView(this));
-        mainPanel.add(GAME_OVER_DEATH_VIEW, new GameOverDeathView(this));
+        mainPanel.add(GAME_OVER_DEATH_VIEW, gameOverDeathView);
 
         add(mainPanel);
         setLocationByPlatform(true);
@@ -71,6 +75,7 @@ public class GameFrame extends JFrame {
     }
 
     public void showBoardView() {
+        boardView.startNewGame();
         cardLayout.show(mainPanel, BOARD_VIEW);
     }
 
@@ -87,7 +92,8 @@ public class GameFrame extends JFrame {
         cardLayout.show(mainPanel, GAME_OVER_VICTORY_VIEW);
     }
 
-    public void showGameOverDeathView() {
+    public void showGameOverDeathView(boolean allButYouDied) {
+        gameOverDeathView.setAllButYouDied(allButYouDied);
         cardLayout.show(mainPanel, GAME_OVER_DEATH_VIEW);
     }
 

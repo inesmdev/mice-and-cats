@@ -118,17 +118,18 @@ public class Server implements AutoCloseable {
                     synchronized (games) {
                         player.setReady(m.ready());
                         if (m.ready() && player.getGame() != null) {
-                            player.getGame().startIfAllReady();
+                            if (player.getGame().startIfAllReady()) {
+                                games.remove(player.getGame().getName());
+                            }
                         }
                         sendAvailableGames(null);
                     }
                 } else if (message instanceof ExitGameMessage m) {
                     synchronized (games) {
                         player.setReady(false);
-                        if (player.getGame() != null) {
-                            player.getGame().removePlayer(player);
-                            player.getGame().stop();
-                            player.setGame(null);
+                        var game = player.getGame();
+                        if (game != null) {
+                            game.killDisconnectedPlayer(player, games);
                         }
                         sendAvailableGames(null);
                     }

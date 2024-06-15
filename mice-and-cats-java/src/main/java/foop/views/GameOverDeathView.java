@@ -9,11 +9,13 @@ import java.awt.*;
 @Slf4j
 public class GameOverDeathView extends JPanel {
 
+    private final JLabel headerLabel;
+
     public GameOverDeathView(GameFrame frame) {
         setLayout(new BorderLayout());
         setOpaque(false);
 
-        JLabel headerLabel = new JLabel("YOU DIED!", SwingConstants.CENTER);
+        headerLabel = new JLabel("", SwingConstants.CENTER);
         headerLabel.setBackground(new Color(255, 0, 0, 150));
         headerLabel.setOpaque(true);
         headerLabel.setFont(new Font("Arial", Font.BOLD, 80));
@@ -53,6 +55,14 @@ public class GameOverDeathView extends JPanel {
         p2.add(Box.createGlue());
 
         add(p2, BorderLayout.CENTER);
+    }
+
+    void setAllButYouDied(boolean allButYouDied) {
+        if (allButYouDied) {
+            headerLabel.setText("All teammates died!");
+        } else {
+            headerLabel.setText("YOU DIED!");
+        }
     }
 
     @Override

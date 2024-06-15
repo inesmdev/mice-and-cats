@@ -45,6 +45,14 @@ public class Client implements AutoCloseable, Runnable {
                 world = new World(m);
             } else if (message instanceof EntityUpdateMessage m) {
                 world.entityUpdate(m);
+            } else if (message instanceof GameOverMessage m) {
+                gameName = null;
+                world = null;
+                switch (m.result()) {
+                    case YOU_DIED -> jFrame.showGameOverDeathView(false);
+                    case ALL_BUT_YOU_DIED -> jFrame.showGameOverDeathView(true);
+                    case VICTORY -> jFrame.showGameOverVictoryView();
+                }
             } else {
                 return message;
             }
