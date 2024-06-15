@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class JoinGameView extends JPanel {
@@ -37,7 +38,7 @@ public class JoinGameView extends JPanel {
                 var component = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof AvailableGamesMessage.Game g) {
                     setText(g.name() + ":" +
-                            " [" + String.join(", ", g.players()) + "]" +
+                            " [" + g.players().stream().map(p -> p.name() + (p.ready() ? " (ready)" : "")).collect(Collectors.joining()) + "]" +
                             " (" + g.duration().toMinutes() + "m " + g.duration().getSeconds() + "s)" +
                             (g.started() ? " (started)" : "")
                     );

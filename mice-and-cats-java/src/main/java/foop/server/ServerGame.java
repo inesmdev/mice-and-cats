@@ -29,7 +29,7 @@ public class ServerGame {
     }
 
     public synchronized AvailableGamesMessage.Game getLobbyInfo() {
-        var ps = players.stream().map(Player::getName).toList();
+        var ps = players.stream().map(p -> new AvailableGamesMessage.PlayerInfo(p.getName(), p.isReady())).toList();
         return new AvailableGamesMessage.Game(name, duration, ps, started);
     }
 
