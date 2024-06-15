@@ -27,6 +27,7 @@ public class World {
     private final HashMap<Integer, Subway> subways;
     private final HashMap<Position, Subway> cellToSubway;
 
+    private Position nextCatGoal = null;
 
     public World(Random seed, int numSubways, int numCols, int numRows, HashSet<Player> players) {
         grid = new int[numRows][numCols];
@@ -61,7 +62,18 @@ public class World {
         var r = new Random();
 
         var cat = entities.get(0);
-        cat.setPosition(new Position(r.nextInt(grid[0].length), r.nextInt(grid.length)));
+
+        if (nextCatGoal == null) {
+            nextCatGoal = new Position(r.nextInt(grid[0].length), r.nextInt(grid.length));
+        }
+        var dx = nextCatGoal.x() - cat.getPosition().x();
+        var dy = nextCatGoal.y() - cat.getPosition().y();
+        dx = Math.min(1, Math.max(-1, dx));
+        dy = Math.min(1, Math.max(-1, dy));
+        cat.setPosition(new Position(cat.getPosition().x() + dx, cat.getPosition().y() + dy));
+        if (nextCatGoal.equals(cat.getPosition())) {
+            nextCatGoal = null;
+        }
 
         var catUpdate = new EntityUpdateMessage(cat.getId(), cat.getName(), cat.getPosition(), cat.isUnderground());
         for (var player : players) {
