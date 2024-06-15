@@ -114,7 +114,11 @@ public class Client implements AutoCloseable, Runnable {
     }
 
     public void exitGame() {
-        send(new ExitGameMessage(gameName));
+        if (gameName != null) {
+            send(new ExitGameMessage(gameName));
+            gameName = null;
+            world = null;
+        }
     }
 
     public void setPlayerName(String name) {

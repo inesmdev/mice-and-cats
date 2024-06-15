@@ -34,12 +34,20 @@ public class GameFrame extends JFrame {
     public GameFrame(Client client) {
         this.client = client;
 
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setTitle("Cat and Mouse");
         setSize(800, 600);
         setLocationRelativeTo(null);
 
         addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                // window close button clicked
+                if (client.getGameName() == null) {
+                    dispose();
+                }
+            }
+
             @Override
             public void windowClosed(WindowEvent e) {
                 client.close();
