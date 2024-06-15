@@ -16,8 +16,6 @@ public class JoinGameView extends JPanel {
     private final JList<AvailableGamesMessage.Game> lobbyList;
     private final DefaultListModel<AvailableGamesMessage.Game> lobbyListModel = new DefaultListModel<>();
 
-    private boolean firstTime = true;
-
     public JoinGameView(GameFrame frame) {
         this.frame = frame;
 
@@ -57,11 +55,6 @@ public class JoinGameView extends JPanel {
             startButton.setEnabled(false);
             AvailableGamesMessage.Game game = lobbyList.getSelectedValue();
             frame.getClient().joinGame(game.name());
-            if (firstTime) {
-
-                firstTime = false;
-            }
-            frame.showBoardView();
         });
         startButton.setEnabled(false);
 

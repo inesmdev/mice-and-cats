@@ -22,7 +22,7 @@ public interface Message {
             case AvailableGamesMessage.TAG -> AvailableGamesMessage::parse;
             case CreateGameMessage.TAG -> CreateGameMessage::parse;
             case EntityUpdateMessage.TAG -> EntityUpdateMessage::parse;
-            case GenericResponseMessage.TAG -> GenericResponseMessage::parse;
+            case GenericErrorMessage.TAG -> GenericErrorMessage::parse;
             case GameWorldMessage.TAG -> GameWorldMessage::parse;
             case InitialMessage.TAG -> InitialMessage::parse;
             case JoinGameMessage.TAG -> JoinGameMessage::parse;
@@ -30,6 +30,7 @@ public interface Message {
             case ExitGameMessage.TAG -> ExitGameMessage::parse;
             case PlayerCommandMessage.TAG -> PlayerCommandMessage::parse;
             case GameOverMessage.TAG -> GameOverMessage::parse;
+            case JoinedGameMessage.TAG -> JoinedGameMessage::parse;
             default -> throw new IOException("Unexpected tag: " + tag);
         };
 

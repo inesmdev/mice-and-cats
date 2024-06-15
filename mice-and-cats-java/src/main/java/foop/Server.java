@@ -87,13 +87,13 @@ public class Server implements AutoCloseable {
                         }
                         // can't create a game with the same name:
                         if (games.containsKey(m.name())) {
-                            player.send(new GenericResponseMessage("Name already exists", true));
+                            player.send(new GenericErrorMessage("Name already exists"));
                         } else {
                             var game = new ServerGame(m.name(), m.minPlayer());
                             game.addPlayer(player);
                             player.setGame(game);
                             games.put(m.name(), game);
-                            player.send(new GenericResponseMessage("", false));
+                            player.send(new JoinedGameMessage(game.getName()));
                         }
                         sendAvailableGames(null);
                     }
@@ -106,11 +106,11 @@ public class Server implements AutoCloseable {
                         }
                         var game = games.get(m.name());
                         if (game == null) {
-                            player.send(new GenericResponseMessage("Game doesn't exist", true));
+                            player.send(new GenericErrorMessage("Game doesn't exist"));
                         } else {
                             game.addPlayer(player);
                             player.setGame(game);
-                            player.send(new GenericResponseMessage("", false));
+                            player.send(new JoinedGameMessage(game.getName()));
                         }
                         sendAvailableGames(null);
                     }

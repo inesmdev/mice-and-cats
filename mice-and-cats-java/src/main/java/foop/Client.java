@@ -51,10 +51,12 @@ public class Client implements AutoCloseable, Runnable {
                 case ALL_BUT_YOU_DIED -> jFrame.showGameOverDeathView(true);
                 case VICTORY -> jFrame.showGameOverVictoryView();
             }
-        } else if (message instanceof GenericResponseMessage m) {
-            if (m.error()) {
-                JOptionPane.showMessageDialog(jFrame, m.message(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
+        } else if (message instanceof JoinedGameMessage m) {
+            gameName = m.name();
+            world = null;
+            jFrame.showBoardView();
+        } else if (message instanceof GenericErrorMessage m) {
+            JOptionPane.showMessageDialog(jFrame, m.message(), "Error", JOptionPane.ERROR_MESSAGE);
         } else {
             throw new RuntimeException("Unexpected message: " + message);
         }

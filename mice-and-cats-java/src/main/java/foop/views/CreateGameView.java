@@ -71,7 +71,6 @@ public class CreateGameView extends JPanel {
                 return;
             }
             frame.getClient().createGame(name, returnSize);
-            frame.showBoardView();
         });
         this.add(createGameButton, BorderLayout.SOUTH);
 
