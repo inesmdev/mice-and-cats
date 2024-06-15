@@ -2,7 +2,6 @@ package foop.views;
 
 import foop.Client;
 import foop.message.AvailableGamesMessage;
-import foop.message.Message;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -18,6 +17,8 @@ public class GameFrame extends JFrame {
     private static final String JOIN_GAME_VIEW = "JoinGameView";
     private static final String BOARD_VIEW = "BoardView";
     private static final String CREATE_GAME_VIEW = "CreateGameView";
+    private static final String GAME_OVER_VICTORY_VIEW = "GameOverVictoryView";
+    private static final String GAME_OVER_DEATH_VIEW = "GameOverDeathView";
 
     @Getter
     private final Client client;
@@ -54,6 +55,8 @@ public class GameFrame extends JFrame {
         mainPanel.add(JOIN_GAME_VIEW, joinGameView);
         mainPanel.add(BOARD_VIEW, new BoardView(this));
         mainPanel.add(CREATE_GAME_VIEW, createGameView);
+        mainPanel.add(GAME_OVER_VICTORY_VIEW, new GameOverVictoryView(this));
+        mainPanel.add(GAME_OVER_DEATH_VIEW, new GameOverDeathView(this));
 
         add(mainPanel);
         setLocationByPlatform(true);
@@ -78,6 +81,14 @@ public class GameFrame extends JFrame {
     public void showCreateGameView() {
         createGameView.setDefaultName(client.getPlayerName());
         cardLayout.show(mainPanel, CREATE_GAME_VIEW);
+    }
+
+    public void showGameOverVictoryView() {
+        cardLayout.show(mainPanel, GAME_OVER_VICTORY_VIEW);
+    }
+
+    public void showGameOverDeathView() {
+        cardLayout.show(mainPanel, GAME_OVER_DEATH_VIEW);
     }
 
     public void updateLobby(AvailableGamesMessage m) {

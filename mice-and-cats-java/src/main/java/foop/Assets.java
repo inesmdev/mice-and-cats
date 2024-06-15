@@ -18,18 +18,24 @@ public class Assets {
     private Image titleScreenBackground;
     private Image mouse;
     private Image cat;
+    private Image victory;
+    private Image death;
 
     public void load() throws IOException {
         titleScreenBackground = readImageResource("/images/titlescreen.jpeg");
-        mouse = readImageResourceAsync("/images/mouse.png");
-        cat = readImageResourceAsync("/images/cat.png");
+
+        // TODO we could load these in a thread
+        mouse = readImageResource("/images/mouse.png");
+        cat = readImageResource("/images/cat.png");
+        victory = readImageResource("/images/victory.jpeg");
+        death = readImageResource("/images/death.jpeg");
     }
 
     private Image readImageResource(String resource) throws IOException {
         return ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream(resource), "Could not find resource " + resource));
     }
 
-    private Image readImageResourceAsync(String resource) {
-        return Toolkit.getDefaultToolkit().createImage(getClass().getResource(resource));
-    }
+//    private Image readImageResourceAsync(String resource) {
+//        return Toolkit.getDefaultToolkit().createImage(getClass().getResource(resource));
+//    }
 }
