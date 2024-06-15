@@ -30,6 +30,7 @@ public class MessageTests {
                 new JoinGameMessage("test"),
                 new SetReadyForGameMessage(true),
                 new SetReadyForGameMessage(false),
+                new GameOverMessage(true),
                 new PlayerCommandMessage(1)
         );
     }
