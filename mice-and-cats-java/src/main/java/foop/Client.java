@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
 import java.util.Random;
@@ -37,38 +36,40 @@ public class Client implements AutoCloseable, Runnable {
         socket = new Socket("localhost", port);
     }
 
-    Message receiveNext(InputStream in) throws IOException {
-        while (true) {
-            var message = Message.parse(in);
-            if (message instanceof AvailableGamesMessage m) {
-                SwingUtilities.invokeLater(() -> jFrame.updateLobby(m));
-            } else if (message instanceof GameWorldMessage m) {
-                world = new World(m);
-            } else if (message instanceof EntityUpdateMessage m) {
-                world.entityUpdate(m);
-            } else if (message instanceof GameOverMessage m) {
-                gameName = null;
-                world = null;
-                switch (m.result()) {
-                    case YOU_DIED -> jFrame.showGameOverDeathView(false);
-                    case ALL_BUT_YOU_DIED -> jFrame.showGameOverDeathView(true);
-                    case VICTORY -> jFrame.showGameOverVictoryView();
-                }
-            } else {
-                return message;
+    private void processMessage(Message message) {
+        if (message instanceof AvailableGamesMessage m) {
+            jFrame.updateLobby(m);
+        } else if (message instanceof GameWorldMessage m) {
+            world = new World(m);
+        } else if (message instanceof EntityUpdateMessage m) {
+            world.entityUpdate(m);
+        } else if (message instanceof GameOverMessage m) {
+            gameName = null;
+            world = null;
+            switch (m.result()) {
+                case YOU_DIED -> jFrame.showGameOverDeathView(false);
+                case ALL_BUT_YOU_DIED -> jFrame.showGameOverDeathView(true);
+                case VICTORY -> jFrame.showGameOverVictoryView();
             }
+        } else if (message instanceof GenericResponseMessage m) {
+            if (m.error()) {
+                JOptionPane.showMessageDialog(jFrame, m.message(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            throw new RuntimeException("Unexpected message: " + message);
         }
     }
 
     @Override
     public void run() {
         try (socket) {
-            SwingUtilities.invokeAndWait(this::createAndShowGUI);
-            var in = socket.getInputStream();
+            SwingUtilities.invokeAndWait(() -> jFrame = new GameFrame(this));
 
+            var in = socket.getInputStream();
             while (Main.running && this.running) {
-                var message = receiveNext(in);
+                var message = Message.parse(in);
                 log.info("{}: {}", clientName, message);
+                SwingUtilities.invokeAndWait(() -> processMessage(message));
             }
         } catch (IOException | InterruptedException | InvocationTargetException e) {
             throw new RuntimeException(e);
@@ -80,10 +81,6 @@ public class Client implements AutoCloseable, Runnable {
             });
             log.info("{} exited", clientName);
         }
-    }
-
-    private void createAndShowGUI() {
-        this.jFrame = new GameFrame(this);
     }
 
     @Override

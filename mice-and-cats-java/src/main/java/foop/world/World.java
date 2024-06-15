@@ -241,7 +241,7 @@ public class World {
         return e.isUnderground() ? Math.abs(grid[e.getPosition().y()][e.getPosition().x()]) : 0;
     }
 
-    public synchronized void render(Graphics2D g, int w, int h, String playerName, boolean superVision) {
+    public void render(Graphics2D g, int w, int h, String playerName, boolean superVision) {
 
         int tileSize = Math.min(w / grid[0].length, h / grid.length);
 
@@ -308,7 +308,7 @@ public class World {
         }
     }
 
-    public synchronized void entityUpdate(EntityUpdateMessage m) {
+    public void entityUpdate(EntityUpdateMessage m) {
         if (m.id() < entities.size()) {
             var entity = entities.get(m.id());
             entity.setName(m.name());
