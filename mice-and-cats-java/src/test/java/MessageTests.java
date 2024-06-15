@@ -23,8 +23,8 @@ public class MessageTests {
                         new AvailableGamesMessage.Game("test2", Duration.ofSeconds(3, 4), List.of(), false)
                 )),
                 new CreateGameMessage("test", 2),
-                new EntityUpdateMessage(42, "cat", new Position(1, 2), false),
-                new GameWorldMessage(new int[][]{new int[]{1, 2, 3}, new int[]{4, 5, 6}}, List.of(new Subway(1, Color.RED, List.of(new Position(1, 2), new Position(3, 4))))),
+                new EntityUpdateMessage(42, "cat", new Position(1, 2), false, true),
+                new GameWorldMessage(new int[][]{new int[]{1, 2, 3}, new int[]{4, 5, 6}}, List.of(new Subway(1, Color.RED, List.of(new Position(1, 2), new Position(3, 4)), List.of(new Position(1, 2), new Position(3, 4))))),
                 new GenericResponseMessage("test", true),
                 new InitialMessage("test"),
                 new JoinGameMessage("test"),

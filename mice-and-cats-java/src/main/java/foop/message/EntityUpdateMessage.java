@@ -6,7 +6,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public record EntityUpdateMessage(int id, String name, Position position, boolean isUnderground) implements Message {
+public record EntityUpdateMessage(int id, String name, Position position, boolean isUnderground, boolean isDead) implements Message {
     public static final int TAG = 8;
 
     public static EntityUpdateMessage parse(DataInputStream in) throws IOException {
@@ -14,7 +14,8 @@ public record EntityUpdateMessage(int id, String name, Position position, boolea
         var name = in.readUTF();
         var position = new Position(in.readInt(), in.readInt());
         var isUnderground = in.readBoolean();
-        return new EntityUpdateMessage(id, name, position, isUnderground);
+        var isDead = in.readBoolean();
+        return new EntityUpdateMessage(id, name, position, isUnderground, isDead);
     }
 
     @Override
@@ -29,6 +30,7 @@ public record EntityUpdateMessage(int id, String name, Position position, boolea
         out.writeInt(position.x());
         out.writeInt(position.y());
         out.writeBoolean(isUnderground);
+        out.writeBoolean(isDead);
     }
 
 }

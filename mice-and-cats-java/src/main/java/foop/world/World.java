@@ -38,10 +38,10 @@ public class World {
 
         placeConnectedSubways(seed, numSubways);
 
-        entities.add(new Entity(0, "cat", new Position(1, 1), false));
+        entities.add(new Entity(0, "cat", new Position(1, 1), false, false));
 
         for (Player player : players) {
-            entities.add(new Entity(entities.size(), player.getName(), getRandomGroundPosition(seed), false));
+            entities.add(new Entity(entities.size(), player.getName(), getRandomGroundPosition(seed), false, false));
         }
     }
 
@@ -56,6 +56,19 @@ public class World {
         });
         this.numRows = grid.length;
         this.numCols = grid[0].length;
+    }
+
+    public void afterEntityMoved(HashSet<Player> players) {
+        var cat = entities.get(0);
+        for (Entity e : entities) {
+            if (cat != e && !e.isDead() && cat.getPosition().equals(e.getPosition())) {
+                e.setDead(true);
+                var update = new EntityUpdateMessage(e.getId(), e.getName(), e.getPosition(), e.isUnderground(), e.isDead());
+                for (var player : players) {
+                    player.send(update);
+                }
+            }
+        }
     }
 
     public void serverUpdate(HashSet<Player> players, Duration duration) {
@@ -74,8 +87,9 @@ public class World {
         if (nextCatGoal.equals(cat.getPosition())) {
             nextCatGoal = null;
         }
+        afterEntityMoved(players);
 
-        var catUpdate = new EntityUpdateMessage(cat.getId(), cat.getName(), cat.getPosition(), cat.isUnderground());
+        var catUpdate = new EntityUpdateMessage(cat.getId(), cat.getName(), cat.getPosition(), cat.isUnderground(), cat.isDead());
         for (var player : players) {
             player.send(catUpdate);
         }
@@ -242,12 +256,17 @@ public class World {
                 var bounds = g.getFontMetrics().getStringBounds(entity.getName(), g);
 
                 boolean isCat = entity.getId() == 0;
-
                 int imageDown = isCat ? 0 : tileSize / 5;
                 int textUp = tileSize / 3;
 
-                var image = isCat ? Assets.getInstance().getCat() : Assets.getInstance().getMouse();
-                g.drawImage(image, tileSize * entity.getPosition().x(), tileSize * entity.getPosition().y() + imageDown, tileSize, tileSize, null);
+                if (entity.isDead()) {
+                    var image = Assets.getInstance().getTombstone();
+                    textUp = 0;
+                    g.drawImage(image, tileSize * entity.getPosition().x(), tileSize * entity.getPosition().y(), tileSize, tileSize, null);
+                } else {
+                    var image = isCat ? Assets.getInstance().getCat() : Assets.getInstance().getMouse();
+                    g.drawImage(image, tileSize * entity.getPosition().x(), tileSize * entity.getPosition().y() + imageDown, tileSize, tileSize, null);
+                }
 
                 if (!isCat) {
                     int x = tileSize * entity.getPosition().x() + tileSize / 2 - (int) (bounds.getWidth() / 2);
@@ -266,8 +285,9 @@ public class World {
             entity.setName(m.name());
             entity.setPosition(m.position());
             entity.setUnderground(m.isUnderground());
+            entity.setDead(m.isDead());
         } else if (m.id() == entities.size()) {
-            entities.add(new Entity(m.id(), m.name(), m.position(), m.isUnderground()));
+            entities.add(new Entity(m.id(), m.name(), m.position(), m.isUnderground(), m.isDead()));
         } else {
             throw new IllegalStateException("Unexpected entity update message: " + m);
         }
@@ -278,14 +298,16 @@ public class World {
         players.forEach(p -> p.send(message));
 
         for (Entity entity : entities) {
-            var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground());
+            var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground(), entity.isDead());
             players.forEach(p -> p.send(entityUpdate));
         }
     }
 
     public void movePlayer(HashSet<Player> players, Player player, int direction) {
-
         var entity = entities.stream().filter(e -> e.getName().equals(player.getName())).findFirst().get();
+        if (entity.isDead()) {
+            return;
+        }
         var position = switch (direction) {
             case 1 -> new Position(entity.getPosition().x(), entity.getPosition().y() - 1);
             case 2 -> new Position(entity.getPosition().x() + 1, entity.getPosition().y());
@@ -325,12 +347,11 @@ public class World {
 
                 entity.setPosition(position);
                 entity.setUnderground(isUnderground);
-                var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground());
+                var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground(), entity.isDead());
                 players.forEach(p -> p.send(entityUpdate));
             }
-
         }
 
-
+        afterEntityMoved(players);
     }
 }

@@ -14,12 +14,15 @@ public class Entity {
     private Position position;
     @Setter
     private boolean isUnderground;
+    @Setter
+    private boolean isDead;
 
-    public Entity(int id, String name, Position position, boolean isUnderground) {
+    public Entity(int id, String name, Position position, boolean isUnderground, boolean isDead) {
         this.id = id;
         this.name = name;
         this.position = position;
         this.isUnderground = isUnderground;
+        this.isDead = isDead;
     }
 
 }
