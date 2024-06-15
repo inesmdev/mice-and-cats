@@ -39,7 +39,7 @@ public class JoinGameView extends JPanel {
                 if (value instanceof AvailableGamesMessage.Game g) {
                     setText(g.name() + ":" +
                             " [" + g.players().stream().map(p -> p.name() + (p.ready() ? " (ready)" : "")).collect(Collectors.joining()) + "]" +
-                            " (" + g.duration().toMinutes() + "m " + g.duration().getSeconds() + "s)" +
+                            " (" + g.duration().toMinutes() + "m " + g.duration().toSecondsPart() + "s)" +
                             (g.started() ? " (started)" : "")
                     );
                 }

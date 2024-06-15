@@ -99,5 +99,6 @@ public class GameFrame extends JFrame {
 
     public void updateLobby(AvailableGamesMessage m) {
         joinGameView.updateLobby(m);
+        boardView.updateLobby(m);
     }
 }

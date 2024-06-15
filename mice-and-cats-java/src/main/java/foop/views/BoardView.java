@@ -1,6 +1,6 @@
 package foop.views;
 
-import foop.Client;
+import foop.message.AvailableGamesMessage;
 import foop.message.PlayerCommandMessage;
 import foop.message.SetReadyForGameMessage;
 import foop.world.World;
@@ -19,12 +19,14 @@ public class BoardView extends JPanel {
     private static final String ACTION_LEFT = "ACTION_LEFT";
     private final GameFrame frame;
     private final JButton readyButton;
+    private final JTextPane playersTextPane;
     private boolean superVision;
     private boolean started;
 
     public BoardView(GameFrame frame) {
         this.frame = frame;
         readyButton = new JButton();
+        playersTextPane = new JTextPane();
         render();
 
         getActionMap().put(ACTION_UP, new AbstractAction() {
@@ -106,6 +108,8 @@ public class BoardView extends JPanel {
         visionCheckbox.addActionListener(e -> superVision = visionCheckbox.isSelected());
         sidePanel.add(visionCheckbox);
 
+        sidePanel.add(playersTextPane);
+
         panel.add(sidePanel, BorderLayout.CENTER);
 
         readyButton.addActionListener(e -> {
@@ -141,4 +145,28 @@ public class BoardView extends JPanel {
         started = false;
     }
 
+    public void updateLobby(AvailableGamesMessage m) {
+        var text = new StringBuilder();
+        var gameName = frame.getClient().getGameName();
+        if (gameName != null) {
+            for (AvailableGamesMessage.Game game : m.games()) {
+                if (game.name().equals(gameName)) {
+                    text.append("Duration: ");
+                    text.append(game.duration().toMinutes());
+                    text.append("m ");
+                    text.append(game.duration().toSecondsPart());
+                    text.append("s\n");
+                    text.append("Players:\n");
+                    for (AvailableGamesMessage.PlayerInfo player : game.players()) {
+                        text.append("    ");
+                        text.append(player.name());
+                        text.append(player.ready() ? " (ready)" : " (not-ready)");
+                        text.append("\n");
+                    }
+                    break;
+                }
+            }
+        }
+        playersTextPane.setText(text.toString());
+    }
 }

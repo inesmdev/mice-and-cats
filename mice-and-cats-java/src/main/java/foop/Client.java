@@ -30,6 +30,7 @@ public class Client implements AutoCloseable, Runnable {
     @Getter
     private String playerName;
 
+    @Getter
     private String gameName;
 
     public Client(int port) throws IOException {
