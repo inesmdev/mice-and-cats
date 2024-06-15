@@ -1,6 +1,5 @@
 package foop.views;
 
-import foop.message.CreateGameMessage;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -71,9 +70,7 @@ public class CreateGameView extends JPanel {
                 JOptionPane.showMessageDialog(frame, "Please enter a valid name");
                 return;
             }
-            frame.send(new CreateGameMessage(name, returnSize));
-            frame.setGameName(name);
-
+            frame.getClient().createGame(name, returnSize);
             frame.showBoardView();
         });
         this.add(createGameButton, BorderLayout.SOUTH);

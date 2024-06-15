@@ -1,7 +1,6 @@
 package foop.views;
 
 import foop.message.AvailableGamesMessage;
-import foop.message.JoinGameMessage;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -56,12 +55,11 @@ public class JoinGameView extends JPanel {
         startButton.addActionListener(e -> {
             startButton.setEnabled(false);
             AvailableGamesMessage.Game game = lobbyList.getSelectedValue();
-            frame.setGameName(game.name());
+            frame.getClient().joinGame(game.name());
             if (firstTime) {
 
                 firstTime = false;
             }
-            frame.send(new JoinGameMessage(game.name()));
             frame.showBoardView();
         });
         startButton.setEnabled(false);

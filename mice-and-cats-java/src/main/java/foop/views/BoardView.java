@@ -1,6 +1,6 @@
 package foop.views;
 
-import foop.message.ExitGameMessage;
+import foop.Client;
 import foop.message.PlayerCommandMessage;
 import foop.message.SetReadyForGameMessage;
 import foop.world.World;
@@ -29,7 +29,7 @@ public class BoardView extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 log.info(ACTION_UP);
                 var playerUpdate = new PlayerCommandMessage(1);
-                frame.send(playerUpdate);
+                frame.getClient().send(playerUpdate);
 
             }
         });
@@ -38,7 +38,7 @@ public class BoardView extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 log.info(ACTION_DOWN);
                 var playerUpdate = new PlayerCommandMessage(3);
-                frame.send(playerUpdate);
+                frame.getClient().send(playerUpdate);
             }
         });
         getActionMap().put(ACTION_RIGHT, new AbstractAction() {
@@ -46,7 +46,7 @@ public class BoardView extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 log.info(ACTION_RIGHT);
                 var playerUpdate = new PlayerCommandMessage(2);
-                frame.send(playerUpdate);
+                frame.getClient().send(playerUpdate);
             }
         });
         getActionMap().put(ACTION_LEFT, new AbstractAction() {
@@ -54,7 +54,7 @@ public class BoardView extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 log.info(ACTION_LEFT);
                 var playerUpdate = new PlayerCommandMessage(4);
-                frame.send(playerUpdate);
+                frame.getClient().send(playerUpdate);
             }
         });
 
@@ -83,7 +83,7 @@ public class BoardView extends JPanel {
                 World world = frame.getClient().getWorld();
                 if (world != null) {
                     readyButton.setText("Started");
-                    world.render(g, getWidth(), getHeight(), frame.getPlayerName(), superVision);
+                    world.render(g, getWidth(), getHeight(), frame.getClient().getPlayerName(), superVision);
                 } else {
                     g.clearRect(0, 0, getWidth(), getHeight());
                 }
@@ -109,7 +109,7 @@ public class BoardView extends JPanel {
             readyButton.setEnabled(false);
             readyButton.setText("Waiting");
             log.info("Starting game...");
-            frame.send(new SetReadyForGameMessage(true));
+            frame.getClient().send(new SetReadyForGameMessage(true));
         });
 
 
@@ -117,10 +117,7 @@ public class BoardView extends JPanel {
             readyButton.setEnabled(true);
             readyButton.setText("Ready");
             log.info("Stopping game");
-            // Todo:
-            //  When this button is pressed the cat should stop moving.
-            //  in the other window and change back to the starting window...
-            frame.send(new ExitGameMessage(frame.getGameName()));
+            frame.getClient().exitGame();
             frame.showTitleScreenView();
         });
 

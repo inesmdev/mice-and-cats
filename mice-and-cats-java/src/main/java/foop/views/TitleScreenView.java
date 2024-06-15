@@ -1,7 +1,6 @@
 package foop.views;
 
 import foop.Assets;
-import foop.message.InitialMessage;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -80,8 +79,7 @@ public class TitleScreenView extends JPanel {
         createBtn.addActionListener(e -> {
             var playerName = tf.getText();
             log.info("New Player with name {}", playerName);
-            frame.setPlayerName(playerName);
-            frame.send(new InitialMessage(playerName));
+            frame.getClient().setPlayerName(playerName);
             frame.showCreateGameView();
         });
 
@@ -89,8 +87,7 @@ public class TitleScreenView extends JPanel {
             log.info("Join Game");
             var playerName = tf.getText();
             log.info("New Player with name {}", playerName);
-            frame.setPlayerName(playerName);
-            frame.send(new InitialMessage(playerName));
+            frame.getClient().setPlayerName(playerName);
             frame.showJoinGameView();
         });
 
@@ -118,7 +115,7 @@ public class TitleScreenView extends JPanel {
         exitBtn.addActionListener(e -> {
             log.info("Exit");
             exitBtn.setEnabled(false);
-            frame.exit();
+            frame.dispose();
         });
 
         panel.add(exitBtn);

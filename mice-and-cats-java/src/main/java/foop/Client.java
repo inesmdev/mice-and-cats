@@ -1,9 +1,6 @@
 package foop;
 
-import foop.message.AvailableGamesMessage;
-import foop.message.EntityUpdateMessage;
-import foop.message.GameWorldMessage;
-import foop.message.Message;
+import foop.message.*;
 import foop.views.GameFrame;
 import foop.world.World;
 import lombok.Getter;
@@ -19,7 +16,6 @@ import java.util.Random;
 
 import static foop.message.Message.serialize;
 
-@Getter
 @Slf4j
 public class Client implements AutoCloseable, Runnable {
 
@@ -27,7 +23,14 @@ public class Client implements AutoCloseable, Runnable {
     private final String clientName = "Client_" + new Random().nextInt(100);
     private volatile boolean running = true;
     private GameFrame jFrame;
+
+    @Getter
     private World world;
+
+    @Getter
+    private String playerName;
+
+    private String gameName;
 
     public Client(int port) throws IOException {
         socket = new Socket("localhost", port);
@@ -80,6 +83,7 @@ public class Client implements AutoCloseable, Runnable {
         try {
             this.socket.close();
         } catch (IOException e) {
+            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -88,5 +92,24 @@ public class Client implements AutoCloseable, Runnable {
     @SneakyThrows
     public synchronized void send(Message message) {
         serialize(message, this.socket.getOutputStream());
+    }
+
+    public void joinGame(String name) {
+        gameName = name;
+        send(new JoinGameMessage(name));
+    }
+
+    public void createGame(String name, int returnSize) {
+        gameName = name;
+        send(new CreateGameMessage(name, returnSize));
+    }
+
+    public void exitGame() {
+        send(new ExitGameMessage(gameName));
+    }
+
+    public void setPlayerName(String name) {
+        playerName = name;
+        send(new InitialMessage(name));
     }
 }
