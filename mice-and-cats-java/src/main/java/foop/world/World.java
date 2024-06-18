@@ -85,6 +85,7 @@ public class World {
             var name = entities.stream().filter(e -> e.getId() != 0 && !e.isDead()).findFirst().get().getName();
             var player = players.stream().filter(p -> p.getName().equals(name)).findFirst().get();
             player.gameOver(new GameOverMessage(GameOverMessage.Result.ALL_BUT_YOU_DIED));
+            return;
         }
 
         // game-over: all players in one tunnel
