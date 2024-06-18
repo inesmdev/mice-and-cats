@@ -27,6 +27,8 @@ public class BoardView extends JPanel {
         this.frame = frame;
         readyButton = new JButton();
         playersTextPane = new JTextPane();
+        playersTextPane.setEditable(false);
+        playersTextPane.setFocusable(false);
         render();
 
         getActionMap().put(ACTION_UP, new AbstractAction() {
@@ -105,7 +107,10 @@ public class BoardView extends JPanel {
         sidePanel.setLayout(new BoxLayout(sidePanel, BoxLayout.Y_AXIS));
 
         var visionCheckbox = new JCheckBox("Super vision", superVision);
-        visionCheckbox.addActionListener(e -> superVision = visionCheckbox.isSelected());
+        visionCheckbox.addActionListener(e -> {
+            superVision = visionCheckbox.isSelected();
+            BoardView.this.grabFocus();
+        });
         sidePanel.add(visionCheckbox);
 
         sidePanel.add(playersTextPane);
