@@ -77,7 +77,7 @@ public class ServerGame {
     }
 
 
-    public void movePlayer(Player player, int direction) {
+    public synchronized void movePlayer(Player player, int direction) {
         world.movePlayer(players, player, direction);
     }
 
