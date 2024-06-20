@@ -42,7 +42,7 @@ public class World {
         entities.add(new Entity(0, "cat", new Position(1, 1), false, false));
 
         for (Player player : players) {
-            entities.add(new Entity(entities.size(), player.getName(), getRandomGroundPosition(seed), false, false));
+            entities.add(new Entity(entities.size(), player.getName(), getRandomGroundPosition(seed), true, false));
         }
     }
 
@@ -231,7 +231,7 @@ public class World {
         int randomX = rand.nextInt(this.numCols);
         int randomY = rand.nextInt(this.numRows);
 
-        while (grid[randomY][randomX] != 0) {
+        while (grid[randomY][randomX] == 0) { //spawn players within subway
             randomX = rand.nextInt(this.numCols);
             randomY = rand.nextInt(this.numRows);
         }
