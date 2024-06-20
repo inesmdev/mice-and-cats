@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Random;
 
 import static foop.message.Message.serialize;
@@ -73,6 +74,8 @@ public class Client implements AutoCloseable, Runnable {
                 log.info("{}: {}", clientName, message);
                 SwingUtilities.invokeAndWait(() -> processMessage(message));
             }
+        } catch (SocketException e) {
+            log.error("Socket exception: {}", e.getMessage());
         } catch (IOException | InterruptedException | InvocationTargetException e) {
             throw new RuntimeException(e);
         } finally {
