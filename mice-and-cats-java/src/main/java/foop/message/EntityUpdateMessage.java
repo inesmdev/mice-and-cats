@@ -1,21 +1,24 @@
 package foop.message;
 
+import foop.world.Entity;
 import foop.world.Position;
+import foop.world.Type;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public record EntityUpdateMessage(int id, String name, Position position, boolean isUnderground, boolean isDead) implements Message {
+public record EntityUpdateMessage(Entity entity) implements Message {
     public static final int TAG = 8;
 
     public static EntityUpdateMessage parse(DataInputStream in) throws IOException {
         var id = in.readInt();
+        var type = Type.valueOf(in.readUTF());
         var name = in.readUTF();
         var position = new Position(in.readInt(), in.readInt());
         var isUnderground = in.readBoolean();
         var isDead = in.readBoolean();
-        return new EntityUpdateMessage(id, name, position, isUnderground, isDead);
+        return new EntityUpdateMessage(new Entity(id, type, name, position, isUnderground, isDead));
     }
 
     @Override
@@ -25,12 +28,13 @@ public record EntityUpdateMessage(int id, String name, Position position, boolea
 
     @Override
     public void serialize(DataOutputStream out) throws IOException {
-        out.writeInt(id);
-        out.writeUTF(name);
-        out.writeInt(position.x());
-        out.writeInt(position.y());
-        out.writeBoolean(isUnderground);
-        out.writeBoolean(isDead);
+        out.writeInt(entity().getId());
+        out.writeUTF(entity().getType().name());
+        out.writeUTF(entity().getName());
+        out.writeInt(entity.getPosition().x());
+        out.writeInt(entity.getPosition().y());
+        out.writeBoolean(entity.isUnderground());
+        out.writeBoolean(entity.isDead());
     }
 
 }
