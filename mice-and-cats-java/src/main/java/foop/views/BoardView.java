@@ -1,6 +1,6 @@
 package foop.views;
 
-import foop.message.ExitGameMessage;
+import foop.message.AvailableGamesMessage;
 import foop.message.PlayerCommandMessage;
 import foop.message.SetReadyForGameMessage;
 import foop.world.World;
@@ -18,10 +18,17 @@ public class BoardView extends JPanel {
     private static final String ACTION_RIGHT = "ACTION_RIGHT";
     private static final String ACTION_LEFT = "ACTION_LEFT";
     private final GameFrame frame;
+    private final JButton readyButton;
+    private final JTextPane playersTextPane;
     private boolean superVision;
+    private boolean started;
 
     public BoardView(GameFrame frame) {
         this.frame = frame;
+        readyButton = new JButton();
+        playersTextPane = new JTextPane();
+        playersTextPane.setEditable(false);
+        playersTextPane.setFocusable(false);
         render();
 
         getActionMap().put(ACTION_UP, new AbstractAction() {
@@ -29,7 +36,7 @@ public class BoardView extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 log.info(ACTION_UP);
                 var playerUpdate = new PlayerCommandMessage(1);
-                frame.send(playerUpdate);
+                frame.getClient().send(playerUpdate);
 
             }
         });
@@ -38,7 +45,7 @@ public class BoardView extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 log.info(ACTION_DOWN);
                 var playerUpdate = new PlayerCommandMessage(3);
-                frame.send(playerUpdate);
+                frame.getClient().send(playerUpdate);
             }
         });
         getActionMap().put(ACTION_RIGHT, new AbstractAction() {
@@ -46,7 +53,7 @@ public class BoardView extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 log.info(ACTION_RIGHT);
                 var playerUpdate = new PlayerCommandMessage(2);
-                frame.send(playerUpdate);
+                frame.getClient().send(playerUpdate);
             }
         });
         getActionMap().put(ACTION_LEFT, new AbstractAction() {
@@ -54,7 +61,7 @@ public class BoardView extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 log.info(ACTION_LEFT);
                 var playerUpdate = new PlayerCommandMessage(4);
-                frame.send(playerUpdate);
+                frame.getClient().send(playerUpdate);
             }
         });
 
@@ -72,7 +79,6 @@ public class BoardView extends JPanel {
 
         setLayout(new BorderLayout());
 
-        JButton readyButton = new JButton("Ready");
         JButton stopButton = new JButton("Stop");
 
         JComponent component = new JComponent() {
@@ -83,7 +89,8 @@ public class BoardView extends JPanel {
                 World world = frame.getClient().getWorld();
                 if (world != null) {
                     readyButton.setText("Started");
-                    world.render(g, getWidth(), getHeight(), frame.getPlayerName(), superVision);
+                    started = true;
+                    world.render(g, getWidth(), getHeight(), frame.getClient().getPlayerName(), superVision);
                 } else {
                     g.clearRect(0, 0, getWidth(), getHeight());
                 }
@@ -100,8 +107,13 @@ public class BoardView extends JPanel {
         sidePanel.setLayout(new BoxLayout(sidePanel, BoxLayout.Y_AXIS));
 
         var visionCheckbox = new JCheckBox("Super vision", superVision);
-        visionCheckbox.addActionListener(e -> superVision = visionCheckbox.isSelected());
+        visionCheckbox.addActionListener(e -> {
+            superVision = visionCheckbox.isSelected();
+            BoardView.this.grabFocus();
+        });
         sidePanel.add(visionCheckbox);
+
+        sidePanel.add(playersTextPane);
 
         panel.add(sidePanel, BorderLayout.CENTER);
 
@@ -109,19 +121,17 @@ public class BoardView extends JPanel {
             readyButton.setEnabled(false);
             readyButton.setText("Waiting");
             log.info("Starting game...");
-            frame.send(new SetReadyForGameMessage(true));
+            frame.getClient().send(new SetReadyForGameMessage(true));
         });
 
-
         stopButton.addActionListener(e -> {
-            readyButton.setEnabled(true);
-            readyButton.setText("Ready");
             log.info("Stopping game");
-            // Todo:
-            //  When this button is pressed the cat should stop moving.
-            //  in the other window and change back to the starting window...
-            frame.send(new ExitGameMessage(frame.getGameName()));
-            frame.showTitleScreenView();
+            frame.getClient().exitGame();
+            if (started) {
+                frame.showGameOverDeathView(false);
+            } else {
+                frame.showTitleScreenView();
+            }
         });
 
         JPanel buttonPanel = new JPanel();
@@ -134,5 +144,34 @@ public class BoardView extends JPanel {
 
     }
 
+    public void startNewGame() {
+        readyButton.setEnabled(true);
+        readyButton.setText("Ready");
+        started = false;
+    }
 
+    public void updateLobby(AvailableGamesMessage m) {
+        var text = new StringBuilder();
+        var gameName = frame.getClient().getGameName();
+        if (gameName != null) {
+            for (AvailableGamesMessage.Game game : m.games()) {
+                if (game.name().equals(gameName)) {
+                    text.append("Duration: ");
+                    text.append(game.duration().toMinutes());
+                    text.append("m ");
+                    text.append(game.duration().toSecondsPart());
+                    text.append("s\n");
+                    text.append("Players:\n");
+                    for (AvailableGamesMessage.PlayerInfo player : game.players()) {
+                        text.append("    ");
+                        text.append(player.name());
+                        text.append(player.ready() ? " (ready)" : " (not-ready)");
+                        text.append("\n");
+                    }
+                    break;
+                }
+            }
+        }
+        playersTextPane.setText(text.toString());
+    }
 }

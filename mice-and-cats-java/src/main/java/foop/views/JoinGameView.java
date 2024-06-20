@@ -1,11 +1,11 @@
 package foop.views;
 
 import foop.message.AvailableGamesMessage;
-import foop.message.JoinGameMessage;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class JoinGameView extends JPanel {
@@ -15,8 +15,6 @@ public class JoinGameView extends JPanel {
 
     private final JList<AvailableGamesMessage.Game> lobbyList;
     private final DefaultListModel<AvailableGamesMessage.Game> lobbyListModel = new DefaultListModel<>();
-
-    private boolean firstTime = true;
 
     public JoinGameView(GameFrame frame) {
         this.frame = frame;
@@ -38,8 +36,8 @@ public class JoinGameView extends JPanel {
                 var component = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 if (value instanceof AvailableGamesMessage.Game g) {
                     setText(g.name() + ":" +
-                            " [" + String.join(", ", g.players()) + "]" +
-                            " (" + g.duration().toMinutes() + "m " + g.duration().getSeconds() + "s)" +
+                            " [" + g.players().stream().map(p -> p.name() + (p.ready() ? " (ready)" : "")).collect(Collectors.joining()) + "]" +
+                            " (" + g.duration().toMinutes() + "m " + g.duration().toSecondsPart() + "s)" +
                             (g.started() ? " (started)" : "")
                     );
                 }
@@ -56,13 +54,7 @@ public class JoinGameView extends JPanel {
         startButton.addActionListener(e -> {
             startButton.setEnabled(false);
             AvailableGamesMessage.Game game = lobbyList.getSelectedValue();
-            frame.setGameName(game.name());
-            if (firstTime) {
-
-                firstTime = false;
-            }
-            frame.send(new JoinGameMessage(game.name()));
-            frame.showBoardView();
+            frame.getClient().joinGame(game.name());
         });
         startButton.setEnabled(false);
 

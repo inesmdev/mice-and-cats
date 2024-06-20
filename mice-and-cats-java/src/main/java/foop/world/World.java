@@ -2,6 +2,7 @@ package foop.world;
 
 import foop.Assets;
 import foop.message.EntityUpdateMessage;
+import foop.message.GameOverMessage;
 import foop.message.GameWorldMessage;
 import foop.server.Player;
 import lombok.Getter;
@@ -27,6 +28,7 @@ public class World {
     private final HashMap<Integer, Subway> subways;
     private final HashMap<Position, Subway> cellToSubway;
 
+    private Position nextCatGoal = null;
 
     public World(Random seed, int numSubways, int numCols, int numRows, HashSet<Player> players) {
         grid = new int[numRows][numCols];
@@ -37,10 +39,10 @@ public class World {
 
         placeConnectedSubways(seed, numSubways);
 
-        entities.add(new Entity(0, "cat", new Position(1, 1), false));
+        entities.add(new Entity(0, "cat", new Position(1, 1), false, false));
 
         for (Player player : players) {
-            entities.add(new Entity(entities.size(), player.getName(), getRandomGroundPosition(seed), false));
+            entities.add(new Entity(entities.size(), player.getName(), getRandomGroundPosition(seed), false, false));
         }
     }
 
@@ -57,13 +59,67 @@ public class World {
         this.numCols = grid[0].length;
     }
 
+    public void afterEntityMoved(HashSet<Player> players) {
+        // necessary if this is called after the game is already over
+        if (players.isEmpty()) {
+            return;
+        }
+
+        var cat = entities.get(0);
+        for (Entity e : entities) {
+            if (cat != e && !e.isDead() && cat.getPosition().equals(e.getPosition()) && cat.isUnderground() == e.isUnderground()) {
+                e.setDead(true);
+                var update = new EntityUpdateMessage(e.getId(), e.getName(), e.getPosition(), e.isUnderground(), e.isDead());
+                // we copy to avoid iterator invalidation, when a player is removed
+                for (var player : new ArrayList<>(players)) {
+                    player.send(update);
+                    if (player.getName().equals(e.getName())) {
+                        player.gameOver(new GameOverMessage(GameOverMessage.Result.YOU_DIED));
+                    }
+                }
+            }
+        }
+
+        // game-over: only one player left
+        if (entities.stream().filter(e -> e.getId() != 0 && !e.isDead()).count() == 1) {
+            var name = entities.stream().filter(e -> e.getId() != 0 && !e.isDead()).findFirst().get().getName();
+            var player = players.stream().filter(p -> p.getName().equals(name)).findFirst().get();
+            player.gameOver(new GameOverMessage(GameOverMessage.Result.ALL_BUT_YOU_DIED));
+            return;
+        }
+
+        // game-over: all players in one tunnel
+        if (entities.stream().filter(e -> e.getId() != 0 && !e.isDead() && getSubway(e) != 0).findFirst().orElse(null) instanceof Entity undead) {
+            var subway = getSubway(undead);
+            if (entities.stream().filter(e -> e.getId() != 0 && !e.isDead()).allMatch(e -> getSubway(e) == subway)) {
+                var victoryMessage = new GameOverMessage(GameOverMessage.Result.VICTORY);
+                entities.stream().filter(e -> e.getId() != 0 && !e.isDead()).forEach(e -> {
+                    var player = players.stream().filter(p -> p.getName().equals(e.getName())).findFirst().get();
+                    player.gameOver(victoryMessage);
+                });
+            }
+        }
+    }
+
     public void serverUpdate(HashSet<Player> players, Duration duration) {
         var r = new Random();
 
         var cat = entities.get(0);
-        cat.setPosition(new Position(r.nextInt(grid[0].length), r.nextInt(grid.length)));
 
-        var catUpdate = new EntityUpdateMessage(cat.getId(), cat.getName(), cat.getPosition(), cat.isUnderground());
+        if (nextCatGoal == null) {
+            nextCatGoal = new Position(r.nextInt(grid[0].length), r.nextInt(grid.length));
+        }
+        var dx = nextCatGoal.x() - cat.getPosition().x();
+        var dy = nextCatGoal.y() - cat.getPosition().y();
+        dx = Math.min(1, Math.max(-1, dx));
+        dy = Math.min(1, Math.max(-1, dy));
+        cat.setPosition(new Position(cat.getPosition().x() + dx, cat.getPosition().y() + dy));
+        if (nextCatGoal.equals(cat.getPosition())) {
+            nextCatGoal = null;
+        }
+        afterEntityMoved(players);
+
+        var catUpdate = new EntityUpdateMessage(cat.getId(), cat.getName(), cat.getPosition(), cat.isUnderground(), cat.isDead());
         for (var player : players) {
             player.send(catUpdate);
         }
@@ -230,12 +286,17 @@ public class World {
                 var bounds = g.getFontMetrics().getStringBounds(entity.getName(), g);
 
                 boolean isCat = entity.getId() == 0;
-
                 int imageDown = isCat ? 0 : tileSize / 5;
                 int textUp = tileSize / 3;
 
-                var image = isCat ? Assets.getInstance().getCat() : Assets.getInstance().getMouse();
-                g.drawImage(image, tileSize * entity.getPosition().x(), tileSize * entity.getPosition().y() + imageDown, tileSize, tileSize, null);
+                if (entity.isDead()) {
+                    var image = Assets.getInstance().getTombstone();
+                    textUp = 0;
+                    g.drawImage(image, tileSize * entity.getPosition().x(), tileSize * entity.getPosition().y(), tileSize, tileSize, null);
+                } else {
+                    var image = isCat ? Assets.getInstance().getCat() : Assets.getInstance().getMouse();
+                    g.drawImage(image, tileSize * entity.getPosition().x(), tileSize * entity.getPosition().y() + imageDown, tileSize, tileSize, null);
+                }
 
                 if (!isCat) {
                     int x = tileSize * entity.getPosition().x() + tileSize / 2 - (int) (bounds.getWidth() / 2);
@@ -254,8 +315,9 @@ public class World {
             entity.setName(m.name());
             entity.setPosition(m.position());
             entity.setUnderground(m.isUnderground());
+            entity.setDead(m.isDead());
         } else if (m.id() == entities.size()) {
-            entities.add(new Entity(m.id(), m.name(), m.position(), m.isUnderground()));
+            entities.add(new Entity(m.id(), m.name(), m.position(), m.isUnderground(), m.isDead()));
         } else {
             throw new IllegalStateException("Unexpected entity update message: " + m);
         }
@@ -266,14 +328,16 @@ public class World {
         players.forEach(p -> p.send(message));
 
         for (Entity entity : entities) {
-            var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground());
+            var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground(), entity.isDead());
             players.forEach(p -> p.send(entityUpdate));
         }
     }
 
     public void movePlayer(HashSet<Player> players, Player player, int direction) {
-
         var entity = entities.stream().filter(e -> e.getName().equals(player.getName())).findFirst().get();
+        if (entity.isDead()) {
+            return;
+        }
         var position = switch (direction) {
             case 1 -> new Position(entity.getPosition().x(), entity.getPosition().y() - 1);
             case 2 -> new Position(entity.getPosition().x() + 1, entity.getPosition().y());
@@ -313,12 +377,20 @@ public class World {
 
                 entity.setPosition(position);
                 entity.setUnderground(isUnderground);
-                var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground());
+                var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground(), entity.isDead());
                 players.forEach(p -> p.send(entityUpdate));
             }
-
         }
 
+        afterEntityMoved(players);
+    }
 
+    public void killDisconnectedPlayer(String name, HashSet<Player> players) {
+        var entity = entities.stream().filter(e -> e.getName().equals(name)).findFirst().orElse(null);
+        if (entity != null && !entity.isDead()) {
+            entity.setDead(true);
+            var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground(), entity.isDead());
+            players.forEach(p -> p.send(entityUpdate));
+        }
     }
 }

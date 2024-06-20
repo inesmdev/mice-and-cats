@@ -2,107 +2,111 @@ package foop.views;
 
 import foop.Client;
 import foop.message.AvailableGamesMessage;
-import foop.message.Message;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
 
-@Getter
 @Slf4j
 public class GameFrame extends JFrame {
 
-    private final Client client;
-    @Setter
+    private static final String TITLE_SCREEN_VIEW = "TitleScreenView";
+    private static final String JOIN_GAME_VIEW = "JoinGameView";
+    private static final String BOARD_VIEW = "BoardView";
+    private static final String CREATE_GAME_VIEW = "CreateGameView";
+    private static final String GAME_OVER_VICTORY_VIEW = "GameOverVictoryView";
+    private static final String GAME_OVER_DEATH_VIEW = "GameOverDeathView";
+
     @Getter
-    private String playerName;
-    private CardLayout cardLayout;
-    private JPanel mainPanel;
-    @Setter
-    private String gameName;
+    private final Client client;
+
+    private final CardLayout cardLayout;
+    private final JPanel mainPanel;
 
     private final JoinGameView joinGameView;
     private final CreateGameView createGameView;
+    private final GameOverDeathView gameOverDeathView;
+    private final BoardView boardView;
 
     public GameFrame(Client client) {
         this.client = client;
 
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setTitle("Cat and Mouse");
         setSize(800, 600);
         setLocationRelativeTo(null);
 
         addWindowListener(new WindowAdapter() {
-            //            @Override
+            @Override
+            public void windowClosing(WindowEvent e) {
+                // window close button clicked
+                if (client.getGameName() == null) {
+                    dispose();
+                }
+            }
+
+            @Override
             public void windowClosed(WindowEvent e) {
                 client.close();
-                try {
-                    client.getSocket().close();
-                } catch (IOException ex) {
-                    log.error(ex.getMessage());
-                }
+                log.info("aaaa");
             }
         });
 
         joinGameView = new JoinGameView(this);
         createGameView = new CreateGameView(this);
+        gameOverDeathView = new GameOverDeathView(this);
+        boardView = new BoardView(this);
 
-        initComponents();
-        setVisible(true);
-    }
-
-    private void initComponents() {
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
-        mainPanel.add("TitleScreenView", new TitleScreenView(this));
-        mainPanel.add("JoinGameView", joinGameView);
-        mainPanel.add("BoardView", new BoardView(this));
-        mainPanel.add("CreateGameView", createGameView);
+        mainPanel.add(TITLE_SCREEN_VIEW, new TitleScreenView(this));
+        mainPanel.add(JOIN_GAME_VIEW, joinGameView);
+        mainPanel.add(BOARD_VIEW, boardView);
+        mainPanel.add(CREATE_GAME_VIEW, createGameView);
+        mainPanel.add(GAME_OVER_VICTORY_VIEW, new GameOverVictoryView(this));
+        mainPanel.add(GAME_OVER_DEATH_VIEW, gameOverDeathView);
 
         add(mainPanel);
         setLocationByPlatform(true);
 
         showTitleScreenView();
+
+        setVisible(true);
     }
 
     public void showTitleScreenView() {
-        this.cardLayout.show(mainPanel, "TitleScreenView");
+        this.cardLayout.show(mainPanel, TITLE_SCREEN_VIEW);
     }
 
     public void showBoardView() {
-        cardLayout.show(mainPanel, "BoardView");
+        boardView.startNewGame();
+        cardLayout.show(mainPanel, BOARD_VIEW);
     }
 
     public void showJoinGameView() {
-        cardLayout.show(mainPanel, "JoinGameView");
+        cardLayout.show(mainPanel, JOIN_GAME_VIEW);
     }
 
     public void showCreateGameView() {
-        createGameView.setDefaultName(playerName);
-        cardLayout.show(mainPanel, "CreateGameView");
+        createGameView.setDefaultName(client.getPlayerName());
+        cardLayout.show(mainPanel, CREATE_GAME_VIEW);
     }
 
-    public void send(Message message) {
-        client.send(message);
+    public void showGameOverVictoryView() {
+        cardLayout.show(mainPanel, GAME_OVER_VICTORY_VIEW);
     }
 
-    public void exit() {
-        dispose();
-        client.close();
-        try {
-            client.getSocket().close();
-        } catch (IOException ex) {
-            log.error(ex.getMessage());
-        }
+    public void showGameOverDeathView(boolean allButYouDied) {
+        gameOverDeathView.setAllButYouDied(allButYouDied);
+        cardLayout.show(mainPanel, GAME_OVER_DEATH_VIEW);
     }
 
     public void updateLobby(AvailableGamesMessage m) {
         joinGameView.updateLobby(m);
+        boardView.updateLobby(m);
     }
 }

@@ -4,7 +4,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public record GenericResponseMessage(String message, boolean error) implements Message {
+public record GenericErrorMessage(String message) implements Message {
     public static final int TAG = 4;
 
     @Override
@@ -15,12 +15,10 @@ public record GenericResponseMessage(String message, boolean error) implements M
     @Override
     public void serialize(DataOutputStream out) throws IOException {
         out.writeUTF(message);
-        out.writeBoolean(error);
     }
 
-    public static GenericResponseMessage parse(DataInputStream in) throws IOException {
+    public static GenericErrorMessage parse(DataInputStream in) throws IOException {
         var message = in.readUTF();
-        var error = in.readBoolean();
-        return new GenericResponseMessage(message, error);
+        return new GenericErrorMessage(message);
     }
 }
