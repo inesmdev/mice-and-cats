@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.*;
 
 import static foop.world.Type.CAT;
-import static foop.world.Type.MICE;
+import static foop.world.Type.MOUSE;
 
 @Slf4j
 public class World {
@@ -50,7 +50,7 @@ public class World {
         entities.add(new Entity(0, CAT, "cat", new Position(1, 1), false, false));
 
         for (Player player : players) {
-            entities.add(new Entity(entities.size(), MICE, player.getName(), getRandomGroundPosition(seed), false, false));
+            entities.add(new Entity(entities.size(), MOUSE, player.getName(), getRandomGroundPosition(seed), false, false));
         }
     }
 
