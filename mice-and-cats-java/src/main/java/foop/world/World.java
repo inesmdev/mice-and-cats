@@ -33,7 +33,7 @@ public class World {
     private final HashMap<Position, Subway> cellToSubway;
 
     private Position nextCatGoal = null;
-    private Map<Integer, Position> catLastSeen = new HashMap<>();
+    private final Map<Integer, Position> catLastSeen = new HashMap<>();
     private long countInMySubway = 0;
 
     public World(Random seed, int numSubways, int numCols, int numRows, HashSet<Player> players) {
@@ -85,8 +85,9 @@ public class World {
                 // we copy to avoid iterator invalidation, when a player is removed
 
 
-                var tmp = players.stream().filter(player -> player.getName().equals(e.getName())).findFirst().orElse(null);
-                if (tmp != null) tmp.gameOver(new GameOverMessage(GameOverMessage.Result.YOU_DIED));
+                players.stream().filter(player -> player.getName().equals(e.getName())).findFirst().ifPresent(
+                        tmp -> tmp.gameOver(new GameOverMessage(GameOverMessage.Result.YOU_DIED))
+                );
             }
         }
 
@@ -94,9 +95,9 @@ public class World {
 
         // game-over: only one player left
         if (countLivingMice == 1) {
-            var name = entities.stream().filter(e -> e.getType() != CAT && !e.isDead()).findFirst().get().getName();
-            var player = players.stream().filter(p -> p.getName().equals(name)).findFirst().get();
-            player.gameOver(new GameOverMessage(GameOverMessage.Result.ALL_BUT_YOU_DIED));
+            entities.stream().filter(e -> e.getType() != CAT && !e.isDead()).findFirst().
+                    flatMap(entity -> players.stream().filter(p -> p.getName().equals(entity.getName())).findFirst()).ifPresent(player ->
+                    player.gameOver(new GameOverMessage(GameOverMessage.Result.ALL_BUT_YOU_DIED)));
             return;
         }
 
@@ -107,8 +108,9 @@ public class World {
                 if (entities.stream().filter(e -> e.getType() != CAT && !e.isDead()).allMatch(e -> getSubway(e) == subway)) {
                     var victoryMessage = new GameOverMessage(GameOverMessage.Result.VICTORY);
                     entities.stream().filter(e -> e.getType() != CAT && !e.isDead()).forEach(e -> {
-                        var player = players.stream().filter(p -> p.getName().equals(e.getName())).findFirst().get();
-                        player.gameOver(victoryMessage);
+                        players.stream().filter(p -> p.getName().equals(e.getName())).findFirst().ifPresent(player ->
+                                player.gameOver(victoryMessage)
+                        );
                     });
                 }
             }
@@ -187,10 +189,11 @@ public class World {
 
     /**
      * Methode to render this world in the UI.
-     * @param g view field to add the rendered world
-     * @param w width of the game field
-     * @param h height of the game field
-     * @param playerName playerName to display
+     *
+     * @param g           view field to add the rendered world
+     * @param w           width of the game field
+     * @param h           height of the game field
+     * @param playerName  playerName to display
      * @param superVision parameter for development, which displays all entities all the time
      */
     public void render(Graphics2D g, int w, int h, String playerName, boolean superVision) {
@@ -323,7 +326,7 @@ public class World {
             default -> throw new IllegalArgumentException("Illegal Direction: " + direction);
         };
 
-        boolean isMoveLegal = false;
+        boolean isMoveLegal;
         boolean isUnderground = entity.isUnderground();
 
         if (isWithinGrid(position)) {
