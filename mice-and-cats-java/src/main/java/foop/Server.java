@@ -15,7 +15,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class Server implements AutoCloseable {
 
-    private final boolean serverRunning = true;
     private final ServerSocket socket;
     private final HashMap<Player, Void> players = new HashMap<>();
     private final HashMap<String, ServerGame> games = new HashMap<>();
@@ -52,7 +51,7 @@ public class Server implements AutoCloseable {
         try (var s = player.getSocket();
              var out = s.getOutputStream()
         ) {
-            while (serverRunning) {
+            while (true) {
                 var message = player.pollMessageToSend(1, TimeUnit.SECONDS);
                 if (message != null) {
                     Message.serialize(message, out);
@@ -86,7 +85,7 @@ public class Server implements AutoCloseable {
                 player.send(generateAvailableGamesMessage());
             }
 
-            while (serverRunning) {
+            while (true) {
                 var message = Message.parse(in);
 
                 if (message instanceof CreateGameMessage m) {
