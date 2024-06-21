@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -19,9 +20,9 @@ public class Server implements AutoCloseable {
     private final HashMap<Player, Void> players = new HashMap<>();
     private final HashMap<String, ServerGame> games = new HashMap<>();
 
-    public Server() throws IOException {
+    public Server(SocketAddress endpoint) throws IOException {
         socket = new ServerSocket();
-        socket.bind(null);
+        socket.bind(endpoint);
     }
 
     public int port() {
@@ -29,6 +30,7 @@ public class Server implements AutoCloseable {
     }
 
     public void runAcceptor() {
+        log.info("Running server acceptor on " + socket.getLocalSocketAddress());
         try (socket) {
             while (Main.running) {
                 var client = socket.accept();

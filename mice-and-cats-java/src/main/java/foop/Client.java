@@ -33,8 +33,8 @@ public class Client implements AutoCloseable, Runnable {
     @Getter
     private String gameName;
 
-    public Client(int port) throws IOException {
-        socket = new Socket("localhost", port);
+    public Client(String host, int port) throws IOException {
+        socket = new Socket(host, port);
     }
 
     private void processMessage(Message message) {
