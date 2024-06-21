@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 public class BoardView extends JPanel {
@@ -20,8 +22,11 @@ public class BoardView extends JPanel {
     private final GameFrame frame;
     private final JButton readyButton;
     private final JTextPane playersTextPane;
+    JPanel votingPanel = new JPanel();
+    List<JButton> votingButtons = new ArrayList<>();
     private boolean superVision;
     private boolean started;
+
 
     public BoardView(GameFrame frame) {
         this.frame = frame;
@@ -29,6 +34,7 @@ public class BoardView extends JPanel {
         playersTextPane = new JTextPane();
         playersTextPane.setEditable(false);
         playersTextPane.setFocusable(false);
+        votingPanel.setLayout(new BoxLayout(votingPanel, BoxLayout.X_AXIS));
         render();
 
         getActionMap().put(ACTION_UP, new AbstractAction() {
@@ -91,6 +97,18 @@ public class BoardView extends JPanel {
                     readyButton.setText("Started");
                     started = true;
                     world.render(g, getWidth(), getHeight(), frame.getClient().getPlayerName(), superVision);
+                    var subways = frame.getClient().getWorld().getSubways();
+                    if (votingButtons.size() != subways.size()) { //only do this once
+                        subways.keySet().forEach(key -> {
+                            JButton btn = new JButton("U" + String.valueOf(subways.get(key).id()));
+                            btn.setBackground(subways.get(key).color());
+                            votingButtons.add(btn);
+                        });
+
+                        votingButtons.forEach(votingPanel::add);
+                    }
+
+
                 } else {
                     g.clearRect(0, 0, getWidth(), getHeight());
                 }
@@ -115,6 +133,7 @@ public class BoardView extends JPanel {
 
         sidePanel.add(playersTextPane);
 
+        sidePanel.add(votingPanel);
         panel.add(sidePanel, BorderLayout.CENTER);
 
         readyButton.addActionListener(e -> {

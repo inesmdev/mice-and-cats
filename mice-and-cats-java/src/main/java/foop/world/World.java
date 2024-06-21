@@ -25,6 +25,7 @@ public class World {
     private final ArrayList<Entity> entities = new ArrayList<>();
 
     private final List<Color> colors = List.of(Color.red, Color.green, Color.blue, Color.yellow);
+    @Getter
     private final HashMap<Integer, Subway> subways;
     private final HashMap<Position, Subway> cellToSubway;
 
