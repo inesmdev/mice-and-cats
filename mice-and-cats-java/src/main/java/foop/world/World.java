@@ -40,10 +40,10 @@ public class World {
 
         placeConnectedSubways(seed, numSubways);
 
-        entities.add(new Entity(0, "cat", new Position(1, 1), false, false));
+        entities.add(new Entity(0, "cat", new Position(1, 1), false, false, -1));
 
         for (Player player : players) {
-            entities.add(new Entity(entities.size(), player.getName(), getRandomGroundPosition(seed), true, false));
+            entities.add(new Entity(entities.size(), player.getName(), getRandomGroundPosition(seed), true, false, -1));
         }
     }
 
@@ -70,7 +70,7 @@ public class World {
         for (Entity e : entities) {
             if (cat != e && !e.isDead() && cat.getPosition().equals(e.getPosition()) && cat.isUnderground() == e.isUnderground()) {
                 e.setDead(true);
-                var update = new EntityUpdateMessage(e.getId(), e.getName(), e.getPosition(), e.isUnderground(), e.isDead());
+                var update = new EntityUpdateMessage(e.getId(), e.getName(), e.getPosition(), e.isUnderground(), e.isDead(), e.getVote());
                 // we copy to avoid iterator invalidation, when a player is removed
                 for (var player : new ArrayList<>(players)) {
                     player.send(update);
@@ -120,7 +120,7 @@ public class World {
         }
         afterEntityMoved(players);
 
-        var catUpdate = new EntityUpdateMessage(cat.getId(), cat.getName(), cat.getPosition(), cat.isUnderground(), cat.isDead());
+        var catUpdate = new EntityUpdateMessage(cat.getId(), cat.getName(), cat.getPosition(), cat.isUnderground(), cat.isDead(), cat.getVote());
         for (var player : players) {
             player.send(catUpdate);
         }
@@ -305,6 +305,16 @@ public class World {
                     var name = entity.isUnderground() ? "(" + entity.getName() + ")" : entity.getName();
                     g.setColor(playerEntity.isUnderground() ? Color.WHITE : Color.BLACK); // depends on how the player sees the background
                     g.drawString(name, x, y);
+
+                    if (entity.getVote() != -1) {
+                        // Draw a circle next to the entity name
+                        int circleDiameter = 10; // Adjust the diameter as needed
+                        int circleX = x + (int) bounds.getWidth() + 5; // Adjust the offset as needed
+                        int circleY = y - (int) bounds.getHeight() + 5; // Adjust the offset as needed
+
+                        g.setColor(subways.get(entity.getVote()).color()); // Set the color of the circle
+                        g.fillOval(circleX, circleY, circleDiameter, circleDiameter);
+                    }
                 }
             }
         }
@@ -318,7 +328,7 @@ public class World {
             entity.setUnderground(m.isUnderground());
             entity.setDead(m.isDead());
         } else if (m.id() == entities.size()) {
-            entities.add(new Entity(m.id(), m.name(), m.position(), m.isUnderground(), m.isDead()));
+            entities.add(new Entity(m.id(), m.name(), m.position(), m.isUnderground(), m.isDead(), -1));
         } else {
             throw new IllegalStateException("Unexpected entity update message: " + m);
         }
@@ -329,7 +339,7 @@ public class World {
         players.forEach(p -> p.send(message));
 
         for (Entity entity : entities) {
-            var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground(), entity.isDead());
+            var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground(), entity.isDead(), entity.getVote());
             players.forEach(p -> p.send(entityUpdate));
         }
     }
@@ -378,7 +388,7 @@ public class World {
 
                 entity.setPosition(position);
                 entity.setUnderground(isUnderground);
-                var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground(), entity.isDead());
+                var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground(), entity.isDead(), entity.getVote());
                 players.forEach(p -> p.send(entityUpdate));
             }
         }
@@ -390,8 +400,19 @@ public class World {
         var entity = entities.stream().filter(e -> e.getName().equals(name)).findFirst().orElse(null);
         if (entity != null && !entity.isDead()) {
             entity.setDead(true);
-            var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground(), entity.isDead());
+            var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground(), entity.isDead(), entity.getVote());
             players.forEach(p -> p.send(entityUpdate));
         }
+    }
+
+    public void updateVote(HashSet<Player> players, Player player, int vote) {
+        log.info("Entity " + player.getName() + " votes " + vote);
+        var entity = entities.stream().filter(e -> e.getName().equals(player.getName())).findFirst().get();
+        if (entity.isDead()) {
+            return;
+        }
+        entity.setVote(vote);
+        var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground(), entity.isDead(), entity.getVote());
+        players.forEach(p -> p.send(entityUpdate));
     }
 }

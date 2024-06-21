@@ -91,4 +91,8 @@ public class ServerGame {
             games.remove(name);
         }
     }
+
+    public void updateVote(Player player, int vote) {
+        world.updateVote(players, player, vote);
+    }
 }

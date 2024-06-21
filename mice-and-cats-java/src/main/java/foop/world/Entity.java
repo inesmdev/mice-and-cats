@@ -16,13 +16,16 @@ public class Entity {
     private boolean isUnderground;
     @Setter
     private boolean isDead;
+    @Setter
+    private Integer vote;
 
-    public Entity(int id, String name, Position position, boolean isUnderground, boolean isDead) {
+    public Entity(int id, String name, Position position, boolean isUnderground, boolean isDead, int vote) {
         this.id = id;
         this.name = name;
         this.position = position;
         this.isUnderground = isUnderground;
         this.isDead = isDead;
+        this.vote = vote;
     }
 
 }

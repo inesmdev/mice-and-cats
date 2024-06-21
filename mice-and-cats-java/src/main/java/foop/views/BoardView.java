@@ -3,6 +3,7 @@ package foop.views;
 import foop.message.AvailableGamesMessage;
 import foop.message.PlayerCommandMessage;
 import foop.message.SetReadyForGameMessage;
+import foop.message.VoteMessage;
 import foop.world.World;
 import lombok.extern.slf4j.Slf4j;
 
@@ -102,6 +103,9 @@ public class BoardView extends JPanel {
                         subways.keySet().forEach(key -> {
                             JButton btn = new JButton("U" + String.valueOf(subways.get(key).id()));
                             btn.setBackground(subways.get(key).color());
+                            btn.addActionListener(e -> {
+                                frame.getClient().send(new VoteMessage(Integer.parseInt(btn.getText().substring(1))));
+                            });
                             votingButtons.add(btn);
                         });
 
