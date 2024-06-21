@@ -85,8 +85,8 @@ public class World {
                 // we copy to avoid iterator invalidation, when a player is removed
 
 
-                var tmp = players.stream().filter(player -> player.getName().equals(e.getName())).findFirst().orElseThrow(() -> new NoSuchElementException("No Player with the name " + e.getName() + " found"));
-                tmp.gameOver(new GameOverMessage(GameOverMessage.Result.YOU_DIED));
+                var tmp = players.stream().filter(player -> player.getName().equals(e.getName())).findFirst().orElse(null);
+                if (tmp != null) tmp.gameOver(new GameOverMessage(GameOverMessage.Result.YOU_DIED));
             }
         }
 
