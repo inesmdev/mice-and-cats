@@ -76,20 +76,17 @@ public class World {
 
         var cats = entities.stream().filter(entity -> entity.getType() == CAT).toList();
         for (Entity e : entities) {
-            if (!cats.contains(e)
-                    && cats.stream().map(Entity::isUnderground).anyMatch(c -> c == e.isUnderground())
+            if (e.getType() == MOUSE
                     && !e.isDead()
-                    && cats.stream().map(Entity::getPosition).anyMatch(c -> c.equals(e.getPosition()))) {
+                    && cats.stream().filter(cat -> cat.isUnderground() == e.isUnderground()).map(Entity::getPosition).anyMatch(c -> c.equals(e.getPosition()))) {
                 // entity was killed by the cat...
                 e.setDead(true);
                 broadcastMsg(players, new EntityUpdateMessage(e));
                 // we copy to avoid iterator invalidation, when a player is removed
 
 
-                var tmp = players.stream().filter(player -> player.getName().equals(e.getName())).toList();
-                for (Player p : tmp) {
-                    p.gameOver(new GameOverMessage(GameOverMessage.Result.YOU_DIED));
-                }
+                var tmp = players.stream().filter(player -> player.getName().equals(e.getName())).findFirst().orElseThrow(() -> new NoSuchElementException("No Player with the name " + e.getName() + " found"));
+                tmp.gameOver(new GameOverMessage(GameOverMessage.Result.YOU_DIED));
             }
         }
 
@@ -238,23 +235,23 @@ public class World {
         g.setFont(new Font("default", Font.BOLD, 12));
         long countOnSameSubway = entities.stream().filter(e -> getSubway(e) == playerSubway).count();
         for (Entity entity : entities) {
-            boolean isCat = entity.getType() == Type.CAT;
+            boolean isMouse = entity.getType() == MOUSE;
             var image = Assets.getInstance().getCat();
-            int imageDown = isCat ? 0 : tileSize / 5;
+            int imageDown = isMouse && !entity.isDead() ? tileSize / 5 : 0;
 
             // update the cat position if you see it:
 
 
             // draw all entities on the same Subway or on the surface as this player
             if (getSubway(entity) == playerSubway || superVision) {
-                if (isCat) {
+                if (!isMouse) {
                     catLastSeen.put(entity.getId(), entity.getPosition());
                 }
                 var bounds = g.getFontMetrics().getStringBounds(entity.getName(), g);
 
                 int textUp = tileSize / 3;
 
-                if (!isCat) {
+                if (isMouse) {
                     image = Assets.getInstance().getMouse();
                     if (entity.isDead()) image = Assets.getInstance().getTombstone();
                 }
@@ -262,7 +259,7 @@ public class World {
 
 
                 // if it's a Mice display the name:
-                if (!isCat) {
+                if (isMouse && !entity.isDead()) {
                     int x = tileSize * entity.getPosition().x() + tileSize / 2 - (int) (bounds.getWidth() / 2);
                     int y = tileSize * entity.getPosition().y() + tileSize / 2 + (int) (bounds.getHeight() / 2) - textUp;
                     var name = entity.isUnderground() ? "(" + entity.getName() + ")" : entity.getName();
@@ -274,7 +271,7 @@ public class World {
             // if the player is underground and was on the surface once draw the last cat position
             if (playerEntity.isUnderground() && countOnSameSubway > countInMySubway) {
                 // update cat last seen position
-                if (isCat) {
+                if (!isMouse) {
                     catLastSeen.put(entity.getId(), entity.getPosition());
                 }
             }
@@ -290,14 +287,14 @@ public class World {
     }
 
     public void entityUpdate(EntityUpdateMessage m) {
-        if (m.entity().getId() < entities.size()) {
-            var entity = entities.get(m.entity().getId());
-            entity.setName(m.entity().getName());
-            entity.setPosition(m.entity().getPosition());
-            entity.setUnderground(m.entity().isUnderground());
-            entity.setDead(m.entity().isDead());
-        } else if (m.entity().getId() == entities.size()) {
-            entities.add(m.entity());
+        if (m.id() < entities.size()) {
+            var entity = entities.get(m.id());
+            entity.setName(m.name());
+            entity.setPosition(m.position());
+            entity.setUnderground(m.isUnderground());
+            entity.setDead(m.isDead());
+        } else if (m.id() == entities.size()) {
+            entities.add(new Entity(m.id(), m.type(), m.name(), m.position(), m.isUnderground(), m.isDead()));
         } else {
             throw new IllegalStateException("Unexpected entity update message: " + m);
         }
