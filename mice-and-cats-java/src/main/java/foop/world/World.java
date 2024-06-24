@@ -154,17 +154,6 @@ public class World {
         return cell.x() < numCols && cell.x() >= 0 && cell.y() < numRows && cell.y() >= 0;
     }
 
-    private Position getRandomGroundPosition(Random rand) {
-        int randomX = rand.nextInt(this.numCols);
-        int randomY = rand.nextInt(this.numRows);
-
-        while (grid[randomY][randomX] == 0) {
-            randomX = rand.nextInt(this.numCols);
-            randomY = rand.nextInt(this.numRows);
-        }
-        return new Position(randomX, randomY);
-    }
-
     public void addSubway(List<Position> subwayCells, int subwayNumber) {
         Position entry1 = null;
         Position entry2 = null;
