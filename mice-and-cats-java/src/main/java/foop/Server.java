@@ -77,9 +77,13 @@ public class Server implements AutoCloseable {
         try (var s = player.getSocket();
              var in = s.getInputStream()
         ) {
-            var initialMessage = Message.parse(in).into(InitialMessage.class);
-            player.setName(initialMessage.playerName());
-            log.info("Server: new player {}", initialMessage.playerName());
+            Message message1 = Message.parse(in);
+            if (message1 instanceof InitialMessage initialMessage) {
+                player.setName(initialMessage.playerName());
+                log.info("Server: new player {}", initialMessage.playerName());
+            } else {
+                throw new IOException("Expected " + InitialMessage.class.getName() + " but got " + message1);
+            }
 
             synchronized (games) {
                 player.send(generateAvailableGamesMessage());
@@ -179,6 +183,7 @@ public class Server implements AutoCloseable {
 
     /**
      * methode to send a message to all players
+     *
      * @param message msg to be sent
      */
     private void broadcastMsg(Message message) {
