@@ -2,6 +2,8 @@ package foop.server;
 
 import foop.message.GameOverMessage;
 import foop.message.Message;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.Socket;
@@ -10,10 +12,17 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class Player {
+    @Setter
+    @Getter
     private String name;
+    @Getter
     private final Socket socket;
+    @Setter
+    @Getter
     private boolean ready;
     private final LinkedTransferQueue<Message> toClient = new LinkedTransferQueue<>();
+    @Setter
+    @Getter
     private ServerGame game;
 
     public Player(Socket socket) {
@@ -27,34 +36,6 @@ public class Player {
 
     public Message pollMessageToSend(long timeout, TimeUnit unit) throws InterruptedException {
         return toClient.poll(timeout, unit);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Socket getSocket() {
-        return socket;
-    }
-
-    public boolean isReady() {
-        return ready;
-    }
-
-    public void setReady(boolean ready) {
-        this.ready = ready;
-    }
-
-    public ServerGame getGame() {
-        return game;
-    }
-
-    public void setGame(ServerGame game) {
-        this.game = game;
     }
 
     @Override

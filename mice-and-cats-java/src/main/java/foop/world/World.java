@@ -4,6 +4,7 @@ import foop.Assets;
 import foop.message.EntityUpdateMessage;
 import foop.message.GameOverMessage;
 import foop.message.GameWorldMessage;
+import foop.message.Message;
 import foop.server.Player;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,9 @@ import java.awt.*;
 import java.time.Duration;
 import java.util.List;
 import java.util.*;
+
+import static foop.world.Type.CAT;
+import static foop.world.Type.MOUSE;
 
 @Slf4j
 public class World {
@@ -22,7 +26,7 @@ public class World {
     private final int numRows;
     private final int numCols;
     @Getter
-    private final ArrayList<Entity> entities = new ArrayList<>();
+    private final List<Entity> entities = new ArrayList<>();
 
     private final List<Color> colors = List.of(Color.red, Color.green, Color.blue, Color.yellow);
     @Getter
@@ -30,6 +34,8 @@ public class World {
     private final HashMap<Position, Subway> cellToSubway;
 
     private Position nextCatGoal = null;
+    private final Map<Integer, Position> catLastSeen = new HashMap<>();
+    private long countInMySubway = 0;
 
     public World(Random seed, int numSubways, int numCols, int numRows, HashSet<Player> players) {
         grid = new int[numRows][numCols];
@@ -38,12 +44,13 @@ public class World {
         this.subways = new HashMap<>();
         this.cellToSubway = new HashMap<>();
 
-        placeConnectedSubways(seed, numSubways);
+        SubwayBuilder subwayBuilder = new SubwayBuilder(this, numRows, numCols);
+        subwayBuilder.placeConnectedSubways(seed, numSubways);
+        entities.add(new Entity(0, CAT, "cat", new Position(1, 1), false, false, -1));
 
-        entities.add(new Entity(0, "cat", new Position(1, 1), false, false, -1));
 
         for (Player player : players) {
-            entities.add(new Entity(entities.size(), player.getName(), getRandomGroundPosition(seed), true, false, -1));
+            entities.add(new Entity(entities.size(), MOUSE, player.getName(), getRandomGroundPosition(seed), true, false, -1));
         }
     }
 
@@ -66,46 +73,63 @@ public class World {
             return;
         }
 
-        var cat = entities.get(0);
+
+        var cats = entities.stream().filter(entity -> entity.getType() == CAT).toList();
         for (Entity e : entities) {
-            if (cat != e && !e.isDead() && cat.getPosition().equals(e.getPosition()) && cat.isUnderground() == e.isUnderground()) {
+            if (e.getType() == MOUSE
+                    && !e.isDead()
+                    && cats.stream().filter(cat -> cat.isUnderground() == e.isUnderground()).map(Entity::getPosition).anyMatch(c -> c.equals(e.getPosition()))) {
+                // entity was killed by the cat...
                 e.setDead(true);
-                var update = new EntityUpdateMessage(e.getId(), e.getName(), e.getPosition(), e.isUnderground(), e.isDead(), e.getVote());
+                broadcastMsg(players, new EntityUpdateMessage(e));
                 // we copy to avoid iterator invalidation, when a player is removed
-                for (var player : new ArrayList<>(players)) {
-                    player.send(update);
-                    if (player.getName().equals(e.getName())) {
-                        player.gameOver(new GameOverMessage(GameOverMessage.Result.YOU_DIED));
-                    }
-                }
+
+
+                players.stream().filter(player -> player.getName().equals(e.getName())).findFirst().ifPresent(
+                        tmp -> tmp.gameOver(new GameOverMessage(GameOverMessage.Result.YOU_DIED))
+                );
             }
         }
 
+        var countLivingMice = entities.stream().filter(e -> e.getType() != CAT && !e.isDead()).count();
+
         // game-over: only one player left
-        if (entities.stream().filter(e -> e.getId() != 0 && !e.isDead()).count() == 1) {
-            var name = entities.stream().filter(e -> e.getId() != 0 && !e.isDead()).findFirst().get().getName();
-            var player = players.stream().filter(p -> p.getName().equals(name)).findFirst().get();
-            player.gameOver(new GameOverMessage(GameOverMessage.Result.ALL_BUT_YOU_DIED));
+        if (countLivingMice == 1) {
+            entities.stream().filter(e -> e.getType() != CAT && !e.isDead()).findFirst().
+                    flatMap(entity -> players.stream().filter(p -> p.getName().equals(entity.getName())).findFirst()).ifPresent(player ->
+                    player.gameOver(new GameOverMessage(GameOverMessage.Result.ALL_BUT_YOU_DIED)));
             return;
         }
 
         // game-over: all players in one tunnel
-        if (entities.stream().filter(e -> e.getId() != 0 && !e.isDead() && getSubway(e) != 0).findFirst().orElse(null) instanceof Entity undead) {
-            var subway = getSubway(undead);
-            if (entities.stream().filter(e -> e.getId() != 0 && !e.isDead()).allMatch(e -> getSubway(e) == subway)) {
-                var victoryMessage = new GameOverMessage(GameOverMessage.Result.VICTORY);
-                entities.stream().filter(e -> e.getId() != 0 && !e.isDead()).forEach(e -> {
-                    var player = players.stream().filter(p -> p.getName().equals(e.getName())).findFirst().get();
-                    player.gameOver(victoryMessage);
-                });
+        if (countLivingMice > 1) {
+            if (entities.stream().filter(e -> e.getType() != CAT && !e.isDead() && getSubway(e) != 0).findFirst().orElse(null) instanceof Entity undead) {
+                var subway = getSubway(undead);
+                if (entities.stream().filter(e -> e.getType() != CAT && !e.isDead()).allMatch(e -> getSubway(e) == subway)) {
+                    var victoryMessage = new GameOverMessage(GameOverMessage.Result.VICTORY);
+                    entities.stream().filter(e -> e.getType() != CAT && !e.isDead()).forEach(e -> {
+                        players.stream().filter(p -> p.getName().equals(e.getName())).findFirst().ifPresent(player ->
+                                player.gameOver(victoryMessage)
+                        );
+                    });
+                }
             }
         }
     }
 
     public void serverUpdate(HashSet<Player> players, Duration duration) {
-        var r = new Random();
 
-        var cat = entities.get(0);
+        var cats = entities.stream().filter(e -> e.getType() == CAT).toList();
+        for (Entity cat : cats) {
+            generateNewCatPosition(cat);
+            afterEntityMoved(players);
+            var msg = new EntityUpdateMessage(cat);
+            broadcastMsg(players, msg);
+        }
+    }
+
+    private void generateNewCatPosition(Entity cat) {
+        var r = new Random();
 
         if (nextCatGoal == null) {
             nextCatGoal = new Position(r.nextInt(grid[0].length), r.nextInt(grid.length));
@@ -118,110 +142,10 @@ public class World {
         if (nextCatGoal.equals(cat.getPosition())) {
             nextCatGoal = null;
         }
-        afterEntityMoved(players);
-
-        var catUpdate = new EntityUpdateMessage(cat.getId(), cat.getName(), cat.getPosition(), cat.isUnderground(), cat.isDead(), cat.getVote());
-        for (var player : players) {
-            player.send(catUpdate);
-        }
     }
 
-    private void placeConnectedSubways(Random seed1, int numSubways) {
-        var tempGrid = new int[numRows][numCols];
-        java.util.List<Position> availableCells = new ArrayList<>();
-        for (int x = 1; x < numCols - 1; x++) {
-            for (int y = 1; y < numRows - 1; y++) {
-                availableCells.add(new Position(x, y));
-            }
-        }
-
-        Collections.shuffle(availableCells, seed1);
-
-        for (int i = 1; i <= numSubways; i++) { //start with 1, since 0 is used for empty cells
-            if (availableCells.isEmpty()) {
-                break; // No more available cells
-            }
-
-            List<Position> subwayCells = new ArrayList<>();
-
-            Position cell1 = availableCells.removeFirst();
-            subwayCells.add(cell1);
-            tempGrid[cell1.y()][cell1.x()] = i;
-            Position currCell = cell1;
-            int numSubwayCells = 0;
-            while (currCell != null && numSubwayCells < 8) {
-                Position newCell = getNeighbor(seed1, availableCells, currCell, i, tempGrid);
-                if (newCell != null) {
-                    tempGrid[newCell.y()][newCell.x()] = i;
-                    subwayCells.add(newCell);
-                }
-                currCell = newCell;
-                numSubwayCells++;
-            }
-
-            //subway has to be at least 4 cells long
-            if (subwayCells.size() > 3) {
-                Position entry1 = null;
-                Position entry2 = null;
-                for (int j = 0; j < subwayCells.size(); j++) {
-                    Position cell = subwayCells.get(j);
-                    if (j == 0) {
-                        grid[cell.y()][cell.x()] = -i;
-                        entry1 = cell;
-                    } else if (j == subwayCells.size() - 1) {
-                        grid[cell.y()][cell.x()] = -i;
-                        entry2 = cell;
-                    } else {
-                        grid[cell.y()][cell.x()] = i;
-                    }
-                }
-                var newSubway = new Subway(subways.size(), colors.get(i % 4), List.of(entry1, entry2), subwayCells.stream().toList());
-                subways.put(newSubway.id(), newSubway);
-                newSubway.subwayCells().forEach(c -> cellToSubway.put(c, newSubway));
-
-            }
-        }
-    }
-
-    private Position getNeighbor(Random seed1, List<Position> availableCells, Position cell, int color, int[][] tempGrid) {
-
-        List<Position> neighbors = new ArrayList<>();
-        neighbors.add(new Position(cell.x() - 1, cell.y()));
-        neighbors.add(new Position(cell.x() + 1, cell.y()));
-        neighbors.add(new Position(cell.x(), cell.y() - 1));
-        neighbors.add(new Position(cell.x(), cell.y() + 1));
-
-        Collections.shuffle(neighbors, seed1); // Randomize the order of neighbors
-
-        for (Position neighbor : neighbors) {
-            if (availableCells.contains(neighbor) && isWithinGrid(neighbor) && noUturn(neighbor, color, tempGrid)) {
-                availableCells.remove(neighbor); // Remove the cell from available cells
-                return neighbor;
-
-            }
-        }
-
-        return null; // No available neighbor found within the distance limit
-    }
-
-    private boolean noUturn(Position cell, int color, int[][] tempGrid) {
-        int count = 0;
-
-        //check in all 4 directions whether a cell of the same color is a neighbor
-        if (tempGrid[cell.y() - 1][cell.x()] == color) {
-            count += 1;
-        }
-        if (tempGrid[cell.y() + 1][cell.x()] == color) {
-            count += 1;
-        }
-        if (tempGrid[cell.y()][cell.x() + 1] == color) {
-            count += 1;
-        }
-        if (tempGrid[cell.y()][cell.x() - 1] == color) {
-            count += 1;
-        }
-
-        return count <= 1;
+    private void broadcastMsg(HashSet<Player> players, Message msg) {
+        players.forEach(player -> player.send(msg));
     }
 
     private boolean isWithinGrid(Position cell) {
@@ -232,17 +156,46 @@ public class World {
         int randomX = rand.nextInt(this.numCols);
         int randomY = rand.nextInt(this.numRows);
 
-        while (grid[randomY][randomX] == 0) { //spawn players within subway
+        while (grid[randomY][randomX] == 0) {
             randomX = rand.nextInt(this.numCols);
             randomY = rand.nextInt(this.numRows);
         }
         return new Position(randomX, randomY);
     }
 
+    public void addSubway(List<Position> subwayCells, int subwayNumber) {
+        Position entry1 = null;
+        Position entry2 = null;
+        for (int j = 0; j < subwayCells.size(); j++) {
+            Position cell = subwayCells.get(j);
+            if (j == 0) {
+                grid[cell.y()][cell.x()] = -subwayNumber;
+                entry1 = cell;
+            } else if (j == subwayCells.size() - 1) {
+                grid[cell.y()][cell.x()] = -subwayNumber;
+                entry2 = cell;
+            } else {
+                grid[cell.y()][cell.x()] = subwayNumber;
+            }
+        }
+        var newSubway = new Subway(subways.size(), colors.get(subwayNumber % 4), List.of(entry1, entry2), subwayCells.stream().toList());
+        subways.put(newSubway.id(), newSubway);
+        newSubway.subwayCells().forEach(c -> cellToSubway.put(c, newSubway));
+    }
+
     private int getSubway(Entity e) {
         return e.isUnderground() ? Math.abs(grid[e.getPosition().y()][e.getPosition().x()]) : 0;
     }
 
+    /**
+     * Methode to render this world in the UI.
+     *
+     * @param g           view field to add the rendered world
+     * @param w           width of the game field
+     * @param h           height of the game field
+     * @param playerName  playerName to display
+     * @param superVision parameter for development, which displays all entities all the time
+     */
     public void render(Graphics2D g, int w, int h, String playerName, boolean superVision) {
 
         int tileSize = Math.min(w / grid[0].length, h / grid.length);
@@ -281,25 +234,35 @@ public class World {
             }
         }
 
+        // Draw entities (Cat's and Mice)
         g.setFont(new Font("default", Font.BOLD, 12));
+        long countOnSameSubway = entities.stream().filter(e -> getSubway(e) == playerSubway).count();
         for (Entity entity : entities) {
+            boolean isMouse = entity.getType() == MOUSE;
+            var image = Assets.getInstance().getCat();
+            int imageDown = isMouse && !entity.isDead() ? tileSize / 5 : 0;
+
+            // update the cat position if you see it:
+
+
+            // draw all entities on the same Subway or on the surface as this player
             if (getSubway(entity) == playerSubway || superVision) {
+                if (!isMouse) {
+                    catLastSeen.put(entity.getId(), entity.getPosition());
+                }
                 var bounds = g.getFontMetrics().getStringBounds(entity.getName(), g);
 
-                boolean isCat = entity.getId() == 0;
-                int imageDown = isCat ? 0 : tileSize / 5;
                 int textUp = tileSize / 3;
 
-                if (entity.isDead()) {
-                    var image = Assets.getInstance().getTombstone();
-                    textUp = 0;
-                    g.drawImage(image, tileSize * entity.getPosition().x(), tileSize * entity.getPosition().y(), tileSize, tileSize, null);
-                } else {
-                    var image = isCat ? Assets.getInstance().getCat() : Assets.getInstance().getMouse();
-                    g.drawImage(image, tileSize * entity.getPosition().x(), tileSize * entity.getPosition().y() + imageDown, tileSize, tileSize, null);
+                if (isMouse) {
+                    image = Assets.getInstance().getMouse();
+                    if (entity.isDead()) image = Assets.getInstance().getTombstone();
                 }
+                g.drawImage(image, tileSize * entity.getPosition().x(), tileSize * entity.getPosition().y() + imageDown, tileSize, tileSize, null);
 
-                if (!isCat) {
+
+                // if it's a Mice display the name:
+                if (isMouse && !entity.isDead()) {
                     int x = tileSize * entity.getPosition().x() + tileSize / 2 - (int) (bounds.getWidth() / 2);
                     int y = tileSize * entity.getPosition().y() + tileSize / 2 + (int) (bounds.getHeight() / 2) - textUp;
                     var name = entity.isUnderground() ? "(" + entity.getName() + ")" : entity.getName();
@@ -317,7 +280,23 @@ public class World {
                     }
                 }
             }
+
+            // if the player is underground and was on the surface once draw the last cat position
+            if (playerEntity.isUnderground() && countOnSameSubway > countInMySubway) {
+                // update cat last seen position
+                if (!isMouse) {
+                    catLastSeen.put(entity.getId(), entity.getPosition());
+                }
+            }
+
+            if (playerEntity.isUnderground()) {
+                if (catLastSeen.containsKey(entity.getId())) {
+                    g.drawImage(image, tileSize * catLastSeen.get(entity.getId()).x(), tileSize * catLastSeen.get(entity.getId()).y() + imageDown, tileSize, tileSize, null);
+                }
+            }
+
         }
+        countInMySubway = countOnSameSubway;
     }
 
     public void entityUpdate(EntityUpdateMessage m) {
@@ -329,7 +308,7 @@ public class World {
             entity.setDead(m.isDead());
             entity.setVote(m.vote());
         } else if (m.id() == entities.size()) {
-            entities.add(new Entity(m.id(), m.name(), m.position(), m.isUnderground(), m.isDead(), -1));
+            entities.add(new Entity(m.id(), m.type(), m.name(), m.position(), m.isUnderground(), m.isDead(), m.vote()));
         } else {
             throw new IllegalStateException("Unexpected entity update message: " + m);
         }
@@ -337,17 +316,17 @@ public class World {
 
     public void sendTo(HashSet<Player> players) {
         var message = new GameWorldMessage(grid, subways.values().stream().toList());
-        players.forEach(p -> p.send(message));
+        broadcastMsg(players, message);
 
         for (Entity entity : entities) {
-            var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground(), entity.isDead(), entity.getVote());
-            players.forEach(p -> p.send(entityUpdate));
+            var entityUpdate = new EntityUpdateMessage(entity);
+            broadcastMsg(players, entityUpdate);
         }
     }
 
     public void movePlayer(HashSet<Player> players, Player player, int direction) {
-        var entity = entities.stream().filter(e -> e.getName().equals(player.getName())).findFirst().get();
-        if (entity.isDead()) {
+        var entity = entities.stream().filter(e -> e.getName().equals(player.getName())).findFirst().orElse(null);
+        if (entity == null || entity.isDead()) {
             return;
         }
         var position = switch (direction) {
@@ -358,7 +337,7 @@ public class World {
             default -> throw new IllegalArgumentException("Illegal Direction: " + direction);
         };
 
-        boolean isMoveLegal = false;
+        boolean isMoveLegal;
         boolean isUnderground = entity.isUnderground();
 
         if (isWithinGrid(position)) {
@@ -389,8 +368,8 @@ public class World {
 
                 entity.setPosition(position);
                 entity.setUnderground(isUnderground);
-                var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground(), entity.isDead(), entity.getVote());
-                players.forEach(p -> p.send(entityUpdate));
+                var entityUpdate = new EntityUpdateMessage(entity);
+                broadcastMsg(players, entityUpdate);
             }
         }
 
@@ -401,8 +380,8 @@ public class World {
         var entity = entities.stream().filter(e -> e.getName().equals(name)).findFirst().orElse(null);
         if (entity != null && !entity.isDead()) {
             entity.setDead(true);
-            var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground(), entity.isDead(), entity.getVote());
-            players.forEach(p -> p.send(entityUpdate));
+            var entityUpdate = new EntityUpdateMessage(entity);
+            broadcastMsg(players, entityUpdate);
         }
     }
 
@@ -413,7 +392,7 @@ public class World {
             return;
         }
         entity.setVote(vote);
-        var entityUpdate = new EntityUpdateMessage(entity.getId(), entity.getName(), entity.getPosition(), entity.isUnderground(), entity.isDead(), entity.getVote());
+        var entityUpdate = new EntityUpdateMessage(entity);
         players.forEach(p -> p.send(entityUpdate));
     }
 }
