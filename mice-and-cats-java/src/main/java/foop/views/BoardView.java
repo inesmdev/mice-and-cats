@@ -3,12 +3,14 @@ package foop.views;
 import foop.message.AvailableGamesMessage;
 import foop.message.PlayerCommandMessage;
 import foop.message.SetReadyForGameMessage;
+import foop.message.VoteMessage;
 import foop.world.World;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 
 @Slf4j
 public class BoardView extends JPanel {
@@ -20,8 +22,11 @@ public class BoardView extends JPanel {
     private final GameFrame frame;
     private final JButton readyButton;
     private final JTextPane playersTextPane;
+    private final JPanel votingPanel = new JPanel();
+    private final ArrayList<JButton> votingButtons = new ArrayList<>();
     private boolean superVision;
     private boolean started;
+
 
     public BoardView(GameFrame frame) {
         this.frame = frame;
@@ -29,6 +34,7 @@ public class BoardView extends JPanel {
         playersTextPane = new JTextPane();
         playersTextPane.setEditable(false);
         playersTextPane.setFocusable(false);
+        votingPanel.setLayout(new BoxLayout(votingPanel, BoxLayout.X_AXIS));
         render();
 
         getActionMap().put(ACTION_UP, new AbstractAction() {
@@ -88,8 +94,24 @@ public class BoardView extends JPanel {
                 Graphics2D g = (Graphics2D) graphics;
                 World world = frame.getClient().getWorld();
                 if (world != null) {
-                    readyButton.setText("Started");
-                    started = true;
+                    if (!started) {
+                        readyButton.setText("Started");
+                        started = true;
+
+                        var subways = frame.getClient().getWorld().getSubways();
+
+                        subways.keySet().forEach(key -> {
+                            JButton btn = new JButton("U" + key);
+                            btn.setBackground(subways.get(key).color());
+                            btn.addActionListener(e -> {
+                                frame.getClient().send(new VoteMessage(key));
+                            });
+                            votingButtons.add(btn);
+                        });
+
+                        votingButtons.forEach(votingPanel::add);
+
+                    }
                     world.render(g, getWidth(), getHeight(), frame.getClient().getPlayerName(), superVision);
                 } else {
                     g.clearRect(0, 0, getWidth(), getHeight());
@@ -115,6 +137,7 @@ public class BoardView extends JPanel {
 
         sidePanel.add(playersTextPane);
 
+        sidePanel.add(votingPanel);
         panel.add(sidePanel, BorderLayout.CENTER);
 
         readyButton.addActionListener(e -> {
@@ -147,6 +170,8 @@ public class BoardView extends JPanel {
     public void startNewGame() {
         readyButton.setEnabled(true);
         readyButton.setText("Ready");
+        votingPanel.removeAll();
+        votingButtons.clear();
         started = false;
     }
 

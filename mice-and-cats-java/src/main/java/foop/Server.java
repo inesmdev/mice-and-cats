@@ -148,6 +148,12 @@ public class Server implements AutoCloseable {
                         var game = Objects.requireNonNull(player.getGame());
                         game.movePlayer(player, m.direction());
                     }
+                } else if (message instanceof VoteMessage m) {
+                    log.info("Votemessage: " + m.vote());
+                    synchronized (games) {
+                        var game = Objects.requireNonNull(player.getGame());
+                        game.updateVote(player, m.vote());
+                    }
                 } else if (message instanceof InitialMessage m) {
                     // allow name changes
                     player.setName(m.playerName());

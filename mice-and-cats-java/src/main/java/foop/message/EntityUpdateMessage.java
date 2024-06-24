@@ -8,12 +8,12 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-public record EntityUpdateMessage(int id, Type type, String name, Position position, boolean isUnderground, boolean isDead) implements Message {
+public record EntityUpdateMessage(int id, Type type, String name, Position position, boolean isUnderground, boolean isDead,  int vote) implements Message {
 
     public static final int TAG = 8;
 
     public EntityUpdateMessage(Entity entity) {
-        this(entity.getId(), entity.getType(), entity.getName(), entity.getPosition(), entity.isUnderground(), entity.isDead());
+        this(entity.getId(), entity.getType(), entity.getName(), entity.getPosition(), entity.isUnderground(), entity.isDead(), entity.getVote());
     }
 
     public static EntityUpdateMessage parse(DataInputStream in) throws IOException {
@@ -23,7 +23,8 @@ public record EntityUpdateMessage(int id, Type type, String name, Position posit
         var position = new Position(in.readInt(), in.readInt());
         var isUnderground = in.readBoolean();
         var isDead = in.readBoolean();
-        return new EntityUpdateMessage(id, type, name, position, isUnderground, isDead);
+        var vote = in.readInt();
+        return new EntityUpdateMessage(id, type, name, position, isUnderground, isDead, vote);
     }
 
     @Override
@@ -40,6 +41,7 @@ public record EntityUpdateMessage(int id, Type type, String name, Position posit
         out.writeInt(position.y());
         out.writeBoolean(isUnderground);
         out.writeBoolean(isDead);
+        out.writeInt(vote);
     }
 
 }
