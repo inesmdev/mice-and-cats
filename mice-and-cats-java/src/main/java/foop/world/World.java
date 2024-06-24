@@ -271,9 +271,9 @@ public class World {
 
                     if (entity.getVote() != -1) {
                         // Draw a circle next to the entity name
-                        int circleDiameter = 10; // Adjust the diameter as needed
-                        int circleX = x + (int) bounds.getWidth() + 5; // Adjust the offset as needed
-                        int circleY = y - (int) bounds.getHeight() + 5; // Adjust the offset as needed
+                        int circleDiameter = 14; // Adjust the diameter as needed
+                        int circleX = x + (int) bounds.getWidth()/2 - circleDiameter/2; // Adjust the offset as needed
+                        int circleY = y - (int) bounds.getHeight() - textUp - 4; // Adjust the offset as needed
 
                         g.setColor(subways.get(entity.getVote()).color()); // Set the color of the circle
                         g.fillOval(circleX, circleY, circleDiameter, circleDiameter);
