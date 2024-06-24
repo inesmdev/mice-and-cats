@@ -327,6 +327,7 @@ public class World {
             entity.setPosition(m.position());
             entity.setUnderground(m.isUnderground());
             entity.setDead(m.isDead());
+            entity.setVote(m.vote());
         } else if (m.id() == entities.size()) {
             entities.add(new Entity(m.id(), m.name(), m.position(), m.isUnderground(), m.isDead(), -1));
         } else {
