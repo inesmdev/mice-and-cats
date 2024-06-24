@@ -11,6 +11,7 @@ import javax.swing.*;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Random;
 
 import static foop.message.Message.serialize;
@@ -42,7 +43,9 @@ public class Client implements AutoCloseable, Runnable {
         } else if (message instanceof GameWorldMessage m) {
             world = new World(m);
         } else if (message instanceof EntityUpdateMessage m) {
-            world.entityUpdate(m);
+            if (world != null) {
+                world.entityUpdate(m);
+            }
         } else if (message instanceof GameOverMessage m) {
             gameName = null;
             world = null;
@@ -73,6 +76,8 @@ public class Client implements AutoCloseable, Runnable {
                 log.info("{}: {}", clientName, message);
                 SwingUtilities.invokeAndWait(() -> processMessage(message));
             }
+        } catch (SocketException e) {
+            log.error("Socket exception: {}", e.getMessage());
         } catch (IOException | InterruptedException | InvocationTargetException e) {
             throw new RuntimeException(e);
         } finally {

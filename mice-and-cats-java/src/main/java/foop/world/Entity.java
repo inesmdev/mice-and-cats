@@ -8,6 +8,7 @@ import lombok.ToString;
 @ToString
 public class Entity {
     private final int id;
+    private final Type type;
     @Setter
     private String name;
     @Setter
@@ -17,8 +18,9 @@ public class Entity {
     @Setter
     private boolean isDead;
 
-    public Entity(int id, String name, Position position, boolean isUnderground, boolean isDead) {
+    public Entity(int id, Type type, String name, Position position, boolean isUnderground, boolean isDead) {
         this.id = id;
+        this.type = type;
         this.name = name;
         this.position = position;
         this.isUnderground = isUnderground;

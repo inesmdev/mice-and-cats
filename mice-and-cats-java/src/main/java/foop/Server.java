@@ -42,6 +42,11 @@ public class Server implements AutoCloseable {
         }
     }
 
+    /**
+     * Thread methode to write messages to the player
+     *
+     * @param player the play which this thread belongs to
+     */
     void runClientWriter(Player player) {
         try (var s = player.getSocket();
              var out = s.getOutputStream()
@@ -63,6 +68,11 @@ public class Server implements AutoCloseable {
         }
     }
 
+    /**
+     * Thread method to react to incoming messages
+     *
+     * @param player the play which this thread belongs to
+     */
     void runClientReader(Player player) {
         try (var s = player.getSocket();
              var in = s.getInputStream()
@@ -72,7 +82,7 @@ public class Server implements AutoCloseable {
             log.info("Server: new player {}", initialMessage.playerName());
 
             synchronized (games) {
-                sendAvailableGames(player);
+                player.send(generateAvailableGamesMessage());
             }
 
             while (true) {
@@ -95,7 +105,7 @@ public class Server implements AutoCloseable {
                             games.put(m.name(), game);
                             player.send(new JoinedGameMessage(game.getName()));
                         }
-                        sendAvailableGames(null);
+                        broadcastMsg(generateAvailableGamesMessage());
                     }
                 } else if (message instanceof JoinGameMessage m) {
                     synchronized (games) {
@@ -112,7 +122,7 @@ public class Server implements AutoCloseable {
                             player.setGame(game);
                             player.send(new JoinedGameMessage(game.getName()));
                         }
-                        sendAvailableGames(null);
+                        broadcastMsg(generateAvailableGamesMessage());
                     }
                 } else if (message instanceof SetReadyForGameMessage m) {
                     synchronized (games) {
@@ -122,7 +132,7 @@ public class Server implements AutoCloseable {
                                 games.remove(player.getGame().getName());
                             }
                         }
-                        sendAvailableGames(null);
+                        broadcastMsg(generateAvailableGamesMessage());
                     }
                 } else if (message instanceof ExitGameMessage m) {
                     synchronized (games) {
@@ -131,7 +141,7 @@ public class Server implements AutoCloseable {
                         if (game != null) {
                             game.killDisconnectedPlayer(player, games);
                         }
-                        sendAvailableGames(null);
+                        broadcastMsg(generateAvailableGamesMessage());
                     }
                 } else if (message instanceof PlayerCommandMessage m) {
                     synchronized (games) {
@@ -154,24 +164,28 @@ public class Server implements AutoCloseable {
         }
     }
 
-    private void sendAvailableGames(Player player) {
-        var message = new AvailableGamesMessage(games.values().stream()
+
+    private Message generateAvailableGamesMessage() {
+        return new AvailableGamesMessage(games.values().stream()
                 .map(ServerGame::getLobbyInfo)
                 .toList());
-
-        if (player == null) {
-            players.keySet().forEach(p -> p.send(message));
-        } else {
-            player.send(message);
-        }
     }
+
+    /**
+     * methode to send a message to all players
+     * @param message msg to be sent
+     */
+    private void broadcastMsg(Message message) {
+        players.keySet().forEach(p -> p.send(message));
+    }
+
 
     private void removePlayer(Player player) {
         players.remove(player);
         ServerGame game = player.getGame();
         if (game != null) {
             game.removePlayer(player);
-            sendAvailableGames(null);
+            broadcastMsg(generateAvailableGamesMessage());
         }
     }
 
