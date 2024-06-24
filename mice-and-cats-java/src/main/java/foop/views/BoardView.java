@@ -99,18 +99,18 @@ public class BoardView extends JPanel {
                         started = true;
 
                         var subways = frame.getClient().getWorld().getSubways();
-                        if (votingButtons.size() < subways.size()) { //only do this once
-                            subways.keySet().forEach(key -> {
-                                JButton btn = new JButton("U" + String.valueOf(subways.get(key).id()));
-                                btn.setBackground(subways.get(key).color());
-                                btn.addActionListener(e -> {
-                                    frame.getClient().send(new VoteMessage(Integer.parseInt(btn.getText().substring(1))));
-                                });
-                                votingButtons.add(btn);
-                            });
 
-                            votingButtons.forEach(votingPanel::add);
-                        }
+                        subways.keySet().forEach(key -> {
+                            JButton btn = new JButton("U" + key);
+                            btn.setBackground(subways.get(key).color());
+                            btn.addActionListener(e -> {
+                                frame.getClient().send(new VoteMessage(key));
+                            });
+                            votingButtons.add(btn);
+                        });
+
+                        votingButtons.forEach(votingPanel::add);
+
                     }
                     world.render(g, getWidth(), getHeight(), frame.getClient().getPlayerName(), superVision);
                 } else {
