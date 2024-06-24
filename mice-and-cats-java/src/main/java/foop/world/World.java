@@ -32,9 +32,8 @@ public class World {
     @Getter
     private final HashMap<Integer, Subway> subways;
     private final HashMap<Position, Subway> cellToSubway;
-
-    private Position nextCatGoal = null;
     private final Map<Integer, Position> catLastSeen = new HashMap<>();
+    private Position nextCatGoal = null;
     private long countInMySubway = 0;
 
     public World(Random seed, int numSubways, int numCols, int numRows, HashSet<Player> players) {
@@ -48,9 +47,12 @@ public class World {
         subwayBuilder.placeConnectedSubways(seed, numSubways);
         entities.add(new Entity(0, CAT, "cat", new Position(1, 1), false, false, -1));
 
-
+        int subway = 0;
         for (Player player : players) {
-            entities.add(new Entity(entities.size(), MOUSE, player.getName(), getRandomGroundPosition(seed), true, false, -1));
+            var cells = getSubways().get(subway + 1).subwayCells(); //subwayIDs start with 1
+            subway = (subway + 1) % getSubways().size();
+            var tile = cells.get(seed.nextInt(cells.size()));
+            entities.add(new Entity(entities.size(), MOUSE, player.getName(), tile, true, false, -1));
         }
     }
 
@@ -97,7 +99,7 @@ public class World {
         if (countLivingMice == 1) {
             entities.stream().filter(e -> e.getType() != CAT && !e.isDead()).findFirst().
                     flatMap(entity -> players.stream().filter(p -> p.getName().equals(entity.getName())).findFirst()).ifPresent(player ->
-                    player.gameOver(new GameOverMessage(GameOverMessage.Result.ALL_BUT_YOU_DIED)));
+                            player.gameOver(new GameOverMessage(GameOverMessage.Result.ALL_BUT_YOU_DIED)));
             return;
         }
 
@@ -178,7 +180,7 @@ public class World {
                 grid[cell.y()][cell.x()] = subwayNumber;
             }
         }
-        var newSubway = new Subway(subways.size(), colors.get(subwayNumber % 4), List.of(entry1, entry2), subwayCells.stream().toList());
+        var newSubway = new Subway(subwayNumber, colors.get(subwayNumber % 4), List.of(entry1, entry2), subwayCells.stream().toList());
         subways.put(newSubway.id(), newSubway);
         newSubway.subwayCells().forEach(c -> cellToSubway.put(c, newSubway));
     }
@@ -272,7 +274,7 @@ public class World {
                     if (entity.getVote() != -1) {
                         // Draw a circle next to the entity name
                         int circleDiameter = 14; // Adjust the diameter as needed
-                        int circleX = x + (int) bounds.getWidth()/2 - circleDiameter/2; // Adjust the offset as needed
+                        int circleX = x + (int) bounds.getWidth() / 2 - circleDiameter / 2; // Adjust the offset as needed
                         int circleY = y - (int) bounds.getHeight() - textUp - 4; // Adjust the offset as needed
 
                         g.setColor(subways.get(entity.getVote()).color()); // Set the color of the circle
