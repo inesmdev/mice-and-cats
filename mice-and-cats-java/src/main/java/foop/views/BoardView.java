@@ -11,7 +11,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 public class BoardView extends JPanel {
@@ -23,8 +22,8 @@ public class BoardView extends JPanel {
     private final GameFrame frame;
     private final JButton readyButton;
     private final JTextPane playersTextPane;
-    JPanel votingPanel = new JPanel();
-    List<JButton> votingButtons = new ArrayList<>();
+    private final JPanel votingPanel = new JPanel();
+    private final ArrayList<JButton> votingButtons = new ArrayList<>();
     private boolean superVision;
     private boolean started;
 
@@ -95,24 +94,25 @@ public class BoardView extends JPanel {
                 Graphics2D g = (Graphics2D) graphics;
                 World world = frame.getClient().getWorld();
                 if (world != null) {
-                    readyButton.setText("Started");
-                    started = true;
-                    world.render(g, getWidth(), getHeight(), frame.getClient().getPlayerName(), superVision);
-                    var subways = frame.getClient().getWorld().getSubways();
-                    if (votingButtons.size() != subways.size()) { //only do this once
-                        subways.keySet().forEach(key -> {
-                            JButton btn = new JButton("U" + String.valueOf(subways.get(key).id()));
-                            btn.setBackground(subways.get(key).color());
-                            btn.addActionListener(e -> {
-                                frame.getClient().send(new VoteMessage(Integer.parseInt(btn.getText().substring(1))));
+                    if (!started) {
+                        readyButton.setText("Started");
+                        started = true;
+
+                        var subways = frame.getClient().getWorld().getSubways();
+                        if (votingButtons.size() < subways.size()) { //only do this once
+                            subways.keySet().forEach(key -> {
+                                JButton btn = new JButton("U" + String.valueOf(subways.get(key).id()));
+                                btn.setBackground(subways.get(key).color());
+                                btn.addActionListener(e -> {
+                                    frame.getClient().send(new VoteMessage(Integer.parseInt(btn.getText().substring(1))));
+                                });
+                                votingButtons.add(btn);
                             });
-                            votingButtons.add(btn);
-                        });
 
-                        votingButtons.forEach(votingPanel::add);
+                            votingButtons.forEach(votingPanel::add);
+                        }
                     }
-
-
+                    world.render(g, getWidth(), getHeight(), frame.getClient().getPlayerName(), superVision);
                 } else {
                     g.clearRect(0, 0, getWidth(), getHeight());
                 }
@@ -170,6 +170,8 @@ public class BoardView extends JPanel {
     public void startNewGame() {
         readyButton.setEnabled(true);
         readyButton.setText("Ready");
+        votingPanel.removeAll();
+        votingButtons.clear();
         started = false;
     }
 
