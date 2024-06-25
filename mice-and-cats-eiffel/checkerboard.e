@@ -6,6 +6,8 @@ create
 
 feature -- Entities
 	cat : POSITION
+	subway_generator : SUBWAYGENERATOR
+	subways : ARRAY2 [INTEGER]
 
 feature -- Initialization
 
@@ -13,12 +15,14 @@ feature -- Initialization
         -- Initialize the checkerboard grid.
     do
         create cat.make
+        create subway_generator.make
+        subways := subway_generator.get_subways
     end
 
     print_grid
         -- Print a 10x10 grid where each cell looks like +---+ |   | +---+
     local
-        y, j, x: INTEGER
+        y, j, x, curr, xtmp, ytmp: INTEGER
     do
         from
             y := 0
@@ -41,12 +45,23 @@ feature -- Initialization
             until
                 x > 9
             loop
-            	if cat.x = x and cat.y = y  then
+            	xtmp := x + 1
+            	ytmp := y + 1 --arrays start at 1
+            	curr := subways.item (ytmp, xtmp)
+
+            	if
+            		cat.x = x and cat.y = y -- render cat position (cat is "above" subways)
+            	then
             		io.put_string ("| c ")
+            	elseif
+            		curr > 0
+            	then
+            		io.put_string ("| ")
+            		io.putint (curr)
+            		io.putstring (" ")
             	else
             		io.put_string ("|   ")
             	end
-
                 x := x + 1
             end
             io.put_string ("|%N")
