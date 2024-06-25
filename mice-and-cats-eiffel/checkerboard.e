@@ -16,19 +16,19 @@ feature -- Initialization
     end
 
     print_grid
-        -- Print a 9x9 grid where each cell looks like +---+ |   | +---+
+        -- Print a 10x10 grid where each cell looks like +---+ |   | +---+
     local
         y, j, x: INTEGER
     do
         from
             y := 0
         until
-            y > 10
+            y > 9
         loop
             from
                 j := 0
             until
-                j > 10
+                j > 9
             loop
                 io.put_string ("+---")
                 j := j + 1
@@ -39,7 +39,7 @@ feature -- Initialization
             from
                 x := 0
             until
-                x > 10
+                x > 9
             loop
             	if cat.x = x and cat.y = y  then
             		io.put_string ("| c ")
@@ -56,7 +56,7 @@ feature -- Initialization
         from
         	j := 0
         until
-            j > 10
+            j > 9
         loop
         	io.put_string ("+---")
             j := j + 1
