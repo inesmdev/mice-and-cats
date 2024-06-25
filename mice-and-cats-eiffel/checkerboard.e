@@ -21,14 +21,14 @@ feature -- Initialization
         y, j, x: INTEGER
     do
         from
-            y := 1
+            y := 0
         until
-            y > 9
+            y > 10
         loop
             from
-                j := 1
+                j := 0
             until
-                j > 9
+                j > 10
             loop
                 io.put_string ("+---")
                 j := j + 1
@@ -37,9 +37,9 @@ feature -- Initialization
 
 
             from
-                x := 1
+                x := 0
             until
-                x > 9
+                x > 10
             loop
             	if cat.x = x and cat.y = y  then
             		io.put_string ("| c ")
@@ -54,9 +54,9 @@ feature -- Initialization
 
         end
         from
-        	j := 1
+        	j := 0
         until
-            j > 9
+            j > 10
         loop
         	io.put_string ("+---")
             j := j + 1
@@ -64,4 +64,16 @@ feature -- Initialization
         io.put_string ("+%N")
     end
 
+feature -- change positions of entities
+	print_frame
+	local
+		random : RANDOMNUMBERGENERATOR
+		random_int : INTEGER
+	do
+		create random.make
+		random_int := random.get_random
+		cat.set_x(random_int\\10) -- get last digit
+		cat.set_y(random_int//10) -- get second last digit
+		print_grid
+	end
 end

@@ -22,4 +22,14 @@ feature -- Initialization
 			y := 1
 		end
 
+feature --setter
+	set_x(para : INTEGER)
+		do
+			x := para
+		end
+
+	set_y(para: INTEGER)
+		do
+			y := para
+		end
 end
