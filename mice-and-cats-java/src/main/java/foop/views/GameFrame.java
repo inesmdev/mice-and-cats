@@ -2,6 +2,7 @@ package foop.views;
 
 import foop.Client;
 import foop.message.AvailableGamesMessage;
+import foop.message.TimeUpdateMessage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -108,5 +109,9 @@ public class GameFrame extends JFrame {
     public void updateLobby(AvailableGamesMessage m) {
         joinGameView.updateLobby(m);
         boardView.updateLobby(m);
+    }
+
+    public void updateDuration(TimeUpdateMessage m) {
+        boardView.updateDuration(m);
     }
 }

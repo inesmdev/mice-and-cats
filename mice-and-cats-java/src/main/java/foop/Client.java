@@ -50,7 +50,7 @@ public class Client implements AutoCloseable, Runnable {
             gameName = null;
             world = null;
             switch (m.result()) {
-                case YOU_DIED -> jFrame.showGameOverDeathView(false);
+                case YOU_DIED, TIMEOUT -> jFrame.showGameOverDeathView(false);
                 case ALL_BUT_YOU_DIED -> jFrame.showGameOverDeathView(true);
                 case VICTORY -> jFrame.showGameOverVictoryView();
             }
@@ -58,6 +58,8 @@ public class Client implements AutoCloseable, Runnable {
             gameName = m.name();
             world = null;
             jFrame.showBoardView();
+        } else if (message instanceof TimeUpdateMessage m) {
+            jFrame.updateDuration(m);
         } else if (message instanceof GenericErrorMessage m) {
             JOptionPane.showMessageDialog(jFrame, m.message(), "Error", JOptionPane.ERROR_MESSAGE);
         } else {

@@ -55,6 +55,7 @@ public interface Message {
             case GameOverMessage.TAG -> GameOverMessage::parse;
             case JoinedGameMessage.TAG -> JoinedGameMessage::parse;
             case VoteMessage.TAG -> VoteMessage::parse;
+            case TimeUpdateMessage.TAG -> TimeUpdateMessage::parse;
             default -> throw new IOException("Unexpected tag: " + tag);
         };
 

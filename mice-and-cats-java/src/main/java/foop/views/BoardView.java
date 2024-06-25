@@ -1,9 +1,6 @@
 package foop.views;
 
-import foop.message.AvailableGamesMessage;
-import foop.message.PlayerCommandMessage;
-import foop.message.SetReadyForGameMessage;
-import foop.message.VoteMessage;
+import foop.message.*;
 import foop.world.World;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,7 +26,6 @@ public class BoardView extends JPanel {
     private final ArrayList<JButton> votingButtons = new ArrayList<>();
     private boolean superVision;
     private boolean started;
-    private Timer timer;
     private Duration duration;
     private final SimpleDateFormat timeFormatter = new SimpleDateFormat("mm:ss");
     private final JButton stopButton = new JButton("Stop");
@@ -93,7 +89,6 @@ public class BoardView extends JPanel {
 
         setLayout(new BorderLayout());
 
-        timer = new Timer(1000, e -> updateTime());
         duration = Duration.ofSeconds(42);
 
         JComponent component = new JComponent() {
@@ -108,7 +103,6 @@ public class BoardView extends JPanel {
                         duration = world.getDuration();
                         timeLabel.setText(timeFormatter.format(duration.toMillis()));
 
-                        timer.start();
                         readyButton.setText("Started");
                         started = true;
 
@@ -193,7 +187,6 @@ public class BoardView extends JPanel {
         votingPanel.removeAll();
         votingButtons.clear();
         started = false;
-        timer.stop();
         timeLabel.setText("--:--");
     }
 
@@ -222,14 +215,7 @@ public class BoardView extends JPanel {
         playersTextPane.setText(text.toString());
     }
 
-    private void updateTime() {
-        duration = duration.minusSeconds(1);
-        if (duration.isNegative()) {
-            timer.stop();
-            stopButton.doClick();
-        } else {
-            var time = timeFormatter.format(duration.toMillis());
-            timeLabel.setText(time);
-        }
+    public void updateDuration(TimeUpdateMessage m) {
+        timeLabel.setText(timeFormatter.format(m.durationMills()));
     }
 }

@@ -2,10 +2,13 @@ package foop.server;
 
 import foop.Main;
 import foop.message.AvailableGamesMessage;
+import foop.message.GameOverMessage;
+import foop.message.TimeUpdateMessage;
 import foop.world.World;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.swing.*;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -57,6 +60,15 @@ public class ServerGame {
     public void run() {
         var r = new Random();
 
+        // Timer for the game duration
+        Timer timer = new Timer(1000, e -> {
+
+            duration = duration.minusSeconds(1);
+            // TODO send update to the players
+            var msg = new TimeUpdateMessage(duration.toMillis());
+            players.forEach(p -> p.send(msg));
+        });
+        timer.start();
         while (Main.running) {
             try {
                 Thread.sleep(1000);
@@ -64,12 +76,20 @@ public class ServerGame {
                 log.error(e.getMessage());
             }
 
+            if (duration.isZero()) {
+                timer.stop();
+                //Todo send Stop Message
+                var msg = new GameOverMessage(GameOverMessage.Result.TIMEOUT);
+                players.forEach(p -> p.send(msg));
+                timer.stop();
+                log.info("Duration finished. Stopping game");
+                return;
+            }
             synchronized (this) {
                 if (players.isEmpty()) {
-                    log.info("no players left. Stopping game.");
+                    log.info("No players left. Stopping game");
                     return;
                 }
-                duration = duration.minusSeconds(1);
                 log.info("server update{}", players);
                 world.serverUpdate(players);
             }
