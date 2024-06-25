@@ -112,9 +112,9 @@ public class Client implements AutoCloseable, Runnable {
         send(new JoinGameMessage(name));
     }
 
-    public void createGame(String name, int returnSize) {
+    public void createGame(String name, int returnSize, int duration) {
         gameName = name;
-        send(new CreateGameMessage(name, returnSize));
+        send(new CreateGameMessage(name, returnSize, duration));
     }
 
     public void exitGame() {

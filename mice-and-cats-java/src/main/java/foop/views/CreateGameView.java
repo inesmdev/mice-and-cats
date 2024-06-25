@@ -42,7 +42,7 @@ public class CreateGameView extends JPanel {
 
         JLabel gameSizeLabel = new JLabel("Game size");
 
-        JTextField gameSize = new JTextField();
+        JTextField gameSize = new JTextField("2");
         gameSize.setPreferredSize(new Dimension(150, 20));
 
         JPanel gameSizePanel = new JPanel();
@@ -53,24 +53,41 @@ public class CreateGameView extends JPanel {
 
         panel.add(gameSizePanel, BorderLayout.CENTER);
 
+        JLabel gameDurationLabel = new JLabel("Game duration [s]");
+        JSpinner gameDuration = new JSpinner();
+        gameDuration.setValue(42);
+        JPanel gameDurationPanel = new JPanel();
+        gameDurationPanel.setMaximumSize(new Dimension(300, 50));
+        gameDurationPanel.add(gameDurationLabel);
+        gameDurationPanel.add(gameDuration);
+
+        panel.add(gameDurationPanel, BorderLayout.CENTER);
+
         this.add(panel, BorderLayout.CENTER);
 
         JButton createGameButton = new JButton("Create Game");
         createGameButton.addActionListener(e -> {
             log.info("Create Game");
             var name = gameName.getText();
+            int duration = 0;
             int size;
             try {
                 size = Integer.parseInt(gameSize.getText());
+                duration = Integer.parseInt(gameDuration.getValue().toString());
             } catch (NumberFormatException ex) {
                 size = 0;
             }
-            var returnSize = size < 1 ? 2 : size;
+            var returnSize = size;
             if (name == null || name.trim().isEmpty()) {
                 JOptionPane.showMessageDialog(frame, "Please enter a valid name");
                 return;
             }
-            frame.getClient().createGame(name, returnSize);
+            if (returnSize <= 0) {
+                JOptionPane.showMessageDialog(frame, "Please enter a valid number of players");
+                return;
+            }
+
+            frame.getClient().createGame(name, returnSize, duration);
         });
         this.add(createGameButton, BorderLayout.SOUTH);
 

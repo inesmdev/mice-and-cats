@@ -22,10 +22,10 @@ public class ServerGame {
     private boolean started;
     private Thread gameThread;
 
-    public ServerGame(String name, int minPlayers) {
+    public ServerGame(String name, int minPlayers, int durationSec) {
         this.name = name;
         this.minPlayers = minPlayers;
-        duration = Duration.ofSeconds(42);
+        duration = Duration.ofSeconds(durationSec);
     }
 
     public synchronized AvailableGamesMessage.Game getLobbyInfo() {
@@ -44,7 +44,7 @@ public class ServerGame {
     public synchronized boolean startIfAllReady() {
         if (players.size() >= minPlayers && players.stream().allMatch(Player::isReady)) {
             started = true;
-            world = new World(new Random(), 4, 20, 5, players);
+            world = new World(new Random(), 4, 20, 5, players, duration);
             world.sendTo(players);
             gameThread = new Thread(this::run);
             gameThread.start();
@@ -69,9 +69,9 @@ public class ServerGame {
                     log.info("no players left. Stopping game.");
                     return;
                 }
-
+                duration = duration.minusSeconds(1);
                 log.info("server update{}", players);
-                world.serverUpdate(players, duration);
+                world.serverUpdate(players);
             }
         }
     }

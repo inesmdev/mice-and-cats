@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public record GameWorldMessage(int[][] subwayTiles, List<Subway> subways) implements Message {
+public record GameWorldMessage(int[][] subwayTiles, List<Subway> subways, long durationSec) implements Message {
 
     public static final int TAG = 7;
 
@@ -36,7 +36,8 @@ public record GameWorldMessage(int[][] subwayTiles, List<Subway> subways) implem
             }
             subways[i] = new Subway(i + 1, color, List.of(exits), Arrays.stream(subwayCells).toList());
         }
-        return new GameWorldMessage(subwayTiles, List.of(subways));
+        var durationSec = in.readLong();
+        return new GameWorldMessage(subwayTiles, List.of(subways), durationSec);
     }
 
     @Override
@@ -67,6 +68,7 @@ public record GameWorldMessage(int[][] subwayTiles, List<Subway> subways) implem
                 out.writeInt(subwayCell.y());
             }
         }
+        out.writeLong(durationSec);
     }
 
     @Override
