@@ -71,8 +71,6 @@ public class ServerGame {
                     return;
                 }
 
-                players.forEach(p -> p.send(timeUpdate));
-
                 if(remaining.isPositive()) {
                     log.info("server update{}", players);
                     world.serverUpdate(players);
@@ -82,6 +80,8 @@ public class ServerGame {
                     new ArrayList<>(players).forEach(p -> p.gameOver(msg));
                     return;
                 }
+
+                players.forEach(p -> p.send(timeUpdate));
             }
 
             try {
