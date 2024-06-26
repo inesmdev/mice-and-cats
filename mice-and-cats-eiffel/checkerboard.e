@@ -111,9 +111,9 @@ feature -- change positions of entities
 		random_int : INTEGER
 	do
 		create random.make
-		random_int := random.get_random
-		cat.set_x(random_int\\10) -- get last digit
-		cat.set_y(random_int//10) -- get second last digit
+
+		cat.set_x(random.new_random\\10)
+		cat.set_y(random.new_random\\10)
 		print_grid
 	end
 

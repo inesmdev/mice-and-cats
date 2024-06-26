@@ -16,10 +16,13 @@ feature -- Coordinates
 
 feature -- Initialization
 	make
-			-- Initialize coordinates to 1,1.
+			-- Initialize coordinates to random
+		local
+			 rnd: RANDOMNUMBERGENERATOR
 		do
-			x := 0
-			y := 0
+			create rnd.make
+			x := rnd.new_random\\10
+			y := rnd.new_random\\10
 		end
 
 feature --setter
@@ -56,9 +59,9 @@ feature
 			i : INTEGER
 		do
 			create rand.make
-			i := rand.get_random
-			x := i\\10
-			y := i//10
+
+			x := (rand.new_random + 1)\\10
+			y := (rand.new_random + 1)\\10
 
 		end
 end
