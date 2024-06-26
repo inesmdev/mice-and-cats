@@ -19,11 +19,9 @@ feature {NONE} -- Initialization
         local
             checkerboard: CHECKERBOARD
             i : INTEGER
-            keylistener : KEYLISTENER
             key : CHARACTER
         do
             create checkerboard.make
-            create keylistener.make
             io.putstring ("NEW GAME%N")
             io.put_string ("Press keys (press 'q' to quit):%N")
             io.put_string ("Press 'a' to move left. %N")
@@ -35,11 +33,12 @@ feature {NONE} -- Initialization
             from
             	i := 0
             until
-            	i >= 10 or else checkerboard.player.is_dead
+            	i >= 10 or else checkerboard.player.is_dead or else key = 'q'
             loop
             	io.put_string ("Please enter key: %N")
+            	io.read_character
             	key := io.last_character
-            	keylistener.process_key (key)
+            	checkerboard.move_player(key)
             	checkerboard.print_frame
             	io.new_line
             	i := i + 1
@@ -56,6 +55,10 @@ feature {NONE} -- Initialization
             then
             	io.put_string ("GAME OVER: COULD NOT HIDE IN TIME.")
             	io.new_line
+            elseif
+            	key = 'q'
+            then
+            	io.put_string ("Player has quit the game.%N")
             end
 
         end

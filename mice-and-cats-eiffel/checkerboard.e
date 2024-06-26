@@ -109,4 +109,35 @@ feature -- change positions of entities
 		cat.set_y(random_int//10) -- get second last digit
 		print_grid
 	end
+
+feature
+	-- move player
+	move_player(key : CHARACTER)
+		do
+			if key = 'a' then
+				if player.pos.x > 1 then
+					player.pos.set_x (player.pos.x - 1)
+				end
+
+            elseif key = 'w' then
+            	if player.pos.y > 1 then
+            		player.pos.set_y(player.pos.y - 1)
+            	end
+
+            elseif key = 's' then
+            	if player.pos.y < 9 then
+            		player.pos.set_y (player.pos.y + 1)
+            	end
+
+            elseif key = 'd' then
+            	if player.pos.x < 9 then
+            		player.pos.set_x (player.pos.x + 1)
+            	end
+
+            else
+            	--invalid command
+            	io.put_string ("Invalid command. Try again.%N")
+            end
+          
+		end
 end
