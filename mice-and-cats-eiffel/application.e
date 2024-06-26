@@ -19,16 +19,27 @@ feature {NONE} -- Initialization
         local
             checkerboard: CHECKERBOARD
             i : INTEGER
+            keylistener : KEYLISTENER
+            key : CHARACTER
         do
             create checkerboard.make
-            io.putstring ("NEW GAME")
-            io.new_line
+            create keylistener.make
+            io.putstring ("NEW GAME%N")
+            io.put_string ("Press keys (press 'q' to quit):%N")
+            io.put_string ("Press 'a' to move left. %N")
+            io.put_string ("Press 'w' to move up. %N")
+            io.put_string ("Press 's' to move down. %N")
+            io.put_string ("Press 'd' to move right. %N")
+
             checkerboard.print_grid
             from
             	i := 0
             until
             	i >= 10 or else checkerboard.player.is_dead
             loop
+            	io.put_string ("Please enter key: %N")
+            	key := io.last_character
+            	keylistener.process_key (key)
             	checkerboard.print_frame
             	io.new_line
             	i := i + 1
