@@ -35,13 +35,16 @@ public class World {
     private final Map<Integer, Position> catLastSeen = new HashMap<>();
     private Position nextCatGoal = null;
     private long countInMySubway = 0;
+    @Getter
+    private final Duration duration;
 
-    public World(Random seed, int numSubways, int numCols, int numRows, HashSet<Player> players) {
+    public World(Random seed, int numSubways, int numCols, int numRows, HashSet<Player> players, Duration duration) {
         grid = new int[numRows][numCols];
         this.numCols = numCols;
         this.numRows = numRows;
         this.subways = new HashMap<>();
         this.cellToSubway = new HashMap<>();
+        this.duration = duration;
 
         SubwayBuilder subwayBuilder = new SubwayBuilder(this, numRows, numCols);
         subwayBuilder.placeConnectedSubways(seed, numSubways);
@@ -65,6 +68,7 @@ public class World {
             subways.put(s.id(), s);
             s.subwayCells().forEach(c -> cellToSubway.put(c, s));
         });
+        this.duration = Duration.ofSeconds(m.durationSec());
         this.numRows = grid.length;
         this.numCols = grid[0].length;
     }
@@ -119,7 +123,7 @@ public class World {
         }
     }
 
-    public void serverUpdate(HashSet<Player> players, Duration duration) {
+    public void serverUpdate(HashSet<Player> players) {
 
         var cats = entities.stream().filter(e -> e.getType() == CAT).toList();
         for (Entity cat : cats) {
@@ -306,7 +310,7 @@ public class World {
     }
 
     public void sendTo(HashSet<Player> players) {
-        var message = new GameWorldMessage(grid, subways.values().stream().toList());
+        var message = new GameWorldMessage(grid, subways.values().stream().toList(), duration.toSeconds());
         broadcastMsg(players, message);
 
         for (Entity entity : entities) {

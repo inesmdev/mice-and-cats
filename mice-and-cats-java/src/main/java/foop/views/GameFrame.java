@@ -2,6 +2,7 @@ package foop.views;
 
 import foop.Client;
 import foop.message.AvailableGamesMessage;
+import foop.message.TimeUpdateMessage;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -100,13 +101,17 @@ public class GameFrame extends JFrame {
         cardLayout.show(mainPanel, GAME_OVER_VICTORY_VIEW);
     }
 
-    public void showGameOverDeathView(boolean allButYouDied) {
-        gameOverDeathView.setAllButYouDied(allButYouDied);
+    public void showGameOverDeathView(GameOverDeathView.Kind kind) {
+        gameOverDeathView.setAllButYouDied(kind);
         cardLayout.show(mainPanel, GAME_OVER_DEATH_VIEW);
     }
 
     public void updateLobby(AvailableGamesMessage m) {
         joinGameView.updateLobby(m);
         boardView.updateLobby(m);
+    }
+
+    public void updateDuration(TimeUpdateMessage m) {
+        boardView.updateDuration(m);
     }
 }

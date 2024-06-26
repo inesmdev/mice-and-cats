@@ -10,6 +10,8 @@ import java.awt.*;
 public class GameOverDeathView extends JPanel {
 
     private final JLabel headerLabel;
+    private final JButton exitBtn;
+    private Image image;
 
     public GameOverDeathView(GameFrame frame) {
         setLayout(new BorderLayout());
@@ -34,7 +36,7 @@ public class GameOverDeathView extends JPanel {
         panel.add(Box.createRigidArea(new Dimension()));
         panel.add(Box.createRigidArea(new Dimension()));
 
-        JButton exitBtn = new JButton("Retreat in sorrow.");
+        exitBtn = new JButton();
         exitBtn.setAlignmentX(CENTER_ALIGNMENT);
         exitBtn.addActionListener(e -> {
             log.info("Return to main menu");
@@ -57,17 +59,34 @@ public class GameOverDeathView extends JPanel {
         add(p2, BorderLayout.CENTER);
     }
 
-    void setAllButYouDied(boolean allButYouDied) {
-        if (allButYouDied) {
-            headerLabel.setText("All teammates died!");
-        } else {
-            headerLabel.setText("YOU DIED!");
+    public enum Kind {
+        YOU_DIED,
+        ALL_TEAMMATES_DIED,
+        OUT_OF_TIME,
+    }
+
+    void setAllButYouDied(Kind kind) {
+        switch (kind) {
+            case YOU_DIED -> {
+                headerLabel.setText("YOU DIED!");
+                exitBtn.setText("Rest in Peace.");
+                image = Assets.getInstance().getDeath();
+            }
+            case ALL_TEAMMATES_DIED -> {
+                headerLabel.setText("All teammates died!");
+                exitBtn.setText("Retreat in sorrow.");
+                image = Assets.getInstance().getDeath();
+            }
+            case OUT_OF_TIME -> {
+                headerLabel.setText("Out of time!");
+                exitBtn.setText("Time waits for no one. Not even you!");
+                image = Assets.getInstance().getOutOfTime();
+            }
         }
     }
 
     @Override
     public void paint(Graphics g) {
-        var image = Assets.getInstance().getDeath();
         g.drawImage(image, 0, 0, getWidth(), getHeight(), null);
         super.paint(g);
     }

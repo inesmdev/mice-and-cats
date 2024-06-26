@@ -1,15 +1,14 @@
 package foop.views;
 
-import foop.message.AvailableGamesMessage;
-import foop.message.PlayerCommandMessage;
-import foop.message.SetReadyForGameMessage;
-import foop.message.VoteMessage;
+import foop.message.*;
 import foop.world.World;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 
 @Slf4j
@@ -22,14 +21,19 @@ public class BoardView extends JPanel {
     private final GameFrame frame;
     private final JButton readyButton;
     private final JTextPane playersTextPane;
-    private final JPanel votingPanel = new JPanel();
+    private JLabel timeLabel;
+    private final JPanel votingPanel = new JPanel(new FlowLayout());
     private final ArrayList<JButton> votingButtons = new ArrayList<>();
     private boolean superVision;
     private boolean started;
+    private Duration duration;
+    private final SimpleDateFormat timeFormatter = new SimpleDateFormat("mm:ss");
+    private final JButton stopButton = new JButton("Stop");
 
 
     public BoardView(GameFrame frame) {
         this.frame = frame;
+
         readyButton = new JButton();
         playersTextPane = new JTextPane();
         playersTextPane.setEditable(false);
@@ -85,7 +89,7 @@ public class BoardView extends JPanel {
 
         setLayout(new BorderLayout());
 
-        JButton stopButton = new JButton("Stop");
+        duration = Duration.ofSeconds(42);
 
         JComponent component = new JComponent() {
             @Override
@@ -95,6 +99,10 @@ public class BoardView extends JPanel {
                 World world = frame.getClient().getWorld();
                 if (world != null) {
                     if (!started) {
+
+                        duration = world.getDuration();
+                        timeLabel.setText(timeFormatter.format(duration.toMillis()));
+
                         readyButton.setText("Started");
                         started = true;
 
@@ -135,6 +143,12 @@ public class BoardView extends JPanel {
         });
         sidePanel.add(visionCheckbox);
 
+        timeLabel = new JLabel();
+        timeLabel.setFont(new Font("Arial", Font.PLAIN, 40));
+        timeLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        timeLabel.setVerticalAlignment(SwingConstants.CENTER);
+        sidePanel.add(timeLabel);
+
         sidePanel.add(playersTextPane);
 
         sidePanel.add(votingPanel);
@@ -151,7 +165,7 @@ public class BoardView extends JPanel {
             log.info("Stopping game");
             frame.getClient().exitGame();
             if (started) {
-                frame.showGameOverDeathView(false);
+                frame.showGameOverDeathView(GameOverDeathView.Kind.YOU_DIED);
             } else {
                 frame.showTitleScreenView();
             }
@@ -173,6 +187,7 @@ public class BoardView extends JPanel {
         votingPanel.removeAll();
         votingButtons.clear();
         started = false;
+        timeLabel.setText("--:--");
     }
 
     public void updateLobby(AvailableGamesMessage m) {
@@ -198,5 +213,9 @@ public class BoardView extends JPanel {
             }
         }
         playersTextPane.setText(text.toString());
+    }
+
+    public void updateDuration(TimeUpdateMessage m) {
+        timeLabel.setText(timeFormatter.format(m.durationMills()));
     }
 }

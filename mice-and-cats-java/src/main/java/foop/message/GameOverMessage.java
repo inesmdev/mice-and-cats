@@ -11,6 +11,7 @@ public record GameOverMessage(Result result) implements Message {
         YOU_DIED,
         ALL_BUT_YOU_DIED,
         VICTORY,
+        TIMEOUT
     }
 
     @Override

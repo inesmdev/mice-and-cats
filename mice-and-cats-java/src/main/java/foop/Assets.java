@@ -21,6 +21,7 @@ public class Assets {
     private Image victory;
     private Image death;
     private Image tombstone;
+    private Image outOfTime;
 
     public void load() throws IOException {
         titleScreenBackground = readImageResource("/images/titlescreen.jpeg");
@@ -31,6 +32,7 @@ public class Assets {
         victory = readImageResource("/images/victory.jpeg");
         death = readImageResource("/images/death.jpeg");
         tombstone = readImageResource("/images/tombstone.jpeg");
+        outOfTime = readImageResource("/images/time.jpeg");
     }
 
     private Image readImageResource(String resource) throws IOException {

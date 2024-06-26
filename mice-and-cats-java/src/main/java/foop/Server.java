@@ -105,7 +105,7 @@ public class Server implements AutoCloseable {
                         if (games.containsKey(m.name())) {
                             player.send(new GenericErrorMessage("Name already exists"));
                         } else {
-                            var game = new ServerGame(m.name(), m.minPlayer());
+                            var game = new ServerGame(m.name(), m.minPlayer(), m.durationSec());
                             game.addPlayer(player);
                             player.setGame(game);
                             games.put(m.name(), game);

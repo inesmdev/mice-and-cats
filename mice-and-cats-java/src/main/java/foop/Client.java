@@ -2,6 +2,7 @@ package foop;
 
 import foop.message.*;
 import foop.views.GameFrame;
+import foop.views.GameOverDeathView;
 import foop.world.World;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -50,14 +51,17 @@ public class Client implements AutoCloseable, Runnable {
             gameName = null;
             world = null;
             switch (m.result()) {
-                case YOU_DIED -> jFrame.showGameOverDeathView(false);
-                case ALL_BUT_YOU_DIED -> jFrame.showGameOverDeathView(true);
+                case YOU_DIED -> jFrame.showGameOverDeathView(GameOverDeathView.Kind.YOU_DIED);
+                case TIMEOUT -> jFrame.showGameOverDeathView(GameOverDeathView.Kind.OUT_OF_TIME);
+                case ALL_BUT_YOU_DIED -> jFrame.showGameOverDeathView(GameOverDeathView.Kind.ALL_TEAMMATES_DIED);
                 case VICTORY -> jFrame.showGameOverVictoryView();
             }
         } else if (message instanceof JoinedGameMessage m) {
             gameName = m.name();
             world = null;
             jFrame.showBoardView();
+        } else if (message instanceof TimeUpdateMessage m) {
+            jFrame.updateDuration(m);
         } else if (message instanceof GenericErrorMessage m) {
             JOptionPane.showMessageDialog(jFrame, m.message(), "Error", JOptionPane.ERROR_MESSAGE);
         } else {
@@ -112,9 +116,9 @@ public class Client implements AutoCloseable, Runnable {
         send(new JoinGameMessage(name));
     }
 
-    public void createGame(String name, int returnSize) {
+    public void createGame(String name, int returnSize, int duration) {
         gameName = name;
-        send(new CreateGameMessage(name, returnSize));
+        send(new CreateGameMessage(name, returnSize, duration));
     }
 
     public void exitGame() {
