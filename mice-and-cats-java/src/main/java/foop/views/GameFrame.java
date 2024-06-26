@@ -101,8 +101,8 @@ public class GameFrame extends JFrame {
         cardLayout.show(mainPanel, GAME_OVER_VICTORY_VIEW);
     }
 
-    public void showGameOverDeathView(boolean allButYouDied) {
-        gameOverDeathView.setAllButYouDied(allButYouDied);
+    public void showGameOverDeathView(GameOverDeathView.Kind kind) {
+        gameOverDeathView.setAllButYouDied(kind);
         cardLayout.show(mainPanel, GAME_OVER_DEATH_VIEW);
     }
 

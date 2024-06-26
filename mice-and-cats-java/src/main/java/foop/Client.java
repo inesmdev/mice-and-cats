@@ -2,6 +2,7 @@ package foop;
 
 import foop.message.*;
 import foop.views.GameFrame;
+import foop.views.GameOverDeathView;
 import foop.world.World;
 import lombok.Getter;
 import lombok.SneakyThrows;
@@ -50,8 +51,9 @@ public class Client implements AutoCloseable, Runnable {
             gameName = null;
             world = null;
             switch (m.result()) {
-                case YOU_DIED, TIMEOUT -> jFrame.showGameOverDeathView(false);
-                case ALL_BUT_YOU_DIED -> jFrame.showGameOverDeathView(true);
+                case YOU_DIED -> jFrame.showGameOverDeathView(GameOverDeathView.Kind.YOU_DIED);
+                case TIMEOUT -> jFrame.showGameOverDeathView(GameOverDeathView.Kind.OUT_OF_TIME);
+                case ALL_BUT_YOU_DIED -> jFrame.showGameOverDeathView(GameOverDeathView.Kind.ALL_TEAMMATES_DIED);
                 case VICTORY -> jFrame.showGameOverVictoryView();
             }
         } else if (message instanceof JoinedGameMessage m) {

@@ -165,7 +165,7 @@ public class BoardView extends JPanel {
             log.info("Stopping game");
             frame.getClient().exitGame();
             if (started) {
-                frame.showGameOverDeathView(false);
+                frame.showGameOverDeathView(GameOverDeathView.Kind.YOU_DIED);
             } else {
                 frame.showTitleScreenView();
             }
