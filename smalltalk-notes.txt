@@ -1,0 +1,58 @@
+
+Setup:
+- 200% scaling
+- +Colorful windows, -Flat widget look, +Syntax highlighting in workspaces
+- all extra packages
+- Save
+
+For high dpi:
+    Extras > Scale Factor > 200%
+
+Running with 3d acceleration in virtualbox broke the GUI.
+
+Project > Save Project seems to be broken.
+Instead click on the Squeak logo in the top left and select Save.
+Clicking (x) and selecting save works as well.
+
+
+
+
+class creation: https://www.youtube.com/watch?v=ewPDhDvTFCk
+Open browser
+To create a package:
+  right click first text pane > add category: MiceAndCats
+To create a class:
+  click on package
+  edit text below (triangle in top right indicates unsaved)
+  hit ctrl+s
+To create method:
+  click on third pane "no messages"
+  edit code below and save
+  type in your initials
+
+
+Intial setup:
+Class Main:
+main
+	"comment stating purpose of message"
+	| variable |
+	variable := 1.
+	Transcript showln: 'test'.
+
+Open Transcript
+Open Workspace and type:
+    Main new main
+Select line > right click > do it
+
+
+
+Git: 
+    https://github.com/hpi-swa/Squot/
+
+Add repo:
+Tools > Git Browser > Add your first project now > select project root
+setup: Right click Project > Add or remove packages MiceAndCats select subdirectory
+
+committing changes:
+    click commit
+
