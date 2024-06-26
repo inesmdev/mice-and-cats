@@ -80,9 +80,9 @@ public class Server implements AutoCloseable {
              var in = s.getInputStream()
         ) {
             Message message1 = Message.parse(in);
-            if (message1 instanceof PlayerNameMessage initialMessage) {
-                player.setName(initialMessage.playerName());
-                log.info("Server: new player {}", initialMessage.playerName());
+            if (message1 instanceof InitialMessage initialMessage) {
+                player.initialize(initialMessage.id());
+                log.info("Server: new player {}", player);
             } else {
                 throw new IOException("Expected " + PlayerNameMessage.class.getName() + " but got " + message1);
             }

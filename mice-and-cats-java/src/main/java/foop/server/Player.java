@@ -7,11 +7,15 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.Socket;
+import java.util.Objects;
 import java.util.concurrent.LinkedTransferQueue;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class Player {
+    @Getter
+    private PlayerId id;
+
     @Setter
     @Getter
     private String name;
@@ -29,6 +33,13 @@ public class Player {
         this.socket = socket;
     }
 
+    public void initialize(PlayerId id) {
+        if (this.id != null) {
+            throw new IllegalStateException("Player has already been initialized");
+        }
+        this.id = id;
+    }
+
     public void send(Message message) {
         log.info("server->{}: {}", name, message);
         toClient.put(message);
@@ -40,10 +51,7 @@ public class Player {
 
     @Override
     public String toString() {
-        return "Player{" +
-                "name='" + name + '\'' +
-                ", socket=" + socket +
-                '}';
+        return "Player{" + "id=" + id + ", name='" + name + '\'' + ", socket=" + socket + '}';
     }
 
     public void gameOver(GameOverMessage gameOverMessage) {

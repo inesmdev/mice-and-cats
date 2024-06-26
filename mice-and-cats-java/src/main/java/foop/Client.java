@@ -1,6 +1,7 @@
 package foop;
 
 import foop.message.*;
+import foop.server.PlayerId;
 import foop.views.GameFrame;
 import foop.views.GameOverDeathView;
 import foop.world.World;
@@ -21,7 +22,7 @@ import static foop.message.Message.serialize;
 public class Client implements AutoCloseable, Runnable {
 
     private final Socket socket;
-    private final String clientName = "Client_" + new Random().nextInt(100);
+    private final PlayerId playerId = PlayerId.makeRandom();
     private volatile boolean running = true;
     private GameFrame jFrame;
 
@@ -36,6 +37,7 @@ public class Client implements AutoCloseable, Runnable {
 
     public Client(String host, int port) throws IOException {
         socket = new Socket(host, port);
+        send(new InitialMessage(playerId));
     }
 
     private void processMessage(Message message) {
@@ -77,7 +79,7 @@ public class Client implements AutoCloseable, Runnable {
             var in = socket.getInputStream();
             while (Main.running && this.running) {
                 var message = Message.parse(in);
-                log.info("{}: {}", clientName, message);
+                log.info("{}: {}", playerId, message);
                 SwingUtilities.invokeAndWait(() -> processMessage(message));
             }
         } catch (SocketException e) {
@@ -90,7 +92,7 @@ public class Client implements AutoCloseable, Runnable {
                     jFrame.dispose();
                 }
             });
-            log.info("{} exited", clientName);
+            log.info("{} exited", playerId);
         }
     }
 
