@@ -80,11 +80,11 @@ public class Server implements AutoCloseable {
              var in = s.getInputStream()
         ) {
             Message message1 = Message.parse(in);
-            if (message1 instanceof InitialMessage initialMessage) {
+            if (message1 instanceof PlayerNameMessage initialMessage) {
                 player.setName(initialMessage.playerName());
                 log.info("Server: new player {}", initialMessage.playerName());
             } else {
-                throw new IOException("Expected " + InitialMessage.class.getName() + " but got " + message1);
+                throw new IOException("Expected " + PlayerNameMessage.class.getName() + " but got " + message1);
             }
 
             synchronized (games) {
@@ -160,7 +160,7 @@ public class Server implements AutoCloseable {
                         var game = Objects.requireNonNull(player.getGame());
                         game.updateVote(player, m.vote());
                     }
-                } else if (message instanceof InitialMessage m) {
+                } else if (message instanceof PlayerNameMessage m) {
                     // allow name changes
                     player.setName(m.playerName());
                 } else {

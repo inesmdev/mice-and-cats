@@ -47,7 +47,7 @@ public interface Message {
             case EntityUpdateMessage.TAG -> EntityUpdateMessage::parse;
             case GenericErrorMessage.TAG -> GenericErrorMessage::parse;
             case GameWorldMessage.TAG -> GameWorldMessage::parse;
-            case InitialMessage.TAG -> InitialMessage::parse;
+            case PlayerNameMessage.TAG -> PlayerNameMessage::parse;
             case JoinGameMessage.TAG -> JoinGameMessage::parse;
             case SetReadyForGameMessage.TAG -> SetReadyForGameMessage::parse;
             case ExitGameMessage.TAG -> ExitGameMessage::parse;

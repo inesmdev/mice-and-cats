@@ -131,6 +131,6 @@ public class Client implements AutoCloseable, Runnable {
 
     public void setPlayerName(String name) {
         playerName = name;
-        send(new InitialMessage(name));
+        send(new PlayerNameMessage(name));
     }
 }
