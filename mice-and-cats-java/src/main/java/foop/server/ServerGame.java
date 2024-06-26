@@ -8,8 +8,8 @@ import foop.world.World;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.swing.*;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
@@ -58,40 +58,36 @@ public class ServerGame {
     }
 
     public void run() {
-        var r = new Random();
+        long startTime = System.nanoTime();
 
-        // Timer for the game duration
-        Timer timer = new Timer(1000, e -> {
-
-            duration = duration.minusSeconds(1);
-            // TODO send update to the players
-            var msg = new TimeUpdateMessage(duration.toMillis());
-            players.forEach(p -> p.send(msg));
-        });
-        timer.start();
         while (Main.running) {
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                log.error(e.getMessage());
-            }
+            long elapsedTime = System.nanoTime() - startTime;
+            var remaining = duration.minusNanos(elapsedTime);
+            var timeUpdate = new TimeUpdateMessage(remaining.toMillis());
 
-            if (duration.isZero()) {
-                timer.stop();
-                //Todo send Stop Message
-                var msg = new GameOverMessage(GameOverMessage.Result.TIMEOUT);
-                players.forEach(p -> p.send(msg));
-                timer.stop();
-                log.info("Duration finished. Stopping game");
-                return;
-            }
             synchronized (this) {
                 if (players.isEmpty()) {
                     log.info("No players left. Stopping game");
                     return;
                 }
-                log.info("server update{}", players);
-                world.serverUpdate(players);
+
+                players.forEach(p -> p.send(timeUpdate));
+
+                if(remaining.isPositive()) {
+                    log.info("server update{}", players);
+                    world.serverUpdate(players);
+                } else {
+                    log.info("Duration finished. Stopping game");
+                    var msg = new GameOverMessage(GameOverMessage.Result.TIMEOUT);
+                    new ArrayList<>(players).forEach(p -> p.gameOver(msg));
+                    return;
+                }
+            }
+
+            try {
+                Thread.sleep(Math.min(1000, remaining.toMillis()));
+            } catch (InterruptedException e) {
+                log.error(e.getMessage());
             }
         }
     }
