@@ -9,8 +9,8 @@ public record TimeUpdateMessage(long durationMills) implements Message{
     public static final int TAG = 14;
 
     public static TimeUpdateMessage parse(DataInputStream in) throws IOException {
-        var durationSeconds = in.readLong();
-        return new TimeUpdateMessage(durationSeconds);
+        var durationMillis = in.readLong();
+        return new TimeUpdateMessage(durationMillis);
     }
 
     @Override
