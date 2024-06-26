@@ -6,6 +6,7 @@ create
 
 feature -- Entities
 	cat : POSITION
+	player : PLAYER
 	subway_generator : SUBWAYGENERATOR
 	subways : ARRAY2 [INTEGER]
 
@@ -16,6 +17,7 @@ feature -- Initialization
     do
         create cat.make
         create subway_generator.make
+        create player.make
         subways := subway_generator.get_subways
     end
 
@@ -50,16 +52,32 @@ feature -- Initialization
             	curr := subways.item (ytmp, xtmp)
 
             	if
-            		cat.x = x and cat.y = y -- render cat position (cat is "above" subways)
+            		cat.equals (player.pos)
+            	then
+            		player.set_is_dead (TRUE)
+            		io.put_string ("player died")
+            	end
+
+            	if
+            		-- render cat position (cat is "above" subways)
+            		cat.x = x and cat.y = y
             	then
             		io.put_string ("| c ")
             	elseif
+            		player.pos.x = x and player.pos.y = y
+            	then
+            		io.put_string ("| ")
+            		io.put_string (player.name)
+            		io.putstring (" ")
+            	elseif
+            		-- this is a subway cell
             		curr > 0
             	then
             		io.put_string ("| ")
             		io.putint (curr)
             		io.putstring (" ")
             	else
+            		-- this is a normal, empty cell
             		io.put_string ("|   ")
             	end
                 x := x + 1

@@ -18,8 +18,8 @@ feature -- Initialization
 	make
 			-- Initialize coordinates to 1,1.
 		do
-			x := 1
-			y := 1
+			x := 0
+			y := 0
 		end
 
 feature --setter
@@ -31,5 +31,34 @@ feature --setter
 	set_y(para: INTEGER)
 		do
 			y := para
+		end
+
+feature
+	-- equals method
+	equals(other : POSITION): BOOLEAN
+		-- equals method
+		do
+			if
+				x = other.x and y = other.y
+			then
+				Result := TRUE
+			else
+				Result := FALSE
+			end
+		end
+
+feature
+
+	set_to_random_position
+		--set random position on 10x10 grid
+		local
+			rand : RANDOMNUMBERGENERATOR
+			i : INTEGER
+		do
+			create rand.make
+			i := rand.get_random
+			x := i\\10
+			y := i//10
+
 		end
 end
