@@ -17,34 +17,30 @@ feature -- Initialization
 	make
 		do
 			create grid.make_filled (0, 10, 10)
-			create_subways
+			create_entries
 		end
 
-feature -- create 4 random non-overlapping subways
-    create_subways
-            -- Place four horizontal lines on the grid, each at least one row apart.
-        local
-            row, col, i: INTEGER
-        do
-            from
-                row := 1
-                i := 1
-            until
-                i > 4 or else row > 10
-            loop
-                from
-                    col := 1
-                until
-                    col > 10
-                loop
-                    grid.put (row, row, col)
-                    col := col + 4
-                end
-                row := row + 4 -- Ensure the next line is at least one row apart
-                i := i + 1
-            end
-        end
+feature
+	create_entries
+		-- create random entries
+		local
+			rnd : RANDOMNUMBERGENERATOR
+			i, col, row : INTEGER
+		do
+			create rnd.make
+			from
+				i := 1
+			until
+				i = 4
+			loop
+				col := rnd.new_random\\10 + 1
+				row := rnd.new_random\\10 + 1
+				grid.put (1, row, col)
 
+				i := i + 1
+			end
+
+		end
 feature -- return grid of subways
 	get_subways: ARRAY2 [INTEGER]
 		do
