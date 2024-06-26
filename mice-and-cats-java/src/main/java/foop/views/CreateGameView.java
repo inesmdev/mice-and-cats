@@ -54,8 +54,8 @@ public class CreateGameView extends JPanel {
         panel.add(gameSizePanel, BorderLayout.CENTER);
 
         JLabel gameDurationLabel = new JLabel("Game duration [s]");
-        JSpinner gameDuration = new JSpinner();
-        gameDuration.setValue(42);
+        var gameDurationModel = new SpinnerNumberModel(60, 5, 60 * 60, 5);
+        JSpinner gameDuration = new JSpinner(gameDurationModel);
         JPanel gameDurationPanel = new JPanel();
         gameDurationPanel.setMaximumSize(new Dimension(300, 50));
         gameDurationPanel.add(gameDurationLabel);
@@ -69,14 +69,14 @@ public class CreateGameView extends JPanel {
         createGameButton.addActionListener(e -> {
             log.info("Create Game");
             var name = gameName.getText();
-            int duration = 0;
             int size;
             try {
                 size = Integer.parseInt(gameSize.getText());
-                duration = Integer.parseInt(gameDuration.getValue().toString());
             } catch (NumberFormatException ex) {
-                size = 0;
+                JOptionPane.showMessageDialog(frame, "Please enter a valid size");
+                return;
             }
+            int duration = gameDurationModel.getNumber().intValue();
             var returnSize = size;
             if (name == null || name.trim().isEmpty()) {
                 JOptionPane.showMessageDialog(frame, "Please enter a valid name");
