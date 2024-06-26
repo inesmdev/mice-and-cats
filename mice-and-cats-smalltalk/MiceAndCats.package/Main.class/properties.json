@@ -1,0 +1,14 @@
+{
+	"category" : "MiceAndCats",
+	"classinstvars" : [
+		 ],
+	"classvars" : [
+		 ],
+	"commentStamp" : "",
+	"instvars" : [
+		 ],
+	"name" : "Main",
+	"pools" : [
+		 ],
+	"super" : "Object",
+	"type" : "normal" }
