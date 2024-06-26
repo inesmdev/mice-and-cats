@@ -33,11 +33,11 @@ feature {NONE} -- Initialization
             from
             	i := 0
             until
-            	i >= 10 or else checkerboard.player.is_dead or else key = 'q' or else checkerboard.victory
+            	i >= 20 or else checkerboard.player.is_dead or else key = 'q' or else checkerboard.victory
             loop
             	io.put_string ("Please enter key: %N")
-            	io.read_character
             	key := io.last_character
+            	io.read_character -- needed for blocking
             	checkerboard.move_player(key)
             	checkerboard.print_frame
             	io.new_line
@@ -53,7 +53,7 @@ feature {NONE} -- Initialization
             	io.putstring ("YOU HAVE WON.")
 
             elseif
-            	i = 10
+            	i = 20
             then
             	io.put_string ("GAME OVER: COULD NOT HIDE IN TIME.")
             	io.new_line

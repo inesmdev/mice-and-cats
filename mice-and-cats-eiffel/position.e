@@ -49,7 +49,7 @@ feature
 				Result := FALSE
 			end
 		end
-
+		
 feature
 
 	set_to_random_position

@@ -106,19 +106,42 @@ feature -- Initialization
 
 feature -- change positions of entities
 	print_frame
-	local
-		random : RANDOMNUMBERGENERATOR
-		random_int : INTEGER
-	do
-		create random.make
+		local
+			random : RANDOMNUMBERGENERATOR
+			i : INTEGER
+		do
+			-- move cat
+			create random.make
+			i := random.new_random\\10\\4 --gives a number between 0 and 3 -> one for each possible direction
+			if i = 0 then
+				if cat.x > 0 then
+					cat.set_x (cat.x - 1)
+				end
 
-		cat.set_x(random.new_random\\10)
-		cat.set_y(random.new_random\\10)
-		print_grid
-	end
+            elseif i = 1 then
+            	if cat.y > 0 then
+            		cat.set_y(cat.y - 1)
+            	end
+
+            elseif i = 2 then
+            	if cat.y < 9 then
+            		cat.set_y (cat.y + 1)
+            	end
+
+            elseif i = 3 then
+            	if cat.x < 9 then
+            		cat.set_x (cat.x + 1)
+            	end
+
+            else
+            	--invalid command
+            	io.put_string ("This should never happen.%N")
+            end
+			print_grid
+		end
 
 feature
-	-- move player
+	-- move entities
 	move_player(key : CHARACTER)
 		do
 			if key = 'a' then
