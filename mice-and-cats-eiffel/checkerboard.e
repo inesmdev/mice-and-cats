@@ -10,6 +10,9 @@ feature -- Entities
 	subway_generator : SUBWAYGENERATOR
 	subways : ARRAY2 [INTEGER]
 
+feature -- game properties
+	victory : BOOLEAN
+
 feature -- Initialization
 
     make
@@ -19,6 +22,7 @@ feature -- Initialization
         create subway_generator.make
         create player.make
         subways := subway_generator.get_subways
+        victory := FALSE
     end
 
     print_grid
@@ -55,7 +59,10 @@ feature -- Initialization
             		cat.equals (player.pos)
             	then
             		player.set_is_dead (TRUE)
-            		io.put_string ("player died")
+            	end
+
+            	if curr > 0 and player.pos.x = x and player.pos.y = y then
+            		victory := true
             	end
 
             	if
@@ -74,7 +81,7 @@ feature -- Initialization
             		curr > 0
             	then
             		io.put_string ("| ")
-            		io.putint (curr)
+            		io.putstring ("O")
             		io.putstring (" ")
             	else
             		-- this is a normal, empty cell
@@ -115,12 +122,12 @@ feature
 	move_player(key : CHARACTER)
 		do
 			if key = 'a' then
-				if player.pos.x > 1 then
+				if player.pos.x > 0 then
 					player.pos.set_x (player.pos.x - 1)
 				end
 
             elseif key = 'w' then
-            	if player.pos.y > 1 then
+            	if player.pos.y > 0 then
             		player.pos.set_y(player.pos.y - 1)
             	end
 
@@ -138,6 +145,6 @@ feature
             	--invalid command
             	io.put_string ("Invalid command. Try again.%N")
             end
-          
+
 		end
 end

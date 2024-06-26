@@ -33,7 +33,7 @@ feature {NONE} -- Initialization
             from
             	i := 0
             until
-            	i >= 10 or else checkerboard.player.is_dead or else key = 'q'
+            	i >= 10 or else checkerboard.player.is_dead or else key = 'q' or else checkerboard.victory
             loop
             	io.put_string ("Please enter key: %N")
             	io.read_character
@@ -47,9 +47,11 @@ feature {NONE} -- Initialization
             if
             	checkerboard.player.is_dead = TRUE
             then
-            	io.put_boolean (checkerboard.player.is_dead)
             	io.put_string ("GAME OVER: YOU DIED.")
             	io.new_line
+            elseif checkerboard.victory then
+            	io.putstring ("YOU HAVE WON.")
+
             elseif
             	i = 10
             then
