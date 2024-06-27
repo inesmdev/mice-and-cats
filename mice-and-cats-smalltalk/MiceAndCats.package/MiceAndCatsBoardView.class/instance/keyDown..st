@@ -13,8 +13,7 @@ keyDown: evt
 	(k = 'd' or: k = '<right>') ifTrue: [ dx := 1 ].
 
 	"Transcript showln: (dx@dy)."
-	(dx ~= 0 or: dy ~= 0) ifTrue: [
-
-		world moveMouse: dx@dy
+	dx @ dy ~= (0@0) ifTrue: [
+		movement := dx @ dy.
 	]
 	

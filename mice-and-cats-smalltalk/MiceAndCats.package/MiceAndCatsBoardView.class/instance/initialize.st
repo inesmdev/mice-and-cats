@@ -3,6 +3,8 @@ initialize
 
 	super initialize.
 	
+	movement := 0@0.
+	
 	self
 		color: (self userInterfaceTheme get: #color for: #ScrollPane);
 		extent: 1920@1080;
@@ -15,5 +17,5 @@ initialize
 		layoutInset: 20;
 		yourself.
 			
-	"we only need key down events"
-	self setProperty: #eventCheck toValue: [:evt | evt isKeyDown].
+	"filter for events"
+	self setProperty: #eventCheck toValue: [:evt | evt isKeyDown ].
