@@ -10,6 +10,7 @@ class
 create
 	make
 
+
 feature -- class variable
 	grid : ARRAY2 [INTEGER]
 
@@ -19,8 +20,32 @@ feature -- Initialization
 			create grid.make_filled (0, 10, 10)
 			create_entries
 		ensure
-			--todo: ensure that all cells are 0
+			check_at_least_one_exit(grid)
 		end
+
+	check_at_least_one_exit (array: ARRAY2 [INTEGER]): BOOLEAN
+            -- Check if all elements in `a_array` are zero.
+        local
+            i, j, sum: INTEGER
+        do
+        	sum := 0
+            from
+                i := 1
+            until
+                i >= 10
+            loop
+                from
+                    j := 1
+                until
+                    j >= 10
+                loop
+                	sum := sum + array.item(i,j)
+                    j := j + 1
+                end
+                i := i + 1
+            end
+            Result := sum > 0
+        end
 
 feature
 	create_entries
@@ -41,9 +66,9 @@ feature
 
 				i := i + 1
 			end
-		ensure
-			--todo: ensure at least one exit
 		end
+
+
 feature -- return grid of subways
 	get_subways: ARRAY2 [INTEGER]
 		do

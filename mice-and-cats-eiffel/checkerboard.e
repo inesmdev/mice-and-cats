@@ -104,9 +104,7 @@ feature -- Initialization
         io.put_string ("+%N")
     end
 
-invariant
-    	-- todo: check that cat and player are within bounds
-    	-- todo: check that at least one exit exists
+
 
 feature -- change positions of entities
 	print_frame
