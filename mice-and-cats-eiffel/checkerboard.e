@@ -134,10 +134,6 @@ feature -- change positions of entities
             	if cat.x < 9 then
             		cat.set_x (cat.x + 1)
             	end
-
-            else
-            	--invalid command
-            	io.put_string ("This should never happen.%N")
             end
 			print_grid
 		end
@@ -165,11 +161,17 @@ feature
             	if player.pos.x < 9 then
             		player.pos.set_x (player.pos.x + 1)
             	end
-
             else
             	--invalid command
             	io.put_string ("Invalid command. Try again.%N")
             end
 
 		end
+
+invariant
+	--ensure that cat and player are always within bounds
+	cat.y < 10 and cat.y >= 0
+	cat.x < 10 and cat.y >= 0
+	player.pos.x < 10 and player.pos.x >= 0
+	player.pos.y < 10 and player.pos.y >= 0
 end
