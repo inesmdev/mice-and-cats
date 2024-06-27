@@ -9,7 +9,9 @@
 		"rng",
 		"width",
 		"height",
-		"grid" ],
+		"grid",
+		"catPos",
+		"mousePos" ],
 	"name" : "MiceAndCatsWorld",
 	"pools" : [
 		 ],

@@ -20,7 +20,12 @@ drawOn: aCanvas
 			      r := ((x*cellSize)@(y*cellSize) extent: cellSize@cellSize).
 				c fillRectangle: r color: color.			
 			]
-		]
+		].
+		
+		c drawImage: (MiceAndCatsAssets cat scaledToSize: (cellSize@cellSize)) at: ((world catPos x)@( world catPos y)*cellSize).
+		c drawImage: (MiceAndCatsAssets mouse scaledToSize: (cellSize@cellSize)) at: ((world mousePos x)@( world mousePos y)*cellSize).
+
+
 	]
 
 	 
