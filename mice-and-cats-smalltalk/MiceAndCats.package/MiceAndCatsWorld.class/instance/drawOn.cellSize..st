@@ -10,7 +10,7 @@ drawOn: canvas cellSize: cellSize
 		]
 	].
 	
-	canvas drawImage: (MiceAndCatsAssets cat scaledToSize: (cellSize@cellSize)) at: (catPos xy * cellSize).
 	canvas drawImage: (MiceAndCatsAssets mouse scaledToSize: (cellSize@cellSize)) at: (mousePos xy * cellSize).
-
+	canvas drawImage: (MiceAndCatsAssets cat scaledToSize: (cellSize@cellSize)) at: (catPos xy * cellSize).
+	
 

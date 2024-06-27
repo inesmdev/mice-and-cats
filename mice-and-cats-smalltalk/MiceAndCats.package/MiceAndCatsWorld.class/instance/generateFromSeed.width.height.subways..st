@@ -4,6 +4,7 @@ generateFromSeed: seed width: w height: h subways: s
 	| |
 	width := w.
 	height := h.
+	subways := s.
 	grid := Array new: (w * h).
 	rng := Random seed: seed.
 	grid at: 1 put: 1.

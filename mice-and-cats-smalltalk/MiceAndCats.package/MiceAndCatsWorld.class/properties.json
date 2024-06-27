@@ -11,7 +11,8 @@
 		"height",
 		"grid",
 		"catPos",
-		"mousePos" ],
+		"mousePos",
+		"subways" ],
 	"name" : "MiceAndCatsWorld",
 	"pools" : [
 		 ],

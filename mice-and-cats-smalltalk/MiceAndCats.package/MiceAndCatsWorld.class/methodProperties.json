@@ -2,8 +2,11 @@
 	"class" : {
 		 },
 	"instance" : {
-		"drawOn:cellSize:" : "robert 6/27/2024 23:29",
-		"generateFromSeed:width:height:subways:" : "robert 6/28/2024 00:02",
+		"drawOn:cellSize:" : "robert 6/28/2024 01:09",
+		"generateFromSeed:width:height:subways:" : "robert 6/28/2024 01:20",
 		"height" : "robert 6/27/2024 10:53",
+		"isDead" : "robert 6/28/2024 01:33",
+		"moveCat" : "robert 6/28/2024 01:23",
 		"moveMouse:" : "robert 6/28/2024 00:29",
+		"subways" : "robert 6/28/2024 01:34",
 		"width" : "robert 6/27/2024 10:53" } }
