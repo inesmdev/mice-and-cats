@@ -2,6 +2,9 @@ event handling
 logEvent: evt
 
 	| eventMorph |
+	
+	
+	
 	evt = self lastEvent
 		ifTrue: [^ self logEventRepetition: evt].
 

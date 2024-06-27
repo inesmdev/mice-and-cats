@@ -1,11 +1,11 @@
 as yet unclassified
 drawOn: canvas cellSize: cellSize
-	"comment stating purpose of message"
+	"Draws the world"
 	|color r|
 	0 to: (height - 1) do: [ :y |
 		0 to: (width - 1) do: [ :x | 
 			color := (x + y \\ 2 = 0) ifTrue: [Color gray] ifFalse: [Color gray darker].
-		      r := ((x*cellSize)@(y*cellSize) extent: cellSize@cellSize).
+		      r := x@y * cellSize extent: cellSize@cellSize.
 			canvas fillRectangle: r color: color.			
 		]
 	].

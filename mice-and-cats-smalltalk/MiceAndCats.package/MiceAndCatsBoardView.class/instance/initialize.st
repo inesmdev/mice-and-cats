@@ -14,15 +14,6 @@ initialize
 		cellGap: 10;
 		layoutInset: 20;
 		yourself.
-	
-	#(processKeyStroke 'Test key stroke'
-	processKeyDown 'Test key down'
-	processKeyUp 'Test key up')
-		groupsDo: [:selector :label |
-			self addMorphBack: (ThreePhaseButtonMorph checkBox
-				target: self;
-				actionSelector: selector;
-				label: label;
-				yourself)].
-	
-	self processKeyStroke.
+			
+	"we only need key down events"
+	self setProperty: #eventCheck toValue: [:evt | evt isKeyDown].

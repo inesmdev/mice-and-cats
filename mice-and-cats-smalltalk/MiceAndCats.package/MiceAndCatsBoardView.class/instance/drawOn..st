@@ -7,13 +7,14 @@ drawOn: aCanvas
       offset := self extent - (world width * cellSize @ (world height * cellSize)) // 2.
 	
 	aCanvas
-		drawString: 'Move your mouse cursor to here and start typing. Try modifiers, too.' translated
+		drawString: 'Control: wasd or arrow keys' translated
 		at: self topLeft
 		font: Preferences standardButtonFont
 		color: Color gray "right parenthesis expected ->".
 
 	aCanvas translateBy: (self topLeft + offset) during: [ :c |		
 		world drawOn: c cellSize: cellSize
-	]
-
+	].
+	
+	self changed.
 	 
