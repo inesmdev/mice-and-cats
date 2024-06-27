@@ -1,6 +1,6 @@
 drawing
 drawOn: aCanvas
-      |r color cellSize offset|
+      | cellSize offset|
 	super drawOn: aCanvas.
 	
 	cellSize := (self width // (world width)) min: (self height // (world height)).
@@ -12,20 +12,8 @@ drawOn: aCanvas
 		font: Preferences standardButtonFont
 		color: Color gray "right parenthesis expected ->".
 
-	"Draw the grid"	
 	aCanvas translateBy: (self topLeft + offset) during: [ :c |		
-		0 to: (world height - 1) do: [ :y |
-			0 to: (world width - 1) do: [ :x | 
-				color := (x + y \\ 2 = 0) ifTrue: [Color black] ifFalse: [Color gray].
-			      r := ((x*cellSize)@(y*cellSize) extent: cellSize@cellSize).
-				c fillRectangle: r color: color.			
-			]
-		].
-		
-		c drawImage: (MiceAndCatsAssets cat scaledToSize: (cellSize@cellSize)) at: ((world catPos x)@( world catPos y)*cellSize).
-		c drawImage: (MiceAndCatsAssets mouse scaledToSize: (cellSize@cellSize)) at: ((world mousePos x)@( world mousePos y)*cellSize).
-
-
+		world drawOn: c cellSize: cellSize
 	]
 
 	 
