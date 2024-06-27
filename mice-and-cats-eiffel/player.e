@@ -18,7 +18,6 @@ feature -- attributes of player
 
 feature
 	-- initialization
-	-- todo: spawn underground
 	make
 		do
 			create pos.make

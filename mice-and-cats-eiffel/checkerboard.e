@@ -61,17 +61,17 @@ feature -- Initialization
             		player.set_is_dead (TRUE)
             	end
 
-            	if curr > 0 and player.pos.x = x and player.pos.y = y then
+            	if curr > 0 and player.pos.x.is_equal (x) and player.pos.y.is_equal (y) then
             		victory := true
             	end
 
             	if
             		-- render cat position (cat is "above" subways)
-            		cat.x = x and cat.y = y
+            		cat.x.is_equal (x) and cat.y.is_equal (y)
             	then
             		io.put_string ("| c ")
             	elseif
-            		player.pos.x = x and player.pos.y = y
+            		player.pos.x.is_equal (x) and player.pos.y.is_equal (y)
             	then
             		io.put_string ("| ")
             		io.put_string (player.name)
