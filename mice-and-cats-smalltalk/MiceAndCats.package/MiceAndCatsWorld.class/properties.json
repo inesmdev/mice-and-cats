@@ -1,0 +1,17 @@
+{
+	"category" : "MiceAndCats",
+	"classinstvars" : [
+		 ],
+	"classvars" : [
+		 ],
+	"commentStamp" : "",
+	"instvars" : [
+		"rng",
+		"width",
+		"height",
+		"grid" ],
+	"name" : "MiceAndCatsWorld",
+	"pools" : [
+		 ],
+	"super" : "Object",
+	"type" : "normal" }

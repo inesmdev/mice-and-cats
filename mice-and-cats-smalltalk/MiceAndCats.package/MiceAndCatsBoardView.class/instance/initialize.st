@@ -5,12 +5,12 @@ initialize
 	
 	self
 		color: (self userInterfaceTheme get: #color for: #ScrollPane);
-		extent: 300@50;
+		extent: 1920@1080;
 		layoutPolicy: TableLayout new;
 		listDirection: #leftToRight;
 		wrapDirection: #topToBottom;
 		hResizing: #rigid;
-		vResizing: #shrinkWrap;
+		vResizing: #rigid;
 		cellGap: 10;
 		layoutInset: 20;
 		yourself.
