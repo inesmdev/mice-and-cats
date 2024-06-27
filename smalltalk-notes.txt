@@ -62,3 +62,11 @@ Tools > Simple Change Sorter can be used to undo changes
 
 In the autocomplete popup you can press the right arrow to show details and press again to open a separate window for them.
 
+
+Images:
+    Run in workspace:
+        MiceAndCatsAssets reloadFromJavaResources.
+    Select the project root.
+    A window with the cat will open on success.
+
+
