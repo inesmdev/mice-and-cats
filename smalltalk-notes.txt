@@ -56,3 +56,6 @@ setup: Right click Project > Add or remove packages MiceAndCats select subdirect
 committing changes:
     click commit
 
+
+Tools > Simple Change Sorter can be used to undo changes
+
