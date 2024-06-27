@@ -18,6 +18,8 @@ feature -- Initialization
 		do
 			create grid.make_filled (0, 10, 10)
 			create_entries
+		ensure
+			--todo: ensure that all cells are 0
 		end
 
 feature
@@ -39,7 +41,8 @@ feature
 
 				i := i + 1
 			end
-
+		ensure
+			--todo: ensure at least one exit
 		end
 feature -- return grid of subways
 	get_subways: ARRAY2 [INTEGER]

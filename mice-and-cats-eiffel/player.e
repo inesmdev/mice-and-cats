@@ -29,6 +29,9 @@ feature
 
 feature --setter
 	set_pos(para : POSITION)
+		require
+			para.x < 10 and para.x >= 0
+			para.y < 10 and para.y >= 0
 		do
 			pos := para
 		end

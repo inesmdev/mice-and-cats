@@ -23,17 +23,29 @@ feature -- Initialization
 			create rnd.make
 			x := rnd.new_random\\10
 			y := rnd.new_random\\10
+
+		ensure
+			x < 10 and x >= 0
+			y < 10 and y >= 0
 		end
 
 feature --setter
 	set_x(para : INTEGER)
+		require
+			para < 10 and para >= 0
 		do
 			x := para
+		ensure
+			x < 10 and x >= 0
 		end
 
 	set_y(para: INTEGER)
+		require
+			para < 10 and para >= 0
 		do
 			y := para
+		ensure
+			y < 10 and y >= 0
 		end
 
 feature
@@ -49,7 +61,7 @@ feature
 				Result := FALSE
 			end
 		end
-		
+
 feature
 
 	set_to_random_position
@@ -62,6 +74,8 @@ feature
 
 			x := (rand.new_random + 1)\\10
 			y := (rand.new_random + 1)\\10
-
+		ensure
+			x < 10 and x >= 0
+			y < 10 and y >= 0
 		end
 end
