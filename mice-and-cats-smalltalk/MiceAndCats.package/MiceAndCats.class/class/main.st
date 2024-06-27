@@ -1,6 +1,6 @@
 as yet unclassified
 main
-	"comment stating purpose of message"
+	"Run the game"
 
 	|world|
 	Transcript showln: 'Running MiceAndCats'.
