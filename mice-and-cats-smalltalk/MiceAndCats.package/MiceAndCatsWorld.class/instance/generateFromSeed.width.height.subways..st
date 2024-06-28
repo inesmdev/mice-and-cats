@@ -18,6 +18,15 @@ generateFromSeed: seed width: w height: h subways: s
 	].
 	self tileAt: (3)@(h // 3) put: -1.
 	self tileAt: (w - 3)@(h // 3) put: -1.
+	
+	0 to: 2 do: [ :x | | min max rand |
+		min := 3.
+		max := w - 3.
+		rand := rng nextInt: (max - min + 1) + min - 1.
+		self tileAt: rand@(h // 3 - 1) put: 1.
+		self tileAt: rand@(h // 3 - 2) put: -1.
+	].
+
 	self tileAt: (3)@l2 put: -2.
 	self tileAt: (w - 3)@l2 put: -2.
 
