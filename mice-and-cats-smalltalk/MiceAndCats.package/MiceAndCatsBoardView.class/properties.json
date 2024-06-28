@@ -1,0 +1,15 @@
+{
+	"category" : "MiceAndCats",
+	"classinstvars" : [
+		 ],
+	"classvars" : [
+		 ],
+	"commentStamp" : "",
+	"instvars" : [
+		"world",
+		"movement" ],
+	"name" : "MiceAndCatsBoardView",
+	"pools" : [
+		 ],
+	"super" : "Morph",
+	"type" : "normal" }

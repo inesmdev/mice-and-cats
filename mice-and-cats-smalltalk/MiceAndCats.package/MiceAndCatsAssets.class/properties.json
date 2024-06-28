@@ -1,0 +1,15 @@
+{
+	"category" : "MiceAndCats",
+	"classinstvars" : [
+		 ],
+	"classvars" : [
+		"Cat",
+		"Mouse" ],
+	"commentStamp" : "",
+	"instvars" : [
+		 ],
+	"name" : "MiceAndCatsAssets",
+	"pools" : [
+		 ],
+	"super" : "Object",
+	"type" : "normal" }

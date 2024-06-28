@@ -1,0 +1,18 @@
+{
+	"category" : "MiceAndCats",
+	"classinstvars" : [
+		 ],
+	"classvars" : [
+		 ],
+	"commentStamp" : "",
+	"instvars" : [
+		"xy",
+		"underground",
+		"x",
+		"y",
+		"z" ],
+	"name" : "MiceAndCatsPosition",
+	"pools" : [
+		 ],
+	"super" : "Object",
+	"type" : "normal" }
