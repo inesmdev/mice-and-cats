@@ -7,6 +7,9 @@ note
 class
 	POSITION
 
+inherit
+	SETTINGS
+
 create
 	make
 
@@ -49,7 +52,7 @@ feature
 				Result := FALSE
 			end
 		end
-		
+
 feature
 
 	set_to_random_position
@@ -60,8 +63,8 @@ feature
 		do
 			create rand.make
 
-			x := (rand.new_random + 1)\\10
-			y := (rand.new_random + 1)\\10
+			x := (rand.new_random + 1)\\game_board_width
+			y := (rand.new_random + 1)\\game_board_height
 
 		end
 end

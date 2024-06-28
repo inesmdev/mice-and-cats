@@ -41,6 +41,8 @@ feature
 			l_seed := l_seed * 1000 + l_time.micro_second
 			create random_sequence.set_seed (l_seed)
 			Result := l_seed\\100 --\\ is modulo, this returns the last 2 digits of seed
+		ensure
+			two_diget_number: RESULT /= VOID and then RESULT >= 0 and then RESULT < 100
 		end
 
 feature {NONE}

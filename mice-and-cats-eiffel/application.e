@@ -14,20 +14,17 @@ create
 
 feature {NONE} -- Initialization
 
-    make
+	make
             -- Initialize the main application.
-        local
+		local
             checkerboard: CHECKERBOARD
             i : INTEGER
+            j: INTEGER
             key : CHARACTER
         do
             create checkerboard.make
             io.putstring ("NEW GAME%N")
-            io.put_string ("Press keys (press 'q' to quit):%N")
-            io.put_string ("Press 'a' to move left. %N")
-            io.put_string ("Press 'w' to move up. %N")
-            io.put_string ("Press 's' to move down. %N")
-            io.put_string ("Press 'd' to move right. %N")
+            print_usage
 
             checkerboard.print_grid
             from
@@ -36,10 +33,18 @@ feature {NONE} -- Initialization
             	i >= 20 or else checkerboard.player.is_dead or else key = 'q' or else checkerboard.victory
             loop
             	io.put_string ("Please enter key: %N")
-            	key := io.last_character
-            	io.read_character -- needed for blocking
+            	io.put_string ("MOVES left")
+            	io.put_integer (20 - i)
+            	io.put_string ("%N")
+            	key := read_char
+
+            	print_usage
+            	io.new_line
+
             	checkerboard.move_player(key)
             	checkerboard.print_frame
+            	checkerboard.check_if_dead
+            	checkerboard.check_if_won
             	io.new_line
             	i := i + 1
             end
@@ -64,5 +69,24 @@ feature {NONE} -- Initialization
             end
 
         end
+
+feature
+
+	read_char: CHARACTER
+        -- Read a character from a console without waiting for Enter.
+    	external "C inline use <conio.h>"
+        	alias "return getch ();"
+    	end
+
+feature {NONE}
+
+	print_usage
+		do
+			io.put_string ("Press keys (press 'q' to quit):%N")
+            io.put_string ("Press 'a' to move left. %N")
+            io.put_string ("Press 'w' to move up. %N")
+            io.put_string ("Press 's' to move down. %N")
+            io.put_string ("Press 'd' to move right. %N")
+		end
 
 end
