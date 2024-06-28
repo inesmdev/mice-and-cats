@@ -14,7 +14,7 @@ generateFromSeed: seed width: w height: h subways: s
 	l2 := h // 3 * 2.
 	4 to: (w - 4) do: [ :x | 
 		self tileAt: x@(h // 3) put: 1.
-		self tileAt: x@l2 put: 1.
+		self tileAt: x@l2 put: 2.
 	].
 	self tileAt: (3)@(h // 3) put: -1.
 	self tileAt: (w - 3)@(h // 3) put: -1.

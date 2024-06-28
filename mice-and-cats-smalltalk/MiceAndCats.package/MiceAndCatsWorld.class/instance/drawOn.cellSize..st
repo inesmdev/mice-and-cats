@@ -8,7 +8,11 @@ drawOn: canvas cellSize: cellSize
 			
 			tile := self tileAt: x@y.
 			tile ~= 0 ifTrue: [
-				color := Color red.
+				tile abs = 1 ifTrue: [
+					color := Color red.
+				] ifFalse: [
+					color := Color blue.
+				] 
 			].
 			tile > 0 ifTrue: [
 				 color := color thriceDarker.
