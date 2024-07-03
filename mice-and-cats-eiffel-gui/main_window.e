@@ -15,13 +15,6 @@ inherit
 			is_in_default_state
 		end
 
-	INTERFACE_NAMES
-		export
-			{NONE} all
-		undefine
-			default_create, copy
-		end
-
 create
 	default_create
 
@@ -172,4 +165,7 @@ feature {NONE} -- Implementation / Constants
 	Window_height: INTEGER = 400
 			-- Initial height for this window.
 
+	Label_confirm_close_window: STRING = "You are about to close this window.%NClick OK to proceed."
+			-- String for the confirmation dialog box that appears
+			-- when the user try to close the first window.
 end
