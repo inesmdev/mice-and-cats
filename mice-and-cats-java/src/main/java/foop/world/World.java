@@ -33,7 +33,6 @@ public class World {
     private final HashMap<Integer, Subway> subways;
     private final HashMap<Position, Subway> cellToSubway;
     private final Map<Integer, Position> catLastSeen = new HashMap<>();
-    private Position nextCatGoal = null;
     private long countInMySubway = 0;
     @Getter
     private final Duration duration;
@@ -135,19 +134,44 @@ public class World {
     }
 
     private void generateNewCatPosition(Entity cat) {
-        var r = new Random();
 
-        if (nextCatGoal == null) {
-            nextCatGoal = new Position(r.nextInt(grid[0].length), r.nextInt(grid.length));
-        }
+        Position nextCatGoal = findNearestPlayer();
+
         var dx = nextCatGoal.x() - cat.getPosition().x();
         var dy = nextCatGoal.y() - cat.getPosition().y();
         dx = Math.min(1, Math.max(-1, dx));
         dy = Math.min(1, Math.max(-1, dy));
         cat.setPosition(new Position(cat.getPosition().x() + dx, cat.getPosition().y() + dy));
-        if (nextCatGoal.equals(cat.getPosition())) {
-            nextCatGoal = null;
+
+    }
+
+    private Position findNearestPlayer(){
+        var visible = entities.stream().filter(e -> e.getType() == MOUSE && !e.isUnderground()).toList();
+        if (!visible.isEmpty()){
+            Entity cat = entities.get(0);
+            Entity nearest = visible.get(0);
+            double nearestDistance = getEuclidianDistance(cat.getPosition(), nearest.getPosition());
+
+            for (int i = 1; i < visible.size(); i++) {
+                Entity curr = visible.get(i);
+                double d = getEuclidianDistance(cat.getPosition(), curr.getPosition());
+                if(nearestDistance > d){
+                    nearestDistance = d;
+                    nearest = curr;
+                }
+            }
+
+            return nearest.getPosition();
         }
+        //if no players are visible, move randomly
+        var r = new Random();
+        return new Position(r.nextInt(grid[0].length), r.nextInt(grid.length));
+    }
+
+    private double getEuclidianDistance(Position a, Position b){
+        int dx = a.x() - b.x();
+        int dy = a.y() - b.y();
+        return Math.sqrt(dx * dx + dy * dy);
     }
 
     private void broadcastMsg(HashSet<Player> players, Message msg) {
