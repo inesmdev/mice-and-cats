@@ -32,7 +32,8 @@ feature {NONE} -- Initialization
 		do
 				-- Create main container.
 			create main_container
-
+			create_pixmap
+			create_drawing_area
 		end
 
 	initialize
@@ -40,9 +41,13 @@ feature {NONE} -- Initialization
 		do
 			Precursor {EV_TITLED_WINDOW}
 
-			build_main_container
-			extend (main_container)
+			drawing_area.expose_actions.extend (agent on_draw)
+			drawing_area.resize_actions.extend (agent on_resize)
 
+			build_main_container
+			main_container.extend (drawing_area)
+
+			extend (main_container)
 
 				-- Execute `request_close_window' when the user clicks
 				-- on the cross in the title bar.
@@ -64,7 +69,6 @@ feature {NONE} -- Initialization
 				(title.is_equal (Window_title))
 		end
 
-
 feature {NONE} -- Implementation, Close event
 
 	request_close_window
@@ -78,7 +82,7 @@ feature {NONE} -- Implementation, Close event
 			if question_dialog.selected_button ~ (create {EV_DIALOG_CONSTANTS}).ev_ok then
 					-- Destroy the window.
 				destroy
-				
+
 					-- End the application.
 					--| TODO: Remove next instruction if you don't want the application
 					--|       to end when the first window is closed..
@@ -86,6 +90,62 @@ feature {NONE} -- Implementation, Close event
 					a.destroy
 				end
 			end
+		end
+
+feature {NONE} -- Drawing Area and Pixmap
+
+	drawing_area: EV_DRAWING_AREA
+			-- Area for custom drawing.
+
+	pixmap: EV_PIXMAP
+			-- Off-screen pixmap for double buffering.
+
+	create_drawing_area
+			-- Create and set up the drawing area.
+		do
+			create drawing_area
+				-- drawing_area.set_background_color (create {EV_COLOR}.make_with_rgb (1, 1, 1))
+		end
+
+	create_pixmap
+			-- Create and set up the pixmap for off-screen drawing.
+		do
+			create pixmap.make_with_size (Window_width, Window_height)
+		end
+
+	on_resize (x, y, w, h: INTEGER)
+			-- Grow pixmap exponentially if required
+		do
+			if pixmap.width < w or pixmap.height < h then
+				create pixmap.make_with_size (w.max (2 * pixmap.width), h.max (2 * pixmap.height))
+			end
+		ensure
+			wide_enough: pixmap.width >= w
+			tall_enough: pixmap.height >= h
+		end
+
+	on_draw (x, y, w, h: INTEGER)
+			-- Handle paint event.
+		require
+			wide_enough: pixmap.width >= drawing_area.width
+			tall_enough: pixmap.height >= drawing_area.height
+		do
+			draw_to_pixmap
+			drawing_area.draw_pixmap (0, 0, pixmap)
+		end
+
+	draw_to_pixmap
+			-- Draw graphics to the pixmap.
+		do
+			pixmap.remove_clip_area
+			pixmap.set_clip_area (create {EV_RECTANGLE}.make (0, 0, drawing_area.width, drawing_area.height))
+
+			pixmap.set_background_color (create {EV_COLOR}.make_with_rgb (0.5, 0.5, 0.5))
+			pixmap.clear
+
+			pixmap.set_background_color (create {EV_COLOR}.make_with_rgb (1, 0, 1))
+			pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 0, 0))
+			pixmap.draw_rectangle (10, 10, pixmap.width - 100, drawing_area.height - 100)
 		end
 
 feature {NONE} -- Implementation
@@ -96,7 +156,7 @@ feature {NONE} -- Implementation
 	build_main_container
 			-- Populate `main_container'.
 		do
-			main_container.extend (create {EV_TEXT})
+				-- main_container.extend (create {EV_TEXT}) -- Remove this line since it's replaced by drawing area
 		ensure
 			main_container_created: main_container /= Void
 		end
