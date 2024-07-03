@@ -125,6 +125,7 @@ feature {NONE} -- Drawing Area and Pixmap
 		do
 			draw_to_pixmap
 			drawing_area.draw_pixmap (0, 0, pixmap)
+			drawing_area.redraw -- immediately request next repaint
 		end
 
 	draw_to_pixmap
