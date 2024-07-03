@@ -111,6 +111,59 @@ feature -- Initialization
 			io.put_string ("+%N")
 		end
 
+	draw (w, h: INTEGER; pixmap: EV_PIXMAP)
+		local
+			tile_size: INTEGER
+			x, y, ox, oy: INTEGER
+			curr: INTEGER
+		do
+			tile_size := (w // width).min (h // height)
+			ox := (w - (width * tile_size)) // 2
+			oy := (h - (height * tile_size)) // 2
+
+			from
+				y := 1
+			until
+				y > map.height
+			loop
+				from
+					x := 1
+				until
+					x > map.width
+				loop
+					curr := map.item (y, x)
+
+					if
+							-- render cat position (cat is "above" subways)
+						cat.pos.x.is_equal (x) and cat.pos.y.is_equal (y)
+					then
+					elseif
+						player.pos.x.is_equal (x) and player.pos.y.is_equal (y)
+					then
+					elseif
+							-- this is a subway cell
+						curr > 0
+					then
+					else
+							-- this is a normal, empty cell
+					end
+
+					if (x + y) \\ 2 = 0 then
+						pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 0.5, 0.5))
+					else
+						pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 0.8, 0.8))
+					end
+
+					pixmap.fill_rectangle (ox + (x - 1) * tile_size, oy + (y - 1) * tile_size, tile_size, tile_size)
+
+					x := x + 1
+				end
+				y := y + 1
+
+			end
+
+		end
+
 feature -- change positions of entities
 	print_frame
 		local

@@ -153,23 +153,16 @@ feature {NONE} -- Drawing Area and Pixmap
 			wide_enough: pixmap.width >= drawing_area.width
 			tall_enough: pixmap.height >= drawing_area.height
 		do
-			draw_to_pixmap
-			drawing_area.draw_pixmap (0, 0, pixmap)
-			drawing_area.redraw -- immediately request next repaint
-		end
-
-	draw_to_pixmap
-			-- Draw graphics to the pixmap.
-		do
 			pixmap.remove_clip_area
 			pixmap.set_clip_area (create {EV_RECTANGLE}.make (0, 0, drawing_area.width, drawing_area.height))
 
 			pixmap.set_background_color (create {EV_COLOR}.make_with_rgb (0.5, 0.5, 0.5))
 			pixmap.clear
 
-			pixmap.set_background_color (create {EV_COLOR}.make_with_rgb (1, 0, 1))
-			pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 0, 0))
-			pixmap.draw_rectangle (10, 10, pixmap.width - 100, drawing_area.height - 100)
+			game_state.draw (drawing_area.width, drawing_area.height, pixmap)
+
+			drawing_area.draw_pixmap (0, 0, pixmap)
+			drawing_area.redraw -- immediately request next repaint
 		end
 
 feature {NONE} -- Implementation
