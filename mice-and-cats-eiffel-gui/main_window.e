@@ -102,7 +102,7 @@ feature {NONE} -- Game state and timing
 			create last_update.make_now
 		end
 
-	do_game_tick
+	maybe_do_game_tick
 		local
 			now: TIME
 		do
@@ -153,6 +153,8 @@ feature {NONE} -- Drawing Area and Pixmap
 			wide_enough: pixmap.width >= drawing_area.width
 			tall_enough: pixmap.height >= drawing_area.height
 		do
+			maybe_do_game_tick
+
 			pixmap.remove_clip_area
 			pixmap.set_clip_area (create {EV_RECTANGLE}.make (0, 0, drawing_area.width, drawing_area.height))
 

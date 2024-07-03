@@ -18,6 +18,7 @@ feature -- game properties
 	victory: BOOLEAN
 	width: INTEGER
 	height: INTEGER
+	rand: RANDOMNUMBERGENERATOR
 
 feature -- Initialization
 
@@ -26,6 +27,8 @@ feature -- Initialization
 		do
 			create cat.make ("CAT")
 			cat.set_pos (create {POSITION}.make)
+
+			create rand.make
 
 			create player.make
 
@@ -181,6 +184,8 @@ feature -- change positions of entities
 feature
 	do_update
 		do
+				--gives a number between 0 and 3 -> one for each possible direction
+			cat.move (rand.new_random \\ 4)
 		end
 
 feature
