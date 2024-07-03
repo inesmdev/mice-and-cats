@@ -124,6 +124,11 @@ feature -- change positions of entities
 		end
 
 feature
+	do_update
+		do
+		end
+
+feature
 	-- move entities
 	move_player (key: CHARACTER)
 		do

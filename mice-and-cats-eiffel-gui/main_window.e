@@ -27,6 +27,7 @@ feature {NONE} -- Initialization
 			create main_container
 			create_pixmap
 			create_drawing_area
+			new_game
 		end
 
 	initialize
@@ -83,6 +84,35 @@ feature {NONE} -- Implementation, Close event
 					a.destroy
 				end
 			end
+		end
+
+feature {NONE} -- Game state and timing
+
+	last_update: TIME
+			-- The time of the last simulation tick
+
+	update_seconds: REAL = 0.1
+
+	game_state: CHECKERBOARD
+			-- the current game state
+
+	new_game
+		do
+			create game_state.make
+			create last_update.make_now
+		end
+
+	do_game_tick
+		local
+			now: TIME
+		do
+			create now.make_now
+
+			if now.relative_duration (last_update).fine_seconds_count >= update_seconds then
+				game_state.do_update
+				last_update.fine_second_add (update_seconds)
+			end
+
 		end
 
 feature {NONE} -- Drawing Area and Pixmap
@@ -169,4 +199,5 @@ feature {NONE} -- Implementation / Constants
 	Label_confirm_close_window: STRING = "You are about to close this window.%NClick OK to proceed."
 			-- String for the confirmation dialog box that appears
 			-- when the user try to close the first window.
+
 end
