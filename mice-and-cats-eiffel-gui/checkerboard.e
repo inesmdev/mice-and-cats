@@ -190,9 +190,9 @@ feature
 
 feature
 	-- move entities
-	move_player (key: CHARACTER)
+	move_player (dir: INTEGER)
 		do
-			player.move (player.char_to_move (key))
+			player.move (dir)
 		end
 
 feature

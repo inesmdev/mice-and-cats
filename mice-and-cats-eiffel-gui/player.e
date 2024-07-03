@@ -85,26 +85,4 @@ feature {ANY}
 		            end
 		end
 
-	char_to_move (key: CHARACTER): INTEGER
-		local
-			i: INTEGER
-		do
-			if key = 'a' then
-				Result := 0
-
-            elseif key = 'w' then
-            	Result := 1
-
-            elseif key = 's' then
-            	Result := 2
-
-            elseif key = 'd' then
-            	Result := 3
-
-            else
-            	--invalid command
-            	io.put_string ("Invalid command. Try again.%N")
-            end
-
-		end
 end

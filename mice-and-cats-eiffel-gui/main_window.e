@@ -47,6 +47,8 @@ feature {NONE} -- Initialization
 				-- on the cross in the title bar.
 			close_request_actions.extend (agent request_close_window)
 
+			key_press_actions.extend (agent on_key_press)
+
 				-- Set the title of the window.
 			set_title (Window_title)
 
@@ -165,6 +167,26 @@ feature {NONE} -- Drawing Area and Pixmap
 
 			drawing_area.draw_pixmap (0, 0, pixmap)
 			drawing_area.redraw -- immediately request next repaint
+		end
+
+feature -- Event handling
+
+	on_key_press (key: EV_KEY)
+			-- Handle key press events.
+		do
+
+			if key.code = key.Key_a or key.code = key.Key_left then
+				game_state.move_player (0)
+			elseif key.code = key.Key_w or key.code = key.Key_up then
+				game_state.move_player (1)
+			elseif key.code = key.Key_s or key.code = key.Key_down then
+				game_state.move_player (2)
+			elseif key.code = key.Key_d or key.code = key.Key_right then
+				game_state.move_player (3)
+			end
+
+				--game_state.move_player (a_key_event.key_code)
+
 		end
 
 feature {NONE} -- Implementation
