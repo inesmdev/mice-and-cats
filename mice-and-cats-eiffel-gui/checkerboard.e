@@ -137,21 +137,23 @@ feature -- Initialization
 							-- render cat position (cat is "above" subways)
 						cat.pos.x.is_equal (x) and cat.pos.y.is_equal (y)
 					then
+						pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0, 0, 1))
 					elseif
 						player.pos.x.is_equal (x) and player.pos.y.is_equal (y)
 					then
+						pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0, 1, 0))
 					elseif
 							-- this is a subway cell
 						curr > 0
 					then
+						pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0, 0, 0))
 					else
 							-- this is a normal, empty cell
-					end
-
-					if (x + y) \\ 2 = 0 then
-						pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 0.5, 0.5))
-					else
-						pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 0.8, 0.8))
+						if (x + y) \\ 2 = 0 then
+							pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 0.5, 0.5))
+						else
+							pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 0.8, 0.8))
+						end
 					end
 
 					pixmap.fill_rectangle (ox + (x - 1) * tile_size, oy + (y - 1) * tile_size, tile_size, tile_size)
