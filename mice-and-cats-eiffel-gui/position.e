@@ -63,8 +63,8 @@ feature
 		do
 			create rand.make
 
-			x := (rand.new_random + 1)\\game_board_width
-			y := (rand.new_random + 1)\\game_board_height
+			x := (rand.new_random)\\game_board_width + 1
+			y := (rand.new_random)\\game_board_height + 1
 
 		end
 end
