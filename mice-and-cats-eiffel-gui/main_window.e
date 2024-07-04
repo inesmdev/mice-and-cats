@@ -99,8 +99,11 @@ feature {NONE} -- Game state and timing
 			-- the current game state
 
 	new_game
+		local
+			settings: SETTINGS
 		do
-			create game_state.make
+			create settings
+			create game_state.make (settings)
 			create last_update.make_now
 		end
 

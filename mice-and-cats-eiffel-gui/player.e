@@ -7,9 +7,6 @@ note
 class
 	PLAYER
 
-inherit
-	SETTINGS
-
 create
 	make
 
@@ -54,7 +51,7 @@ feature --setter
 
 feature {ANY}
 
-	move (i: INTEGER)
+	move (i: INTEGER; board: CHECKERBOARD)
 		require
 			i_in_range: i >= 0 and then i <= 3
 		do
@@ -69,12 +66,12 @@ feature {ANY}
 		            	end
 
 		            elseif i = 2 then
-		            	if pos.y < game_board_height then
+		            	if pos.y < board.height then
 		            		pos.set_y (pos.y + 1)
 		            	end
 
 		            elseif i = 3 then
-		            	if pos.x < game_board_width then
+		            	if pos.x < board.width then
 		            		pos.set_x (pos.x + 1)
 		            	end
 

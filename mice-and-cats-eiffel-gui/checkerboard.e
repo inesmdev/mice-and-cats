@@ -1,47 +1,45 @@
 class
 	CHECKERBOARD
 
-inherit
-	SETTINGS
-
 create
 	make
 
 feature -- Entities
 	cat: CAT
 	player: PLAYER
-	subway_generator: SUBWAYGENERATOR
-	map: ARRAY2 [INTEGER]
-	subways: ARRAY2 [INTEGER]
 
 feature -- game properties
 	victory: BOOLEAN
 	width: INTEGER
 	height: INTEGER
 	rand: RANDOMNUMBERGENERATOR
+	grid: ARRAY2 [INTEGER]
+	subway_exits: ARRAYED_LIST [ARRAYED_LIST [POSITION]]
+	goal: INTEGER
 
 feature -- Initialization
 
-	make
+	make (settings: SETTINGS)
 			-- Initialize the checkerboard grid.
+		local
+			subway_generator: SUBWAYGENERATOR
 		do
 			create rand.make
+
+			create subway_generator.make (settings, rand)
+			grid := subway_generator.get_grid
+			subway_exits := subway_generator.get_subway_exits
+			goal := subway_generator.get_goal
+
+			victory := FALSE
+			width := grid.width
+			height := grid.height
 
 			create cat.make ("CAT")
 			cat.set_pos (random_position())
 
 			create player.make
 			player.set_pos (random_position())
-
-			create map.make_filled (0, game_board_height, game_board_width)
-
-			create subway_generator.make (map, rand)
-
-			subways := map
-
-			victory := FALSE
-			width := map.width
-			height := map.height
 		end
 
 	draw (w, h: INTEGER; pixmap: EV_PIXMAP)
@@ -57,14 +55,14 @@ feature -- Initialization
 			from
 				y := 1
 			until
-				y > map.height
+				y > height
 			loop
 				from
 					x := 1
 				until
-					x > map.width
+					x > width
 				loop
-					curr := map.item (y, x)
+					curr := grid.item (y, x)
 
 					if
 							-- render cat position (cat is "above" subways)
@@ -103,14 +101,14 @@ feature
 	do_update
 		do
 				--gives a number between 0 and 3 -> one for each possible direction
-			cat.move (rand.new_random \\ 4)
+			cat.move (rand.new_random \\ 4, Current)
 		end
 
 feature
 	-- move entities
 	move_player (dir: INTEGER)
 		do
-			player.move (dir)
+			player.move (dir, Current)
 		end
 
 feature
@@ -126,7 +124,7 @@ feature
 
 	check_if_won
 		do
-			if player.pos.x.is_equal (subway_generator.goal.x) and player.pos.y.is_equal (subway_generator.goal.y) then
+			if player.is_underground and then grid.item (player.pos.y, player.pos.x).abs() = goal then
 				victory := true
 			end
 		end
@@ -137,8 +135,8 @@ feature
 			--set random position on the grid
 		do
 			create Result.make
-			Result.set_x (rand.new_random \\ game_board_width + 1)
-			Result.set_y (rand.new_random \\ game_board_height + 1)
+			Result.set_x (rand.new_random \\ width + 1)
+			Result.set_y (rand.new_random \\ height + 1)
 		end
 
 end

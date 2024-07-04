@@ -7,23 +7,22 @@ note
 class
 	SUBWAYGENERATOR
 
-inherit
-	SETTINGS
-
 create
 	make
 
 feature -- class variable
 	grid: ARRAY2 [INTEGER]
-	subways: LINKED_LIST [POSITION]
-	goal: POSITION
+	subway_exits: ARRAYED_LIST [ARRAYED_LIST [POSITION]]
+	goal: INTEGER
+	settings: SETTINGS
 
 feature -- Initialization
-	make (a_grid: ARRAY2 [INTEGER]; rnd: RANDOMNUMBERGENERATOR)
+	make (s: SETTINGS; rnd: RANDOMNUMBERGENERATOR)
 		do
-			grid := a_grid
-			create goal.make
-			create subways.make
+			settings := s
+			create grid.make_filled (0, settings.game_board_height, settings.game_board_width)
+			create subway_exits.make (settings.number_of_subways)
+			goal := 1 -- arbitrarily pick the first subway as the goal
 			create_entries (rnd)
 		end
 
@@ -36,7 +35,7 @@ feature
 			from
 				i := 1
 			until
-				i > number_of_subways
+				i > settings.number_of_subways
 			loop
 				col := rnd.new_random \\ grid.width + 1
 				row := rnd.new_random \\ grid.height + 1
@@ -45,14 +44,19 @@ feature
 				i := i + 1
 			end
 
-			goal.set_x (col)
-			goal.set_y (row)
-
 		end
 feature -- return grid of subways
-	get_subways: ARRAY2 [INTEGER]
+	get_grid: ARRAY2 [INTEGER]
 		do
 			Result := grid
+		end
+	get_subway_exits: ARRAYED_LIST [ARRAYED_LIST [POSITION]]
+		do
+			Result := subway_exits
+		end
+	get_goal: INTEGER
+		do
+			Result := goal
 		end
 
 end

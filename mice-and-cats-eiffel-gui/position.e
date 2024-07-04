@@ -7,9 +7,6 @@ note
 class
 	POSITION
 
-inherit
-	SETTINGS
-
 create
 	make
 
