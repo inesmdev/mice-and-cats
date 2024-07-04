@@ -34,7 +34,7 @@ feature -- Initialization
 
 			create map.make_filled (0, game_board_height, game_board_width)
 
-			create subway_generator.make (map)
+			create subway_generator.make (map, rand)
 
 			subways := map
 

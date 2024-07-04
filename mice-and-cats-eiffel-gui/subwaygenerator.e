@@ -14,41 +14,39 @@ create
 	make
 
 feature -- class variable
-	grid : ARRAY2 [INTEGER]
+	grid: ARRAY2 [INTEGER]
 	subways: LINKED_LIST [POSITION]
 	goal: POSITION
 
 feature -- Initialization
-	make (a_grid: ARRAY2 [INTEGER])
+	make (a_grid: ARRAY2 [INTEGER]; rnd: RANDOMNUMBERGENERATOR)
 		do
 			grid := a_grid
 			create goal.make
 			create subways.make
-			create_entries
+			create_entries (rnd)
 		end
 
 feature
-	create_entries
-		-- create random entries
+	create_entries (rnd: RANDOMNUMBERGENERATOR)
+			-- create random entries
 		local
-			rnd : RANDOMNUMBERGENERATOR
-			i, col, row : INTEGER
+			i, col, row: INTEGER
 		do
-			create rnd.make
 			from
 				i := 1
 			until
 				i > number_of_subways
 			loop
-				col := rnd.new_random\\grid.width + 1
-				row := rnd.new_random\\grid.height + 1
+				col := rnd.new_random \\ grid.width + 1
+				row := rnd.new_random \\ grid.height + 1
 				grid.put (1, row, col)
 
 				i := i + 1
 			end
 
-			goal.set_x(col)
-			goal.set_y(row)
+			goal.set_x (col)
+			goal.set_y (row)
 
 		end
 feature -- return grid of subways
@@ -56,4 +54,5 @@ feature -- return grid of subways
 		do
 			Result := grid
 		end
+
 end
