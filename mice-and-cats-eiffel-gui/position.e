@@ -8,7 +8,8 @@ class
 	POSITION
 
 create
-	make
+	make,
+	make_at
 
 feature -- Coordinates
 	x: INTEGER
@@ -20,6 +21,12 @@ feature -- Initialization
 		do
 			x := 0
 			y := 0
+		end
+	make_at (at_x, at_y: INTEGER)
+			-- Initialize coordinates to zero
+		do
+			x := at_x
+			y := at_y
 		end
 
 feature --setter
