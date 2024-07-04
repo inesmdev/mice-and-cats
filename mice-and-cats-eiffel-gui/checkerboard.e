@@ -78,6 +78,11 @@ feature -- Initialization
 						curr > 0
 					then
 						pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0, 0, 0))
+					elseif
+							-- this is a subway exit
+						curr < 0
+					then
+						pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0.2, 0.3, 0.3))
 					else
 							-- this is a normal, empty cell
 						if (x + y) \\ 2 = 0 then

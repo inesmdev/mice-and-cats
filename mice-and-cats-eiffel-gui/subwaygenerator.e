@@ -32,7 +32,7 @@ feature
 	create_entries
 			-- create random entries
 		local
-			i, col, row, exit: INTEGER
+			i, j, col, row, exit: INTEGER
 			pos: POSITION
 		do
 				-- create exits lists
@@ -60,18 +60,31 @@ feature
 			end
 
 				-- extend subways
-			from
-				i := 1
-			until
-				i > settings.number_of_subways
+			from j := 1
+			until j > settings.max_subway_segments
 			loop
-				exit := rnd.new_random \\ (subway_exits @ i).count + 1
-				pos := subway_exits @ i @ exit
+				from
+					i := 1
+				until
+					i > settings.number_of_subways
+				loop
+					exit := rnd.new_random \\ (subway_exits @ i).count + 1
+					pos := subway_exits @ i @ exit
 
-				if place_segment (pos.x, pos.y, i) then
-				    grid.put (- i, row, col) -- keep exit for now
+					if place_segment (pos.x, pos.y, i) then
+						if rnd.new_random \\ 2 = 0 then
+							(subway_exits @ i).remove_i_th (exit)
+							grid.put (i, pos.y, pos.x) -- don't restore exit
+						else
+							grid.put (- i, pos.y, pos.x) -- restore temporarily removed value
+						end
+					else
+						grid.put (- i, pos.y, pos.x) -- restore temporarily removed value
+					end
+
 					i := i + 1
 				end
+				j := j + 1
 			end
 		end
 
@@ -93,8 +106,7 @@ feature
 				dy := - dy
 			end
 
-				-- 3..=5
-			length := rnd.new_random \\ 3 + 3
+			length := rnd.new_random \\ (settings.max_subway_segment_length.max (2) - 2) + 3
 
 				-- temporarily remove the exit
 			grid.put (0, from_y, from_x)

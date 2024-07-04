@@ -213,7 +213,7 @@ feature {NONE} -- Implementation / Constants
 	Window_width: INTEGER = 800
 			-- Initial width for this window.
 
-	Window_height: INTEGER = 800
+	Window_height: INTEGER = 600
 			-- Initial height for this window.
 
 	Label_confirm_close_window: STRING = "You are about to close this window.%NClick OK to proceed."
