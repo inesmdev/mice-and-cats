@@ -14,35 +14,32 @@ create
 	make
 
 feature -- Coordinates
-	x : INTEGER
-	y : INTEGER
+	x: INTEGER
+	y: INTEGER
 
 feature -- Initialization
 	make
-			-- Initialize coordinates to random
-		local
-			 rnd: RANDOMNUMBERGENERATOR
+			-- Initialize coordinates to zero
 		do
-			create rnd.make
-			x := rnd.new_random\\10
-			y := rnd.new_random\\10
+			x := 0
+			y := 0
 		end
 
 feature --setter
-	set_x(para : INTEGER)
+	set_x (para: INTEGER)
 		do
 			x := para
 		end
 
-	set_y(para: INTEGER)
+	set_y (para: INTEGER)
 		do
 			y := para
 		end
 
 feature
 	-- equals method
-	equals(other : POSITION): BOOLEAN
-		-- equals method
+	equals (other: POSITION): BOOLEAN
+			-- equals method
 		do
 			if
 				x = other.x and y = other.y
@@ -53,18 +50,4 @@ feature
 			end
 		end
 
-feature
-
-	set_to_random_position
-		--set random position on 10x10 grid
-		local
-			rand : RANDOMNUMBERGENERATOR
-			i : INTEGER
-		do
-			create rand.make
-
-			x := (rand.new_random)\\game_board_width + 1
-			y := (rand.new_random)\\game_board_height + 1
-
-		end
 end

@@ -25,12 +25,13 @@ feature -- Initialization
 	make
 			-- Initialize the checkerboard grid.
 		do
-			create cat.make ("CAT")
-			cat.set_pos (create {POSITION}.make)
-
 			create rand.make
 
+			create cat.make ("CAT")
+			cat.set_pos (random_position())
+
 			create player.make
+			player.set_pos (random_position())
 
 			create map.make_filled (0, game_board_height, game_board_width)
 
@@ -128,6 +129,16 @@ feature
 			if player.pos.x.is_equal (subway_generator.goal.x) and player.pos.y.is_equal (subway_generator.goal.y) then
 				victory := true
 			end
+		end
+
+feature
+
+	random_position(): POSITION
+			--set random position on the grid
+		do
+			create Result.make
+			Result.set_x (rand.new_random \\ game_board_width + 1)
+			Result.set_y (rand.new_random \\ game_board_height + 1)
 		end
 
 end

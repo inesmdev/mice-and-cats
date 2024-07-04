@@ -24,7 +24,6 @@ feature
 	make
 		do
 			create pos.make
-			pos.set_to_random_position
 			name := "P"
 			is_underground := FALSE
 			is_dead := FALSE
