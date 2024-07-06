@@ -17,7 +17,6 @@ feature -- game properties
 	subway_exits: ARRAYED_LIST [ARRAYED_LIST [POSITION]]
 	goal: INTEGER
 	subway_colors: ARRAYED_LIST [EV_COLOR]
-	super_vision: BOOLEAN
 
 feature -- Initialization
 
@@ -41,7 +40,6 @@ feature -- Initialization
 			subway_colors.extend (color (240, 128, 128))
 			subway_colors.extend (color (221, 160, 221))
 			subway_colors.extend (color (32, 178, 170))
-			super_vision := FALSE
 
 			create subway_generator.make (settings, rand)
 			grid := subway_generator.get_grid
@@ -64,7 +62,7 @@ feature -- Initialization
 			Result := create {EV_COLOR}.make_with_8_bit_rgb (r, g, b)
 		end
 
-	draw (w, h: INTEGER; pixmap: EV_PIXMAP)
+	draw (w, h: INTEGER; pixmap: EV_PIXMAP; super_vision: BOOLEAN)
 		local
 			tile_size: INTEGER
 			x, y, ox, oy: INTEGER
@@ -95,24 +93,31 @@ feature -- Initialization
 
 					if player_subway = 0 then
 						if curr < 0 then
+							pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0, 0, 0))
+							pixmap.fill_rectangle (ox + (x - 1) * tile_size, oy + (y - 1) * tile_size, tile_size, tile_size)
 							pixmap.set_foreground_color (subway_colors @ - curr)
+							pixmap.fill_rectangle (ox + (x - 1) * tile_size + mu, oy + (y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
 						elseif super_vision and then curr > 0 then
 							pixmap.set_foreground_color (subway_colors @ curr)
+							pixmap.fill_rectangle (ox + (x - 1) * tile_size, oy + (y - 1) * tile_size, tile_size, tile_size)
 						else
 							pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 1, 1))
+							pixmap.fill_rectangle (ox + (x - 1) * tile_size, oy + (y - 1) * tile_size, tile_size, tile_size)
 						end
 					else
-						if curr = - player_subway then
+						if curr = - player_subway or else (curr < 0 and super_vision) then
 							pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 1, 1))
-						elseif curr = player_subway then
-							pixmap.set_foreground_color (subway_colors @ player_subway)
-						elseif super_vision and then curr /= 0 then
-							pixmap.set_foreground_color (subway_colors @ curr.abs())
+							pixmap.fill_rectangle (ox + (x - 1) * tile_size, oy + (y - 1) * tile_size, tile_size, tile_size)
+							pixmap.set_foreground_color (subway_colors @ - curr)
+							pixmap.fill_rectangle (ox + (x - 1) * tile_size + mu, oy + (y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
+						elseif curr = player_subway or else (curr > 0 and super_vision) then
+							pixmap.set_foreground_color (subway_colors @ curr)
+							pixmap.fill_rectangle (ox + (x - 1) * tile_size, oy + (y - 1) * tile_size, tile_size, tile_size)
 						else
 							pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0, 0, 0))
+							pixmap.fill_rectangle (ox + (x - 1) * tile_size, oy + (y - 1) * tile_size, tile_size, tile_size)
 						end
 					end
-					pixmap.fill_rectangle (ox + (x - 1) * tile_size, oy + (y - 1) * tile_size, tile_size, tile_size)
 
 						--pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0, 0, 0))
 						--pixmap.draw_rectangle (ox + (x - 1) * tile_size, oy + (y - 1) * tile_size, tile_size, tile_size)
@@ -122,16 +127,12 @@ feature -- Initialization
 
 			end
 
-			pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0.67, 0.84, 0.9))
-			pixmap.fill_rectangle (ox + (player.pos.x - 1) * tile_size + mu, oy + (player.pos.y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
-			pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0, 0, 0))
-			pixmap.draw_rectangle (ox + (player.pos.x - 1) * tile_size + mu, oy + (player.pos.y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
+			pixmap.set_foreground_color (color (20, 75, 134))
+			pixmap.fill_ellipse (ox + (player.pos.x - 1) * tile_size + mu, oy + (player.pos.y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
 
 			if cat.is_underground = player.is_underground then
 				pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 0.5, 0))
 				pixmap.fill_ellipse (ox + (cat.pos.x - 1) * tile_size + mu, oy + (cat.pos.y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
-				pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0, 0, 0))
-				pixmap.draw_ellipse (ox + (cat.pos.x - 1) * tile_size + mu, oy + (cat.pos.y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
 			end
 
 		end
@@ -148,11 +149,6 @@ feature
 	move_player (dir: INTEGER)
 		do
 			player.move (dir, Current)
-		end
-
-	toggle_super_vision
-		do
-			super_vision := not super_vision
 		end
 
 feature

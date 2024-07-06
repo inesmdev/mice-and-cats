@@ -166,13 +166,15 @@ feature {NONE} -- Drawing Area and Pixmap
 			pixmap.set_background_color (create {EV_COLOR}.make_with_rgb (0.5, 0.5, 0.5))
 			pixmap.clear
 
-			game_state.draw (drawing_area.width, drawing_area.height, pixmap)
+			game_state.draw (drawing_area.width, drawing_area.height, pixmap, super_vision)
 
 			drawing_area.draw_pixmap (0, 0, pixmap)
 			drawing_area.redraw -- immediately request next repaint
 		end
 
 feature -- Event handling
+
+	super_vision: BOOLEAN
 
 	on_key_press (key: EV_KEY)
 			-- Handle key press events.
@@ -189,7 +191,7 @@ feature -- Event handling
 			elseif key.code = key.Key_r then
 			    new_game
 			elseif key.code = key.Key_v then
-			    game_state.toggle_super_vision
+			    super_vision := not super_vision
 			end
 
 		end
