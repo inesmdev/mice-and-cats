@@ -16,15 +16,30 @@ feature -- game properties
 	grid: ARRAY2 [INTEGER]
 	subway_exits: ARRAYED_LIST [ARRAYED_LIST [POSITION]]
 	goal: INTEGER
+	subway_colors: ARRAYED_LIST [EV_COLOR]
 
 feature -- Initialization
 
 	make (settings: SETTINGS)
 			-- Initialize the checkerboard grid.
+		require
+			enough_colors_for_subways: settings.number_of_subways <= 10
 		local
 			subway_generator: SUBWAYGENERATOR
 		do
 			create rand.make
+
+			create subway_colors.make (10)
+			subway_colors.extend (color (255, 99, 71))
+			subway_colors.extend (color (135, 206, 235))
+			subway_colors.extend (color (255, 182, 193))
+			subway_colors.extend (color (144, 238, 144))
+			subway_colors.extend (color (255, 165, 0))
+			subway_colors.extend (color (173, 216, 230))
+			subway_colors.extend (color (238, 130, 238))
+			subway_colors.extend (color (240, 128, 128))
+			subway_colors.extend (color (221, 160, 221))
+			subway_colors.extend (color (32, 178, 170))
 
 			create subway_generator.make (settings, rand)
 			grid := subway_generator.get_grid
@@ -42,15 +57,27 @@ feature -- Initialization
 			player.set_pos (random_position())
 		end
 
+	color (r, g, b: INTEGER): EV_COLOR
+		do
+			Result := create {EV_COLOR}.make_with_8_bit_rgb (r, g, b)
+		end
+
 	draw (w, h: INTEGER; pixmap: EV_PIXMAP)
 		local
 			tile_size: INTEGER
 			x, y, ox, oy: INTEGER
-			curr: INTEGER
+			curr, player_subway: INTEGER
+			mu: INTEGER
 		do
 			tile_size := (w // width).min (h // height)
 			ox := (w - (width * tile_size)) // 2
 			oy := (h - (height * tile_size)) // 2
+			if player.is_underground then
+				player_subway := grid.item (player.pos.y, player.pos.x).abs()
+			else
+				player_subway := 0
+			end
+			mu := tile_size // 20
 
 			from
 				y := 1
@@ -64,40 +91,41 @@ feature -- Initialization
 				loop
 					curr := grid.item (y, x)
 
-					if
-							-- render cat position (cat is "above" subways)
-						cat.pos.x.is_equal (x) and cat.pos.y.is_equal (y)
-					then
-						pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0, 0, 1))
-					elseif
-						player.pos.x.is_equal (x) and player.pos.y.is_equal (y)
-					then
-						pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0, 1, 0))
-					elseif
-							-- this is a subway cell
-						curr > 0
-					then
-						pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0, 0, 0))
-					elseif
-							-- this is a subway exit
-						curr < 0
-					then
-						pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0.2, 0.3, 0.3))
-					else
-							-- this is a normal, empty cell
-						if (x + y) \\ 2 = 0 then
-							pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 0.5, 0.5))
+					if player_subway = 0 then
+						if curr < 0 then
+							pixmap.set_foreground_color (subway_colors @ - curr)
 						else
-							pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 0.8, 0.8))
+							pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 1, 1))
+						end
+					else
+						if curr = - player_subway then
+							pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 1, 1))
+						elseif curr = player_subway then
+							pixmap.set_foreground_color (subway_colors @ player_subway)
+						else
+							pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0, 0, 0))
 						end
 					end
-
 					pixmap.fill_rectangle (ox + (x - 1) * tile_size, oy + (y - 1) * tile_size, tile_size, tile_size)
 
+						--pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0, 0, 0))
+						--pixmap.draw_rectangle (ox + (x - 1) * tile_size, oy + (y - 1) * tile_size, tile_size, tile_size)
 					x := x + 1
 				end
 				y := y + 1
 
+			end
+
+			pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0.67, 0.84, 0.9))
+			pixmap.fill_rectangle (ox + (player.pos.x - 1) * tile_size + mu, oy + (player.pos.y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
+			pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0, 0, 0))
+			pixmap.draw_rectangle (ox + (player.pos.x - 1) * tile_size + mu, oy + (player.pos.y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
+
+			if cat.is_underground = player.is_underground then
+				pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 0.5, 0))
+				pixmap.fill_ellipse (ox + (cat.pos.x - 1) * tile_size + mu, oy + (cat.pos.y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
+				pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0, 0, 0))
+				pixmap.draw_ellipse (ox + (cat.pos.x - 1) * tile_size + mu, oy + (cat.pos.y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
 			end
 
 		end
