@@ -186,9 +186,9 @@ feature -- Event handling
 				game_state.move_player (2)
 			elseif key.code = key.Key_d or key.code = key.Key_right then
 				game_state.move_player (3)
+			elseif key.code = key.Key_r then
+			    new_game
 			end
-
-				--game_state.move_player (a_key_event.key_code)
 
 		end
 
