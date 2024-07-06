@@ -188,6 +188,8 @@ feature -- Event handling
 				game_state.move_player (3)
 			elseif key.code = key.Key_r then
 			    new_game
+			elseif key.code = key.Key_v then
+			    game_state.toggle_super_vision
 			end
 
 		end

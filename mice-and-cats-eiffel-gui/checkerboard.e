@@ -17,6 +17,7 @@ feature -- game properties
 	subway_exits: ARRAYED_LIST [ARRAYED_LIST [POSITION]]
 	goal: INTEGER
 	subway_colors: ARRAYED_LIST [EV_COLOR]
+	super_vision: BOOLEAN
 
 feature -- Initialization
 
@@ -40,6 +41,7 @@ feature -- Initialization
 			subway_colors.extend (color (240, 128, 128))
 			subway_colors.extend (color (221, 160, 221))
 			subway_colors.extend (color (32, 178, 170))
+			super_vision := FALSE
 
 			create subway_generator.make (settings, rand)
 			grid := subway_generator.get_grid
@@ -94,6 +96,8 @@ feature -- Initialization
 					if player_subway = 0 then
 						if curr < 0 then
 							pixmap.set_foreground_color (subway_colors @ - curr)
+						elseif super_vision and then curr > 0 then
+							pixmap.set_foreground_color (subway_colors @ curr)
 						else
 							pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 1, 1))
 						end
@@ -102,6 +106,8 @@ feature -- Initialization
 							pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 1, 1))
 						elseif curr = player_subway then
 							pixmap.set_foreground_color (subway_colors @ player_subway)
+						elseif super_vision and then curr /= 0 then
+							pixmap.set_foreground_color (subway_colors @ curr.abs())
 						else
 							pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0, 0, 0))
 						end
@@ -142,6 +148,11 @@ feature
 	move_player (dir: INTEGER)
 		do
 			player.move (dir, Current)
+		end
+
+	toggle_super_vision
+		do
+			super_vision := not super_vision
 		end
 
 feature
