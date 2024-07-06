@@ -14,6 +14,7 @@ feature
 
 	number_of_subways: INTEGER = 5
 	max_subway_segments: INTEGER = 5
+	min_subway_segment_length: INTEGER = 3
 	max_subway_segment_length: INTEGER = 5
 
 end

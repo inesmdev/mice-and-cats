@@ -19,6 +19,14 @@ feature -- class variable
 
 feature -- Initialization
 	make (s: SETTINGS; rand: RANDOMNUMBERGENERATOR)
+	    require
+			width: s.game_board_width >= 3
+			height: s.game_board_height >= 3
+			subways: s.number_of_subways >= 1
+			segments: s.max_subway_segments >= 1
+			large_enough: s.game_board_width > s.min_subway_segment_length or s.game_board_height > s.min_subway_segment_length
+	        min_length: s.min_subway_segment_length >= 2
+	        max_length: s.max_subway_segment_length >= s.min_subway_segment_length
 		do
 			settings := s
 			rnd := rand
@@ -92,7 +100,7 @@ feature
 		require
 			at_empty_or_exit: grid.item (from_y, from_x) = 0 or grid.item (from_y, from_x) = - subway
 		local
-			dx, dy, length, i: INTEGER
+			dx, dy, length, min_len, i: INTEGER
 		do
 			if rnd.new_random \\ 2 = 0 then
 				dx := 1
@@ -106,7 +114,8 @@ feature
 				dy := - dy
 			end
 
-			length := rnd.new_random \\ (settings.max_subway_segment_length.max (2) - 2) + 3
+            min_len := settings.min_subway_segment_length - 1
+			length := rnd.new_random \\ (settings.max_subway_segment_length.max (min_len) - min_len) + min_len + 1
 
 				-- temporarily remove the exit
 			grid.put (0, from_y, from_x)
@@ -118,7 +127,7 @@ feature
 			until
 				not Result or i >= length
 			loop
-				Result := all_neighbours_zero (from_x + dx * i, from_y + dy * i)
+				Result := it_and_all_neighbours_zero (from_x + dx * i, from_y + dy * i)
 				i := i + 1
 			end
 
@@ -138,10 +147,10 @@ feature
 			end
 		end
 
-	all_neighbours_zero (x, y: INTEGER): BOOLEAN
+	it_and_all_neighbours_zero (x, y: INTEGER): BOOLEAN
 		do
 			if x > 1 and y > 1 and then x < grid.width and then y < grid.height then
-				Result := grid.item (y - 1, x) = 0 and then grid.item (y + 1, x) = 0 and then grid.item (y, x - 1) = 0 and then grid.item (y, x + 1) = 0
+				Result := grid.item (y, x) = 0 and grid.item (y - 1, x) = 0 and then grid.item (y + 1, x) = 0 and then grid.item (y, x - 1) = 0 and then grid.item (y, x + 1) = 0
 			end
 		end
 
