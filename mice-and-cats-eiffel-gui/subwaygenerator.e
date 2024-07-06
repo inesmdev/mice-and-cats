@@ -19,14 +19,14 @@ feature -- class variable
 
 feature -- Initialization
 	make (s: SETTINGS; rand: RANDOMNUMBERGENERATOR)
-	    require
+		require
 			width: s.game_board_width >= 3
 			height: s.game_board_height >= 3
 			subways: s.number_of_subways >= 1
 			segments: s.max_subway_segments >= 1
 			large_enough: s.game_board_width > s.min_subway_segment_length or s.game_board_height > s.min_subway_segment_length
-	        min_length: s.min_subway_segment_length >= 2
-	        max_length: s.max_subway_segment_length >= s.min_subway_segment_length
+			min_length: s.min_subway_segment_length >= 2
+			max_length: s.max_subway_segment_length >= s.min_subway_segment_length
 		do
 			settings := s
 			rnd := rand
@@ -57,8 +57,8 @@ feature
 			until
 				i > settings.number_of_subways
 			loop
-				col := rnd.new_random \\ grid.width + 1
-				row := rnd.new_random \\ grid.height + 1
+				col := rnd.new_random \\ (grid.width - 2) + 2
+				row := rnd.new_random \\ (grid.height - 2) + 2
 
 				if grid.item (row, col) = 0 and then place_segment (col, row, i) then
 					grid.put (- i, row, col)
@@ -94,6 +94,27 @@ feature
 				end
 				j := j + 1
 			end
+
+				-- eliminate exits with more than one neighbour
+			from j := 1
+			until j > settings.number_of_subways
+			loop
+				if (subway_exits @ j).count > 2 then
+					from i := 1
+					until i > (subway_exits @ j).count
+					loop
+						pos := subway_exits @ j @ i
+						if remove_exit_at (pos.x, pos.y) then
+							(subway_exits @ j).remove_i_th (i)
+							grid.put (j, pos.y, pos.x)
+						else
+							i := i + 1
+						end
+
+					end
+				end
+				j := j + 1
+			end
 		end
 
 	place_segment (from_x, from_y, subway: INTEGER): BOOLEAN
@@ -114,7 +135,7 @@ feature
 				dy := - dy
 			end
 
-            min_len := settings.min_subway_segment_length - 1
+			min_len := settings.min_subway_segment_length - 1
 			length := rnd.new_random \\ (settings.max_subway_segment_length.max (min_len) - min_len) + min_len + 1
 
 				-- temporarily remove the exit
@@ -152,6 +173,28 @@ feature
 			if x > 1 and y > 1 and then x < grid.width and then y < grid.height then
 				Result := grid.item (y, x) = 0 and grid.item (y - 1, x) = 0 and then grid.item (y + 1, x) = 0 and then grid.item (y, x - 1) = 0 and then grid.item (y, x + 1) = 0
 			end
+		end
+
+	remove_exit_at (x, y: INTEGER): BOOLEAN
+		require
+			xbounds: x > 1 and x < grid.width
+			ybounds: y > 1 and y < grid.height
+			at_exit: grid.item (y, x) < 0
+		local
+			center: INTEGER
+			n: INTEGER
+		do
+			center := grid.item (y, x).abs()
+			n := 0
+
+			if grid.item (y - 1, x).abs() = center then n := n + 1 end
+			if grid.item (y + 1, x).abs() = center then n := n + 1 end
+			if grid.item (y, x - 1).abs() = center then n := n + 1 end
+			if grid.item (y, x + 1).abs() = center then n := n + 1 end
+
+			Result := n > 1
+		--ensure
+		--	any_neighbour: n > 0
 		end
 
 feature -- return grid of subways
