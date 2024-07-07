@@ -72,11 +72,7 @@ feature -- Initialization
 			tile_size := (w // width).min (h // height)
 			ox := (w - (width * tile_size)) // 2
 			oy := (h - (height * tile_size)) // 2
-			if player.is_underground then
-				player_subway := grid.item (player.pos.y, player.pos.x).abs()
-			else
-				player_subway := 0
-			end
+			player_subway := entity_subway (player)
 			mu := tile_size // 20
 
 			from
@@ -130,7 +126,7 @@ feature -- Initialization
 			pixmap.set_foreground_color (color (20, 75, 134))
 			pixmap.fill_ellipse (ox + (player.pos.x - 1) * tile_size + mu, oy + (player.pos.y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
 
-			if cat.is_underground = player.is_underground then
+			if player_subway = entity_subway (cat) then
 				pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 0.5, 0))
 				pixmap.fill_ellipse (ox + (cat.pos.x - 1) * tile_size + mu, oy + (cat.pos.y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
 			end
@@ -151,7 +147,14 @@ feature
 			player.move (dir, Current)
 		end
 
-feature
+	entity_subway (p: PLAYER): INTEGER
+		do
+			if p.is_underground then
+				Result := grid.item (p.pos.y, p.pos.x).abs()
+			else
+				Result := 0
+			end
+		end
 
 	check_if_dead
 		do
