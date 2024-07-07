@@ -144,7 +144,7 @@ feature
 
 	check_if_dead
 		do
-			if
+			if cat.is_underground = player.is_underground and then
 				cat.pos.equals (player.pos)
 			then
 				player.set_is_dead (TRUE)
@@ -153,7 +153,7 @@ feature
 
 	check_if_won
 		do
-			if player.is_underground and then grid.item (player.pos.y, player.pos.x).abs() = goal then
+			if entity_subway (player) = goal then
 				victory := true
 			end
 		end
