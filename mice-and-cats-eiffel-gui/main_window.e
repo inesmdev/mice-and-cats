@@ -25,8 +25,8 @@ feature {NONE} -- Initialization
 		do
 				-- Create main container.
 			create main_container
-			create_pixmap
-			create_drawing_area
+			create renderer.make_with_size (Window_width, Window_height)
+			create drawing_area
 			new_game
 		end
 
@@ -125,50 +125,25 @@ feature {NONE} -- Drawing Area and Pixmap
 	drawing_area: EV_DRAWING_AREA
 			-- Area for custom drawing.
 
-	pixmap: EV_PIXMAP
-			-- Off-screen pixmap for double buffering.
-
-	create_drawing_area
-			-- Create and set up the drawing area.
-		do
-			create drawing_area
-				-- drawing_area.set_background_color (create {EV_COLOR}.make_with_rgb (1, 1, 1))
-		end
-
-	create_pixmap
-			-- Create and set up the pixmap for off-screen drawing.
-		do
-			create pixmap.make_with_size (Window_width, Window_height)
-		end
+	renderer: RENDERER
+			-- Used to draw to an off-screen pixmap for double buffering.
 
 	on_resize (x, y, w, h: INTEGER)
-			-- Grow pixmap exponentially if required
 		do
-			if pixmap.width < w or pixmap.height < h then
-				create pixmap.make_with_size (w.max (2 * pixmap.width), h.max (2 * pixmap.height))
-			end
-		ensure
-			wide_enough: pixmap.width >= w
-			tall_enough: pixmap.height >= h
+			renderer.resize (w, h)
 		end
 
 	on_draw (x, y, w, h: INTEGER)
 			-- Handle paint event.
 		require
-			wide_enough: pixmap.width >= drawing_area.width
-			tall_enough: pixmap.height >= drawing_area.height
+			wide_enough: renderer.width = drawing_area.width
+			tall_enough: renderer.height = drawing_area.height
 		do
 			maybe_do_game_tick
 
-			pixmap.remove_clip_area
-			pixmap.set_clip_area (create {EV_RECTANGLE}.make (0, 0, drawing_area.width, drawing_area.height))
+			game_state.draw (renderer, super_vision)
 
-			pixmap.set_background_color (create {EV_COLOR}.make_with_rgb (0.5, 0.5, 0.5))
-			pixmap.clear
-
-			game_state.draw (drawing_area.width, drawing_area.height, pixmap, super_vision)
-
-			drawing_area.draw_pixmap (0, 0, pixmap)
+			drawing_area.draw_pixmap (0, 0, renderer.pixmap)
 			drawing_area.redraw -- immediately request next repaint
 		end
 
@@ -189,9 +164,9 @@ feature -- Event handling
 			elseif key.code = key.Key_d or key.code = key.Key_right then
 				game_state.move_player (3)
 			elseif key.code = key.Key_r then
-			    new_game
+				new_game
 			elseif key.code = key.Key_v then
-			    super_vision := not super_vision
+				super_vision := not super_vision
 			end
 
 		end

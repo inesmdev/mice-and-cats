@@ -1,6 +1,9 @@
 class
 	CHECKERBOARD
 
+inherit
+	EV_STOCK_COLORS
+
 create
 	make
 
@@ -62,18 +65,15 @@ feature -- Initialization
 			Result := create {EV_COLOR}.make_with_8_bit_rgb (r, g, b)
 		end
 
-	draw (w, h: INTEGER; pixmap: EV_PIXMAP; super_vision: BOOLEAN)
+	draw (renderer: RENDERER; super_vision: BOOLEAN)
 		local
 			tile_size: INTEGER
 			x, y, ox, oy: INTEGER
 			curr, player_subway: INTEGER
 			mu: INTEGER
 		do
-			tile_size := (w // width).min (h // height)
-			ox := (w - (width * tile_size)) // 2
-			oy := (h - (height * tile_size)) // 2
+			renderer.grid_size (width, height)
 			player_subway := entity_subway (player)
-			mu := tile_size // 20
 
 			from
 				y := 1
@@ -89,48 +89,34 @@ feature -- Initialization
 
 					if player_subway = 0 then
 						if curr < 0 then
-							pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0, 0, 0))
-							pixmap.fill_rectangle (ox + (x - 1) * tile_size, oy + (y - 1) * tile_size, tile_size, tile_size)
-							pixmap.set_foreground_color (subway_colors @ - curr)
-							pixmap.fill_rectangle (ox + (x - 1) * tile_size + mu, oy + (y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
+							renderer.tile (x, y, Black)
+							renderer.tile_center (x, y, subway_colors @ - curr)
 						elseif super_vision and then curr > 0 then
-							pixmap.set_foreground_color (subway_colors @ curr)
-							pixmap.fill_rectangle (ox + (x - 1) * tile_size, oy + (y - 1) * tile_size, tile_size, tile_size)
+							renderer.tile (x, y, subway_colors @ curr)
 						else
-							pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 1, 1))
-							pixmap.fill_rectangle (ox + (x - 1) * tile_size, oy + (y - 1) * tile_size, tile_size, tile_size)
+							renderer.tile (x, y, White)
 						end
 					else
 						if curr = - player_subway or else (curr < 0 and super_vision) then
-							pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 1, 1))
-							pixmap.fill_rectangle (ox + (x - 1) * tile_size, oy + (y - 1) * tile_size, tile_size, tile_size)
-							pixmap.set_foreground_color (subway_colors @ - curr)
-							pixmap.fill_rectangle (ox + (x - 1) * tile_size + mu, oy + (y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
+							renderer.tile (x, y, White)
+							renderer.tile_center (x, y, subway_colors @ - curr)
 						elseif curr = player_subway or else (curr > 0 and super_vision) then
-							pixmap.set_foreground_color (subway_colors @ curr)
-							pixmap.fill_rectangle (ox + (x - 1) * tile_size, oy + (y - 1) * tile_size, tile_size, tile_size)
+							renderer.tile (x, y, subway_colors @ curr)
 						else
-							pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0, 0, 0))
-							pixmap.fill_rectangle (ox + (x - 1) * tile_size, oy + (y - 1) * tile_size, tile_size, tile_size)
+							renderer.tile (x, y, Black)
 						end
 					end
 
-						--pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (0, 0, 0))
-						--pixmap.draw_rectangle (ox + (x - 1) * tile_size, oy + (y - 1) * tile_size, tile_size, tile_size)
 					x := x + 1
 				end
 				y := y + 1
-
 			end
 
-			pixmap.set_foreground_color (color (20, 75, 134))
-			pixmap.fill_ellipse (ox + (player.pos.x - 1) * tile_size + mu, oy + (player.pos.y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
+			renderer.entity (player.pos.x, player.pos.y, color (20, 75, 134))
 
 			if player_subway = entity_subway (cat) then
-				pixmap.set_foreground_color (create {EV_COLOR}.make_with_rgb (1, 0.5, 0))
-				pixmap.fill_ellipse (ox + (cat.pos.x - 1) * tile_size + mu, oy + (cat.pos.y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
+				renderer.entity (cat.pos.x, cat.pos.y, color (255, 127, 0))
 			end
-
 		end
 
 feature
