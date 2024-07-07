@@ -117,6 +117,13 @@ feature -- Initialization
 			if player_subway = entity_subway (cat) then
 				renderer.entity (cat.pos.x, cat.pos.y, color (255, 127, 0))
 			end
+
+			if victory then
+				renderer.center_text ("YOU WON! Press R to restart", Blue)
+			elseif player.is_dead then
+				renderer.center_text ("YOU DIED! Press R to restart", Red)
+			end
+
 		end
 
 feature
@@ -124,13 +131,19 @@ feature
 		do
 				--gives a number between 0 and 3 -> one for each possible direction
 			cat.move (rand.new_random \\ 4, Current)
+			check_if_dead
+			check_if_won
 		end
 
 feature
 	-- move entities
 	move_player (dir: INTEGER)
 		do
-			player.move (dir, Current)
+			if not player.is_dead then
+				player.move (dir, Current)
+				check_if_dead
+				check_if_won
+			end
 		end
 
 	entity_subway (p: PLAYER): INTEGER

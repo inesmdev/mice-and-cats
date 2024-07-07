@@ -93,4 +93,10 @@ feature
 			pixmap.fill_ellipse (ox + (x - 1) * tile_size + mu, oy + (y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
 		end
 
+	center_text (message: READABLE_STRING_GENERAL; color: EV_COLOR)
+		do
+			pixmap.set_foreground_color (color)
+			pixmap.draw_text (width // 2, height // 2, message)
+		end
+
 end
