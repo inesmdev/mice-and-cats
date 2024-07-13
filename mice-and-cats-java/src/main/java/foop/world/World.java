@@ -150,11 +150,11 @@ public class World {
         if (!visible.isEmpty()){
             Entity cat = entities.get(0);
             Entity nearest = visible.get(0);
-            double nearestDistance = getEuclidianDistance(cat.getPosition(), nearest.getPosition());
+            double nearestDistance = cat.getPosition().distanceTo(nearest.getPosition());
 
             for (int i = 1; i < visible.size(); i++) {
                 Entity curr = visible.get(i);
-                double d = getEuclidianDistance(cat.getPosition(), curr.getPosition());
+                double d = cat.getPosition().distanceTo(curr.getPosition());
                 if(nearestDistance > d){
                     nearestDistance = d;
                     nearest = curr;
@@ -166,12 +166,6 @@ public class World {
         //if no players are visible, move randomly
         var r = new Random();
         return new Position(r.nextInt(grid[0].length), r.nextInt(grid.length));
-    }
-
-    private double getEuclidianDistance(Position a, Position b){
-        int dx = a.x() - b.x();
-        int dy = a.y() - b.y();
-        return Math.sqrt(dx * dx + dy * dy);
     }
 
     private void broadcastMsg(HashSet<Player> players, Message msg) {
