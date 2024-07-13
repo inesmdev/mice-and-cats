@@ -134,15 +134,8 @@ public class World {
     }
 
     private void generateNewCatPosition(Entity cat) {
-
         Position nextCatGoal = findNearestPlayer();
-
-        var dx = nextCatGoal.x() - cat.getPosition().x();
-        var dy = nextCatGoal.y() - cat.getPosition().y();
-        dx = Math.min(1, Math.max(-1, dx));
-        dy = Math.min(1, Math.max(-1, dy));
-        cat.setPosition(new Position(cat.getPosition().x() + dx, cat.getPosition().y() + dy));
-
+        cat.setPosition(cat.getPosition().stepTowards(nextCatGoal));
     }
 
     private Position findNearestPlayer(){
