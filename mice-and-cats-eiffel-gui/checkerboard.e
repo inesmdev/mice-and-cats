@@ -1,3 +1,9 @@
+note
+	description: "Represents the entire game board."
+	author: ""
+	date: "$Date$"
+	revision: "$Revision$"
+
 class
 	CHECKERBOARD
 
@@ -24,7 +30,7 @@ feature -- game properties
 feature -- Initialization
 
 	make (settings: SETTINGS)
-			-- Initialize the checkerboard grid.
+			-- Initialize the checkerboard grid according to the settings
 		require
 			enough_colors_for_subways: settings.number_of_subways <= 10
 		local
@@ -61,11 +67,15 @@ feature -- Initialization
 		end
 
 	color (r, g, b: INTEGER): EV_COLOR
+			-- helper function for defining colors more concisely
 		do
 			Result := create {EV_COLOR}.make_with_8_bit_rgb (r, g, b)
 		end
 
 	draw (renderer: RENDERER; super_vision: BOOLEAN)
+			-- render the board using the renderer. super_vision indicates whether
+			-- entities and subway tiles that are normally invisible should be rendered
+			-- anyway
 		local
 			tile_size: INTEGER
 			x, y, ox, oy: INTEGER
@@ -128,6 +138,7 @@ feature -- Initialization
 
 feature
 	do_update
+			-- moves the cat and checks if the game is over
 		do
 				--gives a number between 0 and 3 -> one for each possible direction
 			cat.move (rand.new_random \\ 4, Current)
@@ -138,6 +149,7 @@ feature
 feature
 	-- move entities
 	move_player (dir: INTEGER)
+			-- move the player entity in a given direction and checks if the game is over
 		do
 			if not player.is_dead then
 				player.move (dir, Current)
@@ -147,6 +159,7 @@ feature
 		end
 
 	entity_subway (p: PLAYER): INTEGER
+			-- returns the id of the current subway or zero if the entity is not underground
 		do
 			if p.is_underground then
 				Result := grid.item (p.pos.y, p.pos.x).abs()
@@ -156,6 +169,7 @@ feature
 		end
 
 	check_if_dead
+			-- the player dies if it is at the same position as a cat
 		do
 			if cat.is_underground = player.is_underground and then
 				cat.pos.is_equal (player.pos)
@@ -165,6 +179,7 @@ feature
 		end
 
 	check_if_won
+			-- the player wins after reaching the target subway
 		do
 			if entity_subway (player) = goal then
 				victory := true

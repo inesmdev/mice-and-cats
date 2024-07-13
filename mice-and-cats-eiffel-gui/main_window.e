@@ -91,14 +91,16 @@ feature {NONE} -- Implementation, Close event
 feature {NONE} -- Game state and timing
 
 	last_update: TIME
-			-- The time of the last simulation tick
+			-- The timestamp of the last simulation tick
 
 	update_seconds: REAL = 0.1
+			-- the update inteval
 
 	game_state: CHECKERBOARD
 			-- the current game state
 
 	new_game
+			-- creates and starts a new game with new subways and new entitites
 		local
 			settings: SETTINGS
 		do
@@ -108,6 +110,7 @@ feature {NONE} -- Game state and timing
 		end
 
 	maybe_do_game_tick
+			-- updates the game if a certain amount of time has elapsed since the last update
 		local
 			now: TIME
 		do
@@ -129,6 +132,7 @@ feature {NONE} -- Drawing Area and Pixmap
 			-- Used to draw to an off-screen pixmap for double buffering.
 
 	on_resize (x, y, w, h: INTEGER)
+			-- notify the renderer about the change in resolution
 		do
 			renderer.resize (w, h)
 		end
@@ -150,6 +154,7 @@ feature {NONE} -- Drawing Area and Pixmap
 feature -- Event handling
 
 	super_vision: BOOLEAN
+			-- whether to show things that should normally be invisible
 
 	on_key_press (key: EV_KEY)
 			-- Handle key press events.

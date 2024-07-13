@@ -24,7 +24,7 @@ feature {NONE} -- Initialization
 			a_name_not_void: a_name /= VOID
 		do
 			p_make
-			set_name(a_name)
+			set_name (a_name)
 		end
 
 end

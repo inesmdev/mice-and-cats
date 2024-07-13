@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {SETTINGS}."
+	description: "Contains the settings for a game"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"

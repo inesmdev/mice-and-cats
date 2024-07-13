@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {SUBWAYGENERATOR}."
+	description: "Generates the subways for a new game"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
@@ -19,6 +19,7 @@ feature -- class variable
 
 feature -- Initialization
 	make (s: SETTINGS; rand: RANDOMNUMBERGENERATOR)
+			-- generates the subways for the settings s using a pseudorandom number generator
 		require
 			width: s.game_board_width >= 3
 			height: s.game_board_height >= 3
@@ -38,7 +39,7 @@ feature -- Initialization
 
 feature
 	create_entries
-			-- create random entries
+			-- This method first places one segment for each subway, before expanding all of them.
 		local
 			i, j, col, row, exit: INTEGER
 			pos: POSITION
@@ -118,6 +119,10 @@ feature
 		end
 
 	place_segment (from_x, from_y, subway: INTEGER): BOOLEAN
+			-- Helper method for placing one segment of a subway if the space is empty.
+			-- It clears the tile at from_x, from_y, so the caller must decide
+			-- if he wants to restore the exit or make it an underground tile.
+			-- The other end is always a new exit that is added to the list of exits.
 		require
 			at_empty_or_exit: grid.item (from_y, from_x) = 0 or grid.item (from_y, from_x) = - subway
 		local
@@ -169,6 +174,7 @@ feature
 		end
 
 	it_and_all_neighbours_zero (x, y: INTEGER): BOOLEAN
+			-- checks if the center and the four neighbours are all zero
 		do
 			if x > 1 and y > 1 and then x < grid.width and then y < grid.height then
 				Result := grid.item (y, x) = 0 and grid.item (y - 1, x) = 0 and then grid.item (y + 1, x) = 0 and then grid.item (y, x - 1) = 0 and then grid.item (y, x + 1) = 0
@@ -176,6 +182,7 @@ feature
 		end
 
 	remove_exit_at (x, y: INTEGER): BOOLEAN
+			-- checks if an exit should be removed, because it has more than one neighbour.
 		require
 			xbounds: x > 1 and x < grid.width
 			ybounds: y > 1 and y < grid.height
@@ -193,20 +200,23 @@ feature
 			if grid.item (y, x + 1).abs() = center then n := n + 1 end
 
 			Result := n > 1
-		--ensure
-		--	any_neighbour: n > 0
+				--ensure
+				--	any_neighbour: n > 0
 		end
 
 feature -- return grid of subways
 	get_grid: ARRAY2 [INTEGER]
+			-- return the generated grid
 		do
 			Result := grid
 		end
 	get_subway_exits: ARRAYED_LIST [ARRAYED_LIST [POSITION]]
+			-- return the list of exits
 		do
 			Result := subway_exits
 		end
 	get_goal: INTEGER
+			-- return the goal subway
 		do
 			Result := goal
 		end

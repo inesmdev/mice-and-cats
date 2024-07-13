@@ -1,5 +1,5 @@
 note
-	description: "Summary description for {PLAYER}."
+	description: "A player is an entity that can move around in the game"
 	author: ""
 	date: "$Date$"
 	revision: "$Revision$"
@@ -19,6 +19,7 @@ feature -- attributes of player
 feature
 	-- initialization
 	make
+			-- create a new player that is not underground and not dead
 		do
 			create pos.make
 			name := "P"
@@ -28,21 +29,25 @@ feature
 
 feature --setter
 	set_pos (para: POSITION)
+			-- set the player position
 		do
 			pos := para
 		end
 
 	set_is_underground (para: BOOLEAN)
+			-- set whether the player is underground
 		do
 			is_underground := para
 		end
 
 	set_is_dead (para: BOOLEAN)
+			-- set whether the player is dead
 		do
 			is_dead := para
 		end
 
 	set_name (a_par: STRING)
+			-- change the name
 		require
 			a_par_not_Void: a_par /= VOID
 		do
@@ -52,6 +57,10 @@ feature --setter
 feature {ANY}
 
 	move (i: INTEGER; board: CHECKERBOARD)
+			-- Move the player in a given direction i.
+			-- Performs bounds checks on the world grid and
+			-- inside subways and handles transitions between
+			-- over and underground.
 		require
 			i_in_range: i >= 0 and then i <= 3
 		local
