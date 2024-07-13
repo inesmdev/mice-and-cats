@@ -13,6 +13,7 @@ import java.awt.*;
 import java.time.Duration;
 import java.util.List;
 import java.util.*;
+import java.util.function.Predicate;
 
 import static foop.world.Type.CAT;
 import static foop.world.Type.MOUSE;
@@ -36,9 +37,13 @@ public class World {
     private long countInMySubway = 0;
     @Getter
     private final Duration duration;
+    private final Random random;
+
+    private final ArrayList<EntityAI> entityAIs = new ArrayList<>();
 
     public World(Random seed, int numSubways, int numCols, int numRows, HashSet<Player> players, Duration duration) {
         grid = new int[numRows][numCols];
+        this.random = seed;
         this.numCols = numCols;
         this.numRows = numRows;
         this.subways = new HashMap<>();
@@ -47,7 +52,11 @@ public class World {
 
         SubwayBuilder subwayBuilder = new SubwayBuilder(this, numRows, numCols);
         subwayBuilder.placeConnectedSubways(seed, numSubways);
-        entities.add(new Entity(0, CAT, "cat", new Position(1, 1), false, false, -1));
+        for (int i = 0; i < seed.nextInt(1, 4); ++i) {
+            var cat = new Entity(entities.size(), CAT, "cat", getRandomPosition(), false, false, -1);
+            entities.add(cat);
+            entityAIs.add(new CatAI(cat));
+        }
 
         int subway = 0;
         for (Player player : players) {
@@ -59,6 +68,7 @@ public class World {
     }
 
     public World(GameWorldMessage m) {
+        random = null;
         grid = m.subwayTiles();
         subways = new HashMap<>();
         cellToSubway = new HashMap<>();
@@ -123,42 +133,11 @@ public class World {
     }
 
     public void serverUpdate(HashSet<Player> players) {
-
-        var cats = entities.stream().filter(e -> e.getType() == CAT).toList();
-        for (Entity cat : cats) {
-            generateNewCatPosition(cat);
+        entityAIs.removeIf(ai -> !ai.update(this, e -> {
             afterEntityMoved(players);
-            var msg = new EntityUpdateMessage(cat);
+            var msg = new EntityUpdateMessage(e);
             broadcastMsg(players, msg);
-        }
-    }
-
-    private void generateNewCatPosition(Entity cat) {
-        Position nextCatGoal = findNearestPlayer();
-        cat.setPosition(cat.getPosition().stepTowards(nextCatGoal));
-    }
-
-    private Position findNearestPlayer(){
-        var visible = entities.stream().filter(e -> e.getType() == MOUSE && !e.isUnderground()).toList();
-        if (!visible.isEmpty()){
-            Entity cat = entities.get(0);
-            Entity nearest = visible.get(0);
-            double nearestDistance = cat.getPosition().distanceTo(nearest.getPosition());
-
-            for (int i = 1; i < visible.size(); i++) {
-                Entity curr = visible.get(i);
-                double d = cat.getPosition().distanceTo(curr.getPosition());
-                if(nearestDistance > d){
-                    nearestDistance = d;
-                    nearest = curr;
-                }
-            }
-
-            return nearest.getPosition();
-        }
-        //if no players are visible, move randomly
-        var r = new Random();
-        return new Position(r.nextInt(grid[0].length), r.nextInt(grid.length));
+        }));
     }
 
     private void broadcastMsg(HashSet<Player> players, Message msg) {
@@ -189,7 +168,13 @@ public class World {
         newSubway.subwayCells().forEach(c -> cellToSubway.put(c, newSubway));
     }
 
-    private int getSubway(Entity e) {
+    /**
+     * The subway of the entity or zero.
+     *
+     * @param e The entity.
+     * @return The subway id or zero.
+     */
+    public int getSubway(Entity e) {
         return e.isUnderground() ? Math.abs(grid[e.getPosition().y()][e.getPosition().x()]) : 0;
     }
 
@@ -400,5 +385,33 @@ public class World {
         entity.setVote(vote);
         var entityUpdate = new EntityUpdateMessage(entity);
         players.forEach(p -> p.send(entityUpdate));
+    }
+
+    /**
+     * Find the closest entity to a position that satisfies a predicate.
+     *
+     * @param position   The target position.
+     * @param acceptable Indicates which entities to consider.
+     * @return One of the entities that are the closest, or null if there are no acceptable ones.
+     */
+    public Entity findNearestEntity(Position position, Predicate<Entity> acceptable) {
+        Entity nearest = null;
+        double bestDistance = Double.POSITIVE_INFINITY;
+
+        for (Entity e : entities) {
+            double distance = e.getPosition().distanceTo(position);
+            if (distance < bestDistance && acceptable.test(e)) {
+                nearest = e;
+                bestDistance = distance;
+            }
+        }
+        return nearest;
+    }
+
+    /**
+     * @return A random grid position using the random number generator of this world.
+     */
+    public Position getRandomPosition() {
+        return new Position(random.nextInt(numCols), random.nextInt(numRows));
     }
 }
