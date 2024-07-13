@@ -34,7 +34,7 @@ public class World {
     private final HashMap<Integer, Subway> subways;
     private final HashMap<Position, Subway> cellToSubway;
     private final Map<Integer, Position> catLastSeen = new HashMap<>();
-    private long countInMySubway = 0;
+    private long countInMySubway = Integer.MAX_VALUE;
     @Getter
     private final Duration duration;
     private final Random random;
@@ -196,6 +196,9 @@ public class World {
         var playerEntity = entities.stream().filter(e -> e.getName().equals(playerName)).findFirst().orElse(null);
         if (playerEntity == null) {
             return; // we haven't received the entities yet
+        }
+        if (!playerEntity.isUnderground() && countInMySubway == Integer.MAX_VALUE) {
+            countInMySubway = 0;
         }
         var playerSubway = getSubway(playerEntity);
 
