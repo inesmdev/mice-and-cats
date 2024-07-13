@@ -158,7 +158,7 @@ feature
 	check_if_dead
 		do
 			if cat.is_underground = player.is_underground and then
-				cat.pos.equals (player.pos)
+				cat.pos.is_equal (player.pos)
 			then
 				player.set_is_dead (TRUE)
 			end

@@ -7,6 +7,12 @@ note
 class
 	POSITION
 
+inherit
+	ANY
+		redefine
+			is_equal
+		end
+
 create
 	make,
 	make_at
@@ -23,7 +29,7 @@ feature -- Initialization
 			y := 0
 		end
 	make_at (at_x, at_y: INTEGER)
-			-- Initialize coordinates to zero
+			-- Initialize at specific coordinates
 		do
 			x := at_x
 			y := at_y
@@ -42,16 +48,11 @@ feature --setter
 
 feature
 	-- equals method
-	equals (other: POSITION): BOOLEAN
+	is_equal (other: POSITION): BOOLEAN
 			-- equals method
+			-- covariant redefinition of argument
 		do
-			if
-				x = other.x and y = other.y
-			then
-				Result := TRUE
-			else
-				Result := FALSE
-			end
+			Result := standard_is_equal (other)
 		end
 
 end
