@@ -15,6 +15,8 @@ feature -- constants
 		once Result := 1 end
 	mouse_id: INTEGER
 		once Result := 2 end
+	tombstone_id: INTEGER
+		once Result := 3 end
 
 feature {NONE}
 
@@ -30,6 +32,7 @@ feature {NONE}
 
 			add_image (directory + "/images/cat.png")
 			add_image (directory + "/images/mouse.png")
+			add_image (directory + "/images/tombstone.jpeg")
 		end
 
 	add_image (path: READABLE_STRING_GENERAL)
