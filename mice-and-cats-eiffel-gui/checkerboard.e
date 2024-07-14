@@ -83,6 +83,7 @@ feature -- Initialization
 			mu: INTEGER
 		do
 			renderer.grid_size (width, height)
+			renderer.clear (gray)
 			player_subway := entity_subway (player)
 
 			from
