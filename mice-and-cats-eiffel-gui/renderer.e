@@ -11,6 +11,7 @@ create
 	make_with_size
 
 feature
+	assets: ASSETS
 	pixmap: EV_PIXMAP
 	width, height: INTEGER
 
@@ -19,10 +20,11 @@ feature
 	ox, oy: INTEGER
 	mu: INTEGER
 
-	make_with_size (a_width, a_height: INTEGER)
+	make_with_size (a_width, a_height: INTEGER; a: ASSETS)
 			-- initialize the renderer for a given screen size
 		do
 			create pixmap.make_with_size (a_width, a_height)
+			assets := a
 			grid_size (1, 1)
 		end
 
@@ -91,14 +93,15 @@ feature
 			pixmap.fill_rectangle (ox + (x - 1) * tile_size + mu, oy + (y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
 		end
 
-	entity (x, y: INTEGER; color: EV_COLOR)
+	entity (x, y: INTEGER; color: EV_COLOR; image_id: INTEGER)
 			-- render an entity
 		require
 			x_bounds: x > 0 and x <= tiles_x
 			y_bounds: y > 0 and y <= tiles_y
 		do
-			pixmap.set_foreground_color (color)
-			pixmap.fill_ellipse (ox + (x - 1) * tile_size + mu, oy + (y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
+			--pixmap.set_foreground_color (color)
+			--pixmap.fill_ellipse (ox + (x - 1) * tile_size + mu, oy + (y - 1) * tile_size + mu, tile_size - 2 * mu, tile_size - 2 * mu)
+			pixmap.draw_pixmap (ox + (x - 1) * tile_size, oy + (y - 1) * tile_size, assets.get_image(image_id, tile_size, tile_size))
 		end
 
 	center_text (message: READABLE_STRING_GENERAL; color: EV_COLOR)

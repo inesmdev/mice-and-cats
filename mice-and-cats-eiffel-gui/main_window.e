@@ -23,9 +23,10 @@ feature {NONE} -- Initialization
 	create_interface_objects
 			-- <Precursor>
 		do
+			create assets.load_from_directory ("../mice-and-cats-java/src/main/resources")
 				-- Create main container.
 			create main_container
-			create renderer.make_with_size (Window_width, Window_height)
+			create renderer.make_with_size (Window_width, Window_height, assets)
 			create drawing_area
 			new_game
 		end
@@ -130,6 +131,9 @@ feature {NONE} -- Drawing Area and Pixmap
 
 	renderer: RENDERER
 			-- Used to draw to an off-screen pixmap for double buffering.
+
+	assets: ASSETS
+			-- drawable assets
 
 	on_resize (x, y, w, h: INTEGER)
 			-- notify the renderer about the change in resolution

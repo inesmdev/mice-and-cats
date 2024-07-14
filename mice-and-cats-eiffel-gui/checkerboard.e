@@ -122,10 +122,10 @@ feature -- Initialization
 				y := y + 1
 			end
 
-			renderer.entity (player.pos.x, player.pos.y, color (20, 75, 134))
+			renderer.entity (player.pos.x, player.pos.y, color (20, 75, 134), renderer.assets.mouse_id)
 
 			if player_subway = entity_subway (cat) then
-				renderer.entity (cat.pos.x, cat.pos.y, color (255, 127, 0))
+				renderer.entity (cat.pos.x, cat.pos.y, color (255, 127, 0), renderer.assets.cat_id)
 			end
 
 			if victory then
