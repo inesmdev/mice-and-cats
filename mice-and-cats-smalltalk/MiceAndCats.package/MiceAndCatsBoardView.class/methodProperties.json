@@ -1,0 +1,15 @@
+{
+	"class" : {
+		"descriptionForPartsBin" : "mt 4/23/2021 18:15" },
+	"instance" : {
+		"drawOn:" : "robert 6/28/2024 00:24",
+		"handleEvent:deemphasize:" : "mt 4/23/2021 18:04",
+		"handleEvent:emphasize:" : "mt 4/23/2021 18:04",
+		"handlesKeyboard:" : "mt 4/23/2021 17:35",
+		"handlesMouseOver:" : "mt 4/23/2021 15:39",
+		"initialize" : "robert 6/28/2024 00:59",
+		"keyDown:" : "robert 6/28/2024 00:43",
+		"mouseEnter:" : "mt 4/25/2021 07:15",
+		"setWorld:" : "robert 6/27/2024 10:58",
+		"step" : "robert 6/28/2024 01:35",
+		"stepTime" : "robert 6/28/2024 00:56" } }
