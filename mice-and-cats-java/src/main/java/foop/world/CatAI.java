@@ -39,7 +39,7 @@ public class CatAI implements EntityAI {
 
         // if we see a mouse we target override the next goal:
         int controlledSubway = world.getSubway(controlled);
-        var nearestMouse = world.findNearestEntity(controlled.getPosition(), e -> e.getType() == MOUSE && world.getSubway(e) == controlledSubway);
+        var nearestMouse = world.findNearestEntity(controlled.getPosition(), e -> e.getType() == MOUSE && !e.isDead() && world.getSubway(e) == controlledSubway);
         if (nearestMouse != null) {
             nextGoal = nearestMouse.getPosition();
             lastKnownMousePosition = nearestMouse.getPosition();
