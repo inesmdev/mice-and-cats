@@ -23,6 +23,14 @@ public class CatAI implements EntityAI {
         this.controlled = entity;
     }
 
+    /**
+     * Move towards mouse if visible, otherwise patrol between the last known mouse location and random points.
+     *
+     * @param world The world.
+     * @param onUpdate Called whenever an entity is updated. This is deliberately abstract
+     *                 in case we want to run AIs on the client later.
+     * @return Whether the controlled cat is still alive.
+     */
     @Override
     public boolean update(World world, Consumer<Entity> onUpdate) {
         if (controlled.isDead()) {
